@@ -7,17 +7,26 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ItemSupplierBinding
-import com.nayya.myktor.domain.Counterparty
+import com.nayya.myktor.domain.CounterpartyEntity
 
 class SuppliersAdapter(
-    private var items: List<Counterparty>,
-    private val onLongClick: (Counterparty) -> Unit,
+    private var items: List<CounterpartyEntity>,
+    private val onItemClick: (CounterpartyEntity) -> Unit,
+    private val onLongClick: (CounterpartyEntity) -> Unit,
 ) : RecyclerView.Adapter<SuppliersAdapter.ViewHolder>() {
 
     class ViewHolder(private val binding: ItemSupplierBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(counterparty: Counterparty, onLongClick: (Counterparty) -> Unit) {
-            binding.tvSupplierName.text = counterparty.name
+        fun bind(
+            counterpartyEntity: CounterpartyEntity,
+            onItemClick: (CounterpartyEntity) -> Unit,
+            onLongClick: (CounterpartyEntity) -> Unit,
+        ) {
+            binding.tvSupplierName.text = counterpartyEntity.name
+
+            binding.root.setOnClickListener {
+                onItemClick(counterpartyEntity)
+            }
 
             // Длинное нажатие → показать меню
             binding.root.setOnLongClickListener {
@@ -25,7 +34,7 @@ class SuppliersAdapter(
                 popup.menuInflater.inflate(R.menu.menu_supplier, popup.menu)
                 popup.setOnMenuItemClickListener {
                     if (it.itemId == R.id.action_delete) {
-                        onLongClick(counterparty) // Вызываем функцию удаления
+                        onLongClick(counterpartyEntity) // Вызываем функцию удаления
                         true
                     } else false
                 }
@@ -45,6 +54,7 @@ class SuppliersAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(
             items[position],
+            onItemClick,
             onLongClick
         )
     }
@@ -52,7 +62,7 @@ class SuppliersAdapter(
     override fun getItemCount() = items.size
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateList(newItems: List<Counterparty>) {
+    fun updateList(newItems: List<CounterpartyEntity>) {
         items = newItems
         notifyDataSetChanged()
     }

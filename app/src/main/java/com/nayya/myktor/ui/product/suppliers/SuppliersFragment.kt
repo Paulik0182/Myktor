@@ -4,12 +4,13 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentSuppliersBinding
-import com.nayya.myktor.ui.product.editsupplier.EditSupplierFragment
+import com.nayya.myktor.domain.CounterpartyEntity
 import com.nayya.myktor.utils.viewBinding
 import kotlinx.coroutines.launch
 
@@ -25,8 +26,12 @@ class SuppliersFragment : Fragment(R.layout.fragment_suppliers) {
         viewModel = ViewModelProvider(this).get(SupplierViewModel::class.java)
 
         adapter = SuppliersAdapter(
-            emptyList()) {supplier ->
-            viewModel.deleteSupplier(supplier.id) // Удаляем поставщика
+            emptyList(),
+            onItemClick = { supplier ->
+                getController().openEditSupplierFragment(supplier)
+            }
+        ) { supplierDel ->
+            supplierDel.id?.let { viewModel.deleteSupplier(it) } // Удаляем поставщика
         }
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -36,25 +41,25 @@ class SuppliersFragment : Fragment(R.layout.fragment_suppliers) {
             adapter.updateList(suppliers)
         }
 
-//        viewModel.fetchSuppliers()
-        // Запускаем suspend функцию в корутине
+        // Запускаем suspend функцию в корутине (первая загрузка данных)
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.fetchSuppliers()
         }
 
+        setFragmentResultListener("supplier_updated") { _, _ ->
+            viewModel.fetchSuppliers() // Обновляем список только если данные изменились
+        }
+
         // Кнопка "Добавить поставщика"
         binding.addCounterpartyButton.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.container, EditSupplierFragment.newInstance())
-                .addToBackStack(null)
-                .commit()
+            getController().openEditSupplierFragment(null)
         }
     }
 
     private fun getController(): Controller = activity as Controller
 
     interface Controller {
-        // TODO
+        fun openEditSupplierFragment(supplier: CounterpartyEntity?)
     }
 
     override fun onAttach(context: Context) {

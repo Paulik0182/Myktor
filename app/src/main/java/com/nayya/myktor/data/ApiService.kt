@@ -1,6 +1,6 @@
 package com.nayya.myktor.data
 
-import com.nayya.myktor.domain.Counterparty
+import com.nayya.myktor.domain.CounterpartyEntity
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -22,7 +22,7 @@ interface ApiService {
 
     // Получение списка поставщиков
     @GET("/counterparties")
-    suspend fun getSuppliers(): List<Counterparty>
+    suspend fun getSuppliers(): List<CounterpartyEntity>
 
     // Удаление поставщика
     @DELETE("/counterparties/{id}")
@@ -30,11 +30,11 @@ interface ApiService {
 
     // Добавление нового поставщика
     @POST("/counterparties")
-    suspend fun addSupplier(@Body counterparty: Counterparty)
+    suspend fun addSupplier(@Body counterpartyEntity: CounterpartyEntity)
 
     // Обновление данных поставщика
     @PUT("/counterparties/{id}")
-    suspend fun updateSupplier(@Path("id") id: Int, @Body counterparty: Counterparty)
+    suspend fun updateSupplier(@Path("id") id: Int, @Body counterpartyEntity: CounterpartyEntity)
 
     // Получение списка заказов
     @GET("/orders")
