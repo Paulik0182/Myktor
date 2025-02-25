@@ -1,5 +1,6 @@
 package com.nayya.myktor.ui.product.suppliers
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,26 +27,14 @@ class SupplierViewModel : ViewModel() {
         }
     }
 
-//    suspend fun fetchSuppliers(): List<CounterpartyEntity> {
-//        return withContext(Dispatchers.IO) { // Переключаем поток на фоновый
-//            try {
-//                val response = RetrofitInstance.api.getSuppliers()
-//                suppliers.postValue(response)
-//                response
-//            } catch (e: Exception) {
-//                suppliers.postValue(emptyList()) // В случае ошибки отправляем пустой список
-//                emptyList()
-//            }
-//        }
-//    }
-
     fun deleteSupplier(id: Int) {
         viewModelScope.launch {
             try {
                 RetrofitInstance.api.deleteSupplier(id)
                 fetchSuppliers() // Перезагружаем список после удаления
             } catch (e: Exception) {
-                // Лог ошибки
+                e.printStackTrace()
+                Log.e("Supplier", "Ошибка: ${e.localizedMessage}")
             }
         }
     }
