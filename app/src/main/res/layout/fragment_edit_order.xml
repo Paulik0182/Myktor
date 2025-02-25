@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/counterpartyEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Контрагент ID"
+        android:inputType="number" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/orderItemsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical" />
+
+    <Button
+        android:id="@+id/addItemButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Добавить товар" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Сохранить" />
+
+</LinearLayout>

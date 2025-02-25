@@ -4,8 +4,10 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.nayya.myktor.databinding.ActivityMainBinding
 import com.nayya.myktor.domain.CounterpartyEntity
+import com.nayya.myktor.domain.OrderEntity
 import com.nayya.myktor.domain.ProductEntity
 import com.nayya.myktor.ui.product.AccountingProductsFragment
+import com.nayya.myktor.ui.product.editorder.EditOrderFragment
 import com.nayya.myktor.ui.product.editproduct.EditProductFragment
 import com.nayya.myktor.ui.product.editsupplier.EditSupplierFragment
 import com.nayya.myktor.ui.product.orders.OrdersFragment
@@ -67,5 +69,9 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
     override fun openEditProductFragment(product: ProductEntity?) {
         swapFragment(EditProductFragment.newInstance(product))
+    }
+
+    override fun openEditOrderFragment(orderEntity: OrderEntity?) {
+        swapFragment(EditOrderFragment.newInstance(orderEntity?.id))
     }
 }

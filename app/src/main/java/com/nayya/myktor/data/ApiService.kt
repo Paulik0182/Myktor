@@ -1,6 +1,7 @@
 package com.nayya.myktor.data
 
 import com.nayya.myktor.domain.CounterpartyEntity
+import com.nayya.myktor.domain.OrderEntity
 import com.nayya.myktor.domain.ProductEntity
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -51,5 +52,17 @@ interface ApiService {
 
     // Получение списка заказов
     @GET("/orders")
-    suspend fun getOrders(): List<Int>
+    suspend fun getOrders(): List<OrderEntity>
+
+    @GET("/orders/{id}")
+    suspend fun getOrderDetails(@Path("id") id: Int): OrderEntity
+
+    @POST("/orders")
+    suspend fun createOrder(@Body order: OrderEntity)
+
+    @PUT("/orders/{id}")
+    suspend fun updateOrder(@Path("id") id: Int, @Body order: OrderEntity)
+
+    @DELETE("/orders/{id}")
+    suspend fun deleteOrder(@Path("id") id: Int)
 }
