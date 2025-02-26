@@ -42,7 +42,7 @@ class EditOrderFragment : Fragment(R.layout.fragment_edit_order) {
                 it,
                 onSuccess = { fetchedOrder ->
                     order = fetchedOrder
-                    binding.counterpartyEditText.setText(fetchedOrder.counterpartyId.toString())
+                    binding.counterpartyEditText.setText(fetchedOrder.counterpartyName)
                     adapter.updateList(fetchedOrder.items)
                 },
                 onError = {
@@ -54,7 +54,7 @@ class EditOrderFragment : Fragment(R.layout.fragment_edit_order) {
         binding.addItemButton.setOnClickListener {
             val newItem = OrderItemEntity(
                 orderId = orderId ?: 0,
-                productId = 1, // Нужно заменить на выбор товара
+                productId = 2, // Нужно заменить на выбор товара
                 supplierId = 1,
                 quantity = 1
             )
@@ -63,7 +63,7 @@ class EditOrderFragment : Fragment(R.layout.fragment_edit_order) {
 
         binding.saveButton.setOnClickListener {
             val updatedOrder = order?.copy(
-                counterpartyId = binding.counterpartyEditText.text.toString().toInt(),
+                counterpartyId = order!!.counterpartyId, // TODO Это мне не нравится
                 items = adapter.getItems()
             )
             updatedOrder?.let {

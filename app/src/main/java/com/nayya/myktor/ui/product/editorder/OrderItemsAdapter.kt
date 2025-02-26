@@ -20,7 +20,7 @@ class OrderItemsAdapter(
             onQuantityChange: (Int) -> Unit,
             onDelete: () -> Unit,
         ) {
-            binding.productNameTextView.text = "Товар ID: ${item.productId}"
+            binding.productNameTextView.text = item.productName
             binding.quantityEditText.setText(item.quantity.toString())
 
             // Используем doAfterTextChanged

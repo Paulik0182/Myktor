@@ -22,6 +22,9 @@ interface ApiService {
     @GET("/products")
     suspend fun getProducts(): List<ProductEntity>
 
+    @GET("/products/{id}")
+    suspend fun getProductById(@Path("id") id: Int): ProductEntity
+
     // Удаление продукта
     @DELETE("/products/{id}")
     suspend fun deleteProduct(@Path("id") id: Int)
@@ -37,6 +40,9 @@ interface ApiService {
     // Получение списка поставщиков
     @GET("/counterparties")
     suspend fun getSuppliers(): List<CounterpartyEntity>
+
+    @GET("/counterparties/{id}")
+    suspend fun getCounterpartyById(@Path("id") id: Int): CounterpartyEntity
 
     // Удаление поставщика
     @DELETE("/counterparties/{id}")
