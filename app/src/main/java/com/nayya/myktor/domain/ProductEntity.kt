@@ -18,5 +18,12 @@ data class ProductEntity(
     val price: BigDecimal, // Используем BigDecimal для работы с деньгами
     val hasSuppliers: Boolean,
     val supplierCount: Int,
+    val stockQuantity: Int, // Количество товара на складе
+    val minStockQuantity: Int, // Неснижаемый остаток
+    val productCodes: List<ProductCodeEntity>, // Список кодов товара (штрих-коды, QR-коды)
+    val isDemanded: Boolean, // Флаг востребованности
+    val productLinks: List<ProductLinkEntity>, // Список интернет-ссылок
+    val locations: List<WarehouseLocationEntity>, // Код места хранения товара
+    val images: List<ProductImageEntity>, // Для картинок
 )
 

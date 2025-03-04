@@ -60,6 +60,13 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
                     name,
                     description,
                     price,
+                    stockQuantity = 0, // добавить выбор количества на складе
+                    minStockQuantity = 0, // добавить ввод минимального количества
+                    productCodes = emptyList(), // Добавить ввод штрих-кодов
+                    isDemanded = true, // Добавить чекбокс
+                    productLinks = emptyList(), // Пока заглушка, добавить UI
+                    locations = emptyList(), // Пока заглушка, добавить UI
+                    images = emptyList(), // Пока заглушка, добавить UI
                     onSuccess = {
                         setFragmentResult("product_updated", Bundle())
                         parentFragmentManager.popBackStack()
