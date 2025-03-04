@@ -1,6 +1,7 @@
 package com.nayya.myktor.ui.product.editorder
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -41,6 +42,7 @@ class EditOrderFragment : Fragment(R.layout.fragment_edit_order) {
             viewModel.fetchOrderDetails(
                 it,
                 onSuccess = { fetchedOrder ->
+                    Log.d("API", "Полученный заказ: $fetchedOrder")
                     order = fetchedOrder
                     binding.counterpartyEditText.setText(fetchedOrder.counterpartyName)
                     adapter.updateList(fetchedOrder.items)

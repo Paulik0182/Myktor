@@ -9,6 +9,6 @@ data class OrderItemEntity(
     val productId: Int,
     val productName: String = "",  // <-- Добавляем название продукта
     val supplierId: Int,
-    val supplierName: String = "",  // <-- Если нужно название поставщика
+    val supplierName: String? = null,  // <-- Если нужно название поставщика
     val quantity: Int,
 )

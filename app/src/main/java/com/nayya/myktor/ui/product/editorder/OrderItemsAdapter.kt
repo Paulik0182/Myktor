@@ -47,7 +47,10 @@ class OrderItemsAdapter(
             items[position],
             onQuantityChange = { newQuantity ->
                 items = items.toMutableList().apply {
-                    this[position] = this[position].copy(quantity = newQuantity)
+                    this[position] = this[position].copy(
+                        quantity = newQuantity,
+                        supplierName = this[position].supplierName ?: "" // Защита от null
+                    )
                 }
             },
             onDelete = {

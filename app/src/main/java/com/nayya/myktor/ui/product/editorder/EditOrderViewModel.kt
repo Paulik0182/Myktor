@@ -56,41 +56,7 @@ class EditOrderViewModel(
         viewModelScope.launch {
             try {
                 val order = RetrofitInstance.api.getOrderDetails(orderId)
-
-                // Получаем контрагента
-                val counterparty = RetrofitInstance.api.getCounterpartyById(order.counterpartyId)
-
-                // Получаем названия продуктов
-                val itemsWithNames = order.items.map { item ->
-                    val product = RetrofitInstance.api.getProductById(item.productId)
-                    item.copy(
-                        productName = product.name,   // Добавляем имя продукта
-                        supplierName = product.name   // Если нужно имя поставщика, меняем тут
-                    )
-                }
-
-                // Формируем объект с именами вместо ID
-                val updatedOrder = order.copy(
-                    counterpartyName = counterparty.name,  // Добавляем имя контрагента
-                    items = itemsWithNames
-                )
-
-                onSuccess(updatedOrder)
-            } catch (e: Exception) {
-                onError()
-            }
-        }
-    }
-
-    fun fetchOrderDetails2(
-        orderId: Int,
-        onSuccess: (OrderEntity) -> Unit,
-        onError: () -> Unit,
-    ) {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitInstance.api.getOrderDetails(orderId)
-                onSuccess(response)
+                onSuccess(order)
             } catch (e: Exception) {
                 onError()
             }
