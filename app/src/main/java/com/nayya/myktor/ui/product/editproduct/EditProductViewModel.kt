@@ -31,6 +31,8 @@ class EditProductViewModel(
         productLinks: List<ProductLinkEntity>,
         locations: List<WarehouseLocationEntity>,
         images: List<ProductImageEntity>,
+        categories: List<String>, // категория
+        subcategories: List<String>, // подкатегория
         onSuccess: () -> Unit,
         onError: (Throwable) -> Unit,
     ) {
@@ -49,7 +51,9 @@ class EditProductViewModel(
                     isDemanded = isDemanded,
                     productLinks = productLinks,
                     locations = locations,
-                    images = images
+                    images = images,
+                    categories = categories,
+                    subcategories = subcategories
                 )
 
                 Log.d("API", "Отправка запроса: $productEntity")

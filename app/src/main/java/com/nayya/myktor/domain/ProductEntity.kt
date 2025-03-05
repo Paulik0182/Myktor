@@ -25,5 +25,6 @@ data class ProductEntity(
     val productLinks: List<ProductLinkEntity>, // Список интернет-ссылок
     val locations: List<WarehouseLocationEntity>, // Код места хранения товара
     val images: List<ProductImageEntity>, // Для картинок
+    val categories: List<String>, // категория
+    val subcategories: List<String>, // подкатегория
 )
-

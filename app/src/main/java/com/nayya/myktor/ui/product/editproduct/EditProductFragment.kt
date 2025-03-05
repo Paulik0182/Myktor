@@ -67,6 +67,8 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
                     productLinks = emptyList(), // Пока заглушка, добавить UI
                     locations = emptyList(), // Пока заглушка, добавить UI
                     images = emptyList(), // Пока заглушка, добавить UI
+                    categories = emptyList(), // Пока заглушка, добавить UI
+                    subcategories = emptyList(), // Пока заглушка, добавить UI
                     onSuccess = {
                         setFragmentResult("product_updated", Bundle())
                         parentFragmentManager.popBackStack()
