@@ -42,7 +42,7 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
 
         // Подкатегории
         subcategoryAdapter = SubcategoryAdapter(
-            category.subcategories,
+            category.subcategories ?: emptyList(),
             onItemClick = { /* переход по подкатегории */ }
         )
         binding.subcategoryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
