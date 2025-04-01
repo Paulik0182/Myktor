@@ -90,6 +90,7 @@ class RequestRepository {
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true // позволяет игнорировать неизвестные ключи в JSON-ответе
+                explicitNulls = false
                 prettyPrint = true // форматирует JSON в читаемом виде (удобно для отладки).
                 isLenient = true // позволяет парсить JSON, даже если он не полностью соответствует спецификации.
             })
