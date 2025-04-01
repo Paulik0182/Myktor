@@ -6,13 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.domain.ProductEntity
+import com.nayya.myktor.domain.productentity.Product
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ProductViewModel : ViewModel() {
 
-    val products = MutableLiveData<List<ProductEntity>>()
+    val products = MutableLiveData<List<Product>>()
 
     fun fetchProducts() {
         viewModelScope.launch {
@@ -28,7 +29,7 @@ class ProductViewModel : ViewModel() {
         }
     }
 
-    fun deleteProduct(id: Int) {
+    fun deleteProduct(id: Long) {
         viewModelScope.launch {
             try {
                 RetrofitInstance.api.deleteProduct(id)

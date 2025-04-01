@@ -3,12 +3,15 @@ package com.nayya.myktor.data
 import com.nayya.myktor.domain.CounterpartyEntity
 import com.nayya.myktor.domain.OrderEntity
 import com.nayya.myktor.domain.ProductEntity
+import com.nayya.myktor.domain.productentity.CategoryEntity
+import com.nayya.myktor.domain.productentity.Product
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 /**
  * Определяем API-интерфейс с Retrofit
@@ -18,16 +21,19 @@ interface ApiService {
      * suspend fun – Используем Kotlin Coroutines для асинхронных запросов.
      */
 
+    @GET("/categories")
+    suspend fun getCategories(@Query("lang") lang: String): List<CategoryEntity>
+
     // Получение списка товаров
     @GET("/products")
-    suspend fun getProducts(): List<ProductEntity>
+    suspend fun getProducts(): List<Product>
 
     @GET("/products/{id}")
-    suspend fun getProductById(@Path("id") id: Int): ProductEntity
+    suspend fun getProductById(@Path("id") id: Long): Product
 
     // Удаление продукта
     @DELETE("/products/{id}")
-    suspend fun deleteProduct(@Path("id") id: Int)
+    suspend fun deleteProduct(@Path("id") id: Long)
 
     // Добавление нового продукта
     @POST("/products")

@@ -26,6 +26,10 @@ class AccountingProductsFragment : Fragment(R.layout.fragment_accounting_product
         binding.suppliersButton.setOnClickListener {
             getController().openSuppliers()
         }
+
+        binding.productsCategoryButton.setOnClickListener {
+            getController().openCategory()
+        }
     }
 
     private fun getController(): Controller = activity as Controller
@@ -33,6 +37,7 @@ class AccountingProductsFragment : Fragment(R.layout.fragment_accounting_product
     interface Controller {
         fun openOrders()
         fun openProduct()
+        fun openCategory()
         fun openSuppliers()
     }
 

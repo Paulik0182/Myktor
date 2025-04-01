@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentProductsBinding
 import com.nayya.myktor.domain.ProductEntity
+import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.utils.viewBinding
 import kotlinx.coroutines.launch
 
@@ -59,7 +60,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
     private fun getController(): Controller = activity as Controller
 
     interface Controller {
-        fun openEditProductFragment(product: ProductEntity?)
+        fun openEditProductFragment(product: Product?)
     }
 
     override fun onAttach(context: Context) {

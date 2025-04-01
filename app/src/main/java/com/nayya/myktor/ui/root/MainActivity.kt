@@ -6,7 +6,11 @@ import com.nayya.myktor.databinding.ActivityMainBinding
 import com.nayya.myktor.domain.CounterpartyEntity
 import com.nayya.myktor.domain.OrderEntity
 import com.nayya.myktor.domain.ProductEntity
+import com.nayya.myktor.domain.productentity.CategoryEntity
+import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.ui.product.AccountingProductsFragment
+import com.nayya.myktor.ui.product.category.CategoriesFragment
+import com.nayya.myktor.ui.product.category.subcategory.SubcategoryFragment
 import com.nayya.myktor.ui.product.editorder.EditOrderFragment
 import com.nayya.myktor.ui.product.editproduct.EditProductFragment
 import com.nayya.myktor.ui.product.editsupplier.EditSupplierFragment
@@ -26,7 +30,9 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     ProductsFragment.Controller,
     SuppliersFragment.Controller,
     EditSupplierFragment.Controller,
-    EditProductFragment.Controller {
+    EditProductFragment.Controller,
+    CategoriesFragment.Controller,
+    SubcategoryFragment.Controller {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +65,10 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         swapFragment(ProductsFragment.newInstance())
     }
 
+    override fun openCategory() {
+        swapFragment(CategoriesFragment.newInstance())
+    }
+
     override fun openSuppliers() {
         swapFragment(SuppliersFragment.newInstance())
     }
@@ -67,11 +77,19 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         swapFragment(EditSupplierFragment.newInstance(supplier))
     }
 
-    override fun openEditProductFragment(product: ProductEntity?) {
-        swapFragment(EditProductFragment.newInstance(product))
-    }
+//    override fun openEditProductFragment(product: ProductEntity?) {
+//        swapFragment(EditProductFragment.newInstance(product))
+//    }
 
     override fun openEditOrderFragment(orderEntity: OrderEntity?) {
         swapFragment(EditOrderFragment.newInstance(orderEntity?.id))
+    }
+
+    override fun openEditProductFragment(product: Product?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openSubcategoryFragment(category: CategoryEntity, products: List<Product>) {
+        swapFragment(SubcategoryFragment.newInstance(category, products))
     }
 }

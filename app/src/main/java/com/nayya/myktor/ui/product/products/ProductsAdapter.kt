@@ -8,24 +8,25 @@ import androidx.recyclerview.widget.RecyclerView
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ItemProductBinding
 import com.nayya.myktor.domain.ProductEntity
+import com.nayya.myktor.domain.productentity.Product
 
 class ProductsAdapter(
-    private var items: List<ProductEntity>,
-    private val onItemClick: (ProductEntity) -> Unit,
-    private val onLongClick: (ProductEntity) -> Unit,
+    private var items: List<Product>,
+    private val onItemClick: (Product) -> Unit,
+    private val onLongClick: (Product) -> Unit,
 ) : RecyclerView.Adapter<ProductsAdapter.ViewHolder>() {
 
     class ViewHolder(private val binding: ItemProductBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(
-            productEntity: ProductEntity,
-            onItemClick: (ProductEntity) -> Unit,
-            onLongClick: (ProductEntity) -> Unit,
+            product: Product,
+            onItemClick: (Product) -> Unit,
+            onLongClick: (Product) -> Unit,
         ) {
-            binding.tvProductName.text = productEntity.name
+            binding.tvProductName.text = product.name
 
             binding.root.setOnClickListener {
-                onItemClick(productEntity)
+                onItemClick(product)
             }
 
             binding.root.setOnLongClickListener {
@@ -33,7 +34,7 @@ class ProductsAdapter(
                 popup.menuInflater.inflate(R.menu.menu_supplier, popup.menu)
                 popup.setOnMenuItemClickListener {
                     if (it.itemId == R.id.action_delete) {
-                        onLongClick(productEntity)
+                        onLongClick(product)
                         true
                     } else false
                 }
@@ -61,7 +62,7 @@ class ProductsAdapter(
     override fun getItemCount() = items.size
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateList(newItems: List<ProductEntity>) {
+    fun updateList(newItems: List<Product>) {
         items = newItems
         notifyDataSetChanged()
     }
