@@ -10,6 +10,7 @@ import androidx.fragment.app.setFragmentResult
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentEditProductBinding
 import com.nayya.myktor.domain.ProductEntity
+import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.ui.product.products.ProductViewModel
 import com.nayya.myktor.utils.viewBinding
 import java.math.BigDecimal
@@ -24,13 +25,13 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
         EditProductViewModel(productViewModel)
     }
 
-    private var productId: Int? = null
+    private var productId: Long? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         if (arguments?.containsKey(ARG_PRODUCT_ID) == true) {
-            productId = arguments?.getInt(ARG_PRODUCT_ID)
+            productId = arguments?.getLong(ARG_PRODUCT_ID)
         }
 
         val productName = arguments?.getString(ARG_PRODUCT_NAME)
@@ -55,31 +56,31 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
                     return@setOnClickListener
                 }
 
-                viewModel.saveProduct(
-                    productId,
-                    name,
-                    description,
-                    price,
-                    stockQuantity = 0, // добавить выбор количества на складе
-                    minStockQuantity = 0, // добавить ввод минимального количества
-                    productCodes = emptyList(), // Добавить ввод штрих-кодов
-                    isDemanded = true, // Добавить чекбокс
-                    productLinks = emptyList(), // Пока заглушка, добавить UI
-                    locations = emptyList(), // Пока заглушка, добавить UI
-                    images = emptyList(), // Пока заглушка, добавить UI
-                    categories = emptyList(), // Пока заглушка, добавить UI
-                    subcategories = emptyList(), // Пока заглушка, добавить UI
-                    onSuccess = {
-                        setFragmentResult("product_updated", Bundle())
-                        parentFragmentManager.popBackStack()
-                        Toast.makeText(requireContext(), "Продукт сохранен", Toast.LENGTH_SHORT)
-                            .show()
-                    },
-                    onError = {
-                        Toast.makeText(requireContext(), "Ошибка сохранения", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                )
+//                viewModel.saveProduct(
+//                    productId,
+//                    name,
+//                    description,
+//                    price,
+//                    stockQuantity = 0, // добавить выбор количества на складе
+//                    minStockQuantity = 0, // добавить ввод минимального количества
+//                    productCodes = emptyList(), // Добавить ввод штрих-кодов
+//                    isDemanded = true, // Добавить чекбокс
+//                    productLinks = emptyList(), // Пока заглушка, добавить UI
+//                    locations = emptyList(), // Пока заглушка, добавить UI
+//                    images = emptyList(), // Пока заглушка, добавить UI
+//                    categories = emptyList(), // Пока заглушка, добавить UI
+//                    subcategories = emptyList(), // Пока заглушка, добавить UI
+//                    onSuccess = {
+//                        setFragmentResult("product_updated", Bundle())
+//                        parentFragmentManager.popBackStack()
+//                        Toast.makeText(requireContext(), "Продукт сохранен", Toast.LENGTH_SHORT)
+//                            .show()
+//                    },
+//                    onError = {
+//                        Toast.makeText(requireContext(), "Ошибка сохранения", Toast.LENGTH_SHORT)
+//                            .show()
+//                    }
+//                )
             } else {
                 Toast.makeText(requireContext(), "Заполните все поля", Toast.LENGTH_SHORT).show()
             }
@@ -102,11 +103,11 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
         private const val ARG_PRODUCT_DESCRIPTION = "product_description"
         private const val ARG_PRODUCT_PRICE = "product_price"
 
-        fun newInstance(productEntity: ProductEntity? = null): EditProductFragment {
+        fun newInstance(product: Product? = null): EditProductFragment {
             val fragment = EditProductFragment()
             val args = Bundle()
-            productEntity?.let {
-                it.id?.let { it1 -> args.putInt(ARG_PRODUCT_ID, it1) }
+            product?.let {
+                it.id?.let { it1 -> args.putLong(ARG_PRODUCT_ID, it1) }
                 args.putString(ARG_PRODUCT_NAME, it.name)
                 args.putString(ARG_PRODUCT_DESCRIPTION, it.description)
                 args.putString(ARG_PRODUCT_PRICE, it.price.toPlainString())

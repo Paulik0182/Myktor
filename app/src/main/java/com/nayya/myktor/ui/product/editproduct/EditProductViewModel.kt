@@ -9,6 +9,9 @@ import com.nayya.myktor.domain.ProductEntity
 import com.nayya.myktor.domain.ProductImageEntity
 import com.nayya.myktor.domain.ProductLinkEntity
 import com.nayya.myktor.domain.WarehouseLocationEntity
+import com.nayya.myktor.domain.productentity.Product
+import com.nayya.myktor.domain.productentity.ProductCode
+import com.nayya.myktor.domain.productentity.ProductLink
 import com.nayya.myktor.ui.product.products.ProductViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,51 +23,50 @@ class EditProductViewModel(
 ) : ViewModel() {
 
     fun saveProduct(
-        productId: Int?,
-        name: String,
-        description: String,
-        price: BigDecimal,
-        stockQuantity: Int,
-        minStockQuantity: Int,
-        productCodes: List<ProductCodeEntity>,
-        isDemanded: Boolean = true,
-        productLinks: List<ProductLinkEntity>,
-        locations: List<WarehouseLocationEntity>,
-        images: List<ProductImageEntity>,
-        categories: List<String>, // категория
-        subcategories: List<String>, // подкатегория
+        product: Product,
         onSuccess: () -> Unit,
         onError: (Throwable) -> Unit,
     ) {
         viewModelScope.launch {
             try {
-                val productEntity = ProductEntity(
-                    id = productId,
-                    name = name,
-                    description = description,
-                    price = price,
+                val productRequest = Product(
+                    id = product.id,
+                    name = product.name,
+                    description = product.description,
+                    price = product.price,
                     hasSuppliers = false,
                     supplierCount = 0,
-                    stockQuantity = stockQuantity,
-                    minStockQuantity = minStockQuantity,
-                    productCodes = productCodes,
-                    isDemanded = isDemanded,
-                    productLinks = productLinks,
-                    locations = locations,
-                    images = images,
-                    categories = categories,
-                    subcategories = subcategories
+                    totalStockQuantity = product.totalStockQuantity,
+                    minStockQuantity = product.minStockQuantity,
+
+                    isDemanded = product.isDemanded,
+                    measurementUnitId = product.measurementUnitId,
+                    measurementUnitList = product.measurementUnitList,
+                    measurementUnit = product.measurementUnit,
+                    measurementUnitAbbreviation = product.measurementUnitAbbreviation,
+
+                    productCodes = product.productCodes,
+                    productLinks = product.productLinks,
+                    productImages = product.productImages,
+                    productCounterparties = product.productCounterparties,
+                    productSuppliers = product.productSuppliers,
+                    measurementUnits = product.measurementUnits,
+                    productOrderItem = product.productOrderItem,
+                    categories = product.categories,
+                    subcategoryIds = product.subcategoryIds,
+                    categoryIds = product.categoryIds,
+                    subcategories = product.subcategories
                 )
 
-                Log.d("API", "Отправка запроса: $productEntity")
+                Log.d("API", "Отправка запроса: $productRequest")
 
-                if (productId == null) {
-                    RetrofitInstance.api.addProduct(productEntity)
+                if (product.id == null) {
+                    RetrofitInstance.api.addProduct(productRequest)
                     Log.d("API", "Продукт добавлен")
                 } else {
                     RetrofitInstance.api.updateProduct(
-                        productId,
-                        productEntity
+                        product.id,
+                        productRequest
                     )
                     Log.d("API", "Продукт обновлен")
                 }

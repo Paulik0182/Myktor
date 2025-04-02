@@ -1,6 +1,8 @@
 package com.nayya.myktor.ui.product.products
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,7 +15,34 @@ import kotlinx.coroutines.withContext
 
 class ProductViewModel : ViewModel() {
 
-    val products = MutableLiveData<List<Product>>()
+    private val _products = MutableLiveData<List<Product>>()
+    val products: LiveData<List<Product>> get() = _products
+
+    private val _filteredProducts = MediatorLiveData<List<Product>>()
+    val filteredProducts: LiveData<List<Product>> get() = _filteredProducts
+
+    private var subcategoryId: Long? = null
+
+    init {
+        _filteredProducts.addSource(_products) { updateFilteredProducts() }
+    }
+
+    fun setSubcategoryFilter(subId: Long?) {
+        subcategoryId = subId
+        updateFilteredProducts()
+    }
+
+    private fun updateFilteredProducts() {
+        val currentProducts = _products.value.orEmpty()
+        val filtered = subcategoryId?.let { subId ->
+            currentProducts.filter { it.subcategoryIds.orEmpty().contains(subId) }
+        } ?: currentProducts
+        _filteredProducts.postValue(filtered)
+    }
+
+    fun setProducts(products: List<Product>) {
+        _products.value = products
+    }
 
     fun fetchProducts() {
         viewModelScope.launch {
@@ -21,10 +50,10 @@ class ProductViewModel : ViewModel() {
                 val response = withContext(Dispatchers.IO) {
                     RetrofitInstance.api.getProducts()
                 }
-                products.value = emptyList()
-                products.postValue(response)
+                _products.value = emptyList()
+                _products.postValue(response)
             } catch (e: Exception) {
-                products.postValue(emptyList()) // В случае ошибки отправляем пустой список
+                _products.postValue(emptyList()) // В случае ошибки отправляем пустой список
             }
         }
     }

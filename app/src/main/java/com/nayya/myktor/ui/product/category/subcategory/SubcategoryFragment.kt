@@ -37,7 +37,10 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
         // Подкатегории
         subcategoryAdapter = SubcategoryAdapter(
             category.subcategories ?: emptyList(),
-            onItemClick = { /* переход по подкатегории */ }
+            onItemClick = { selectedSubcategory ->
+                val subcategoryId = selectedSubcategory.id ?: return@SubcategoryAdapter
+                getController().openProductsBySubcategory(subcategoryId, allProducts)
+            }
         )
         binding.subcategoryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.subcategoryRecyclerView.adapter = subcategoryAdapter
@@ -62,6 +65,7 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
     private fun getController(): Controller = activity as Controller
 
     interface Controller {
+        fun openProductsBySubcategory(subcategoryId: Long, products: List<Product>)
     }
 
     override fun onAttach(context: Context) {

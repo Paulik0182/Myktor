@@ -77,19 +77,19 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         swapFragment(EditSupplierFragment.newInstance(supplier))
     }
 
-//    override fun openEditProductFragment(product: ProductEntity?) {
-//        swapFragment(EditProductFragment.newInstance(product))
-//    }
-
     override fun openEditOrderFragment(orderEntity: OrderEntity?) {
         swapFragment(EditOrderFragment.newInstance(orderEntity?.id))
     }
 
     override fun openEditProductFragment(product: Product?) {
-        TODO("Not yet implemented")
+        swapFragment(EditProductFragment.newInstance(product))
     }
 
     override fun openSubcategoryFragment(category: CategoryEntity, products: List<Product>) {
         swapFragment(SubcategoryFragment.newInstance(category, products))
+    }
+
+    override fun openProductsBySubcategory(subcategoryId: Long, products: List<Product>) {
+        swapFragment(ProductsFragment.newInstance(products, subcategoryId))
     }
 }

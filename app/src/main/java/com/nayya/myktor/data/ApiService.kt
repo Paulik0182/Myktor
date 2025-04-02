@@ -37,11 +37,11 @@ interface ApiService {
 
     // Добавление нового продукта
     @POST("/products")
-    suspend fun addProduct(@Body productEntity: ProductEntity)
+    suspend fun addProduct(@Body product: Product)
 
     // Обновление данных о продукте
     @PUT("/products/{id}")
-    suspend fun updateProduct(@Path("id") id: Int, @Body productEntity: ProductEntity)
+    suspend fun updateProduct(@Path("id") id: Long, @Body product: Product)
 
     // Получение списка поставщиков
     @GET("/counterparties")
