@@ -5,4 +5,10 @@
 
     <string name="image_desc">Изображение категории</string>
 
+    <string name="favorite">В избранное</string>
+    <string name="order">Заказать</string>
+    <string name="plus">Плюс</string>
+    <string name="minus">Минус</string>
+    <string name="product_image">Изображение товара</string>
+
 </resources>

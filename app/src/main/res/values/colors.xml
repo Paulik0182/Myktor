@@ -4,5 +4,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#DCDCDC</color>
     <color name="green">#87F86F</color>
+    <color name="gray_placeholder">#C6C5C5</color>
+    <color name="purple_500">#6200EE</color>
+
 
 </resources>

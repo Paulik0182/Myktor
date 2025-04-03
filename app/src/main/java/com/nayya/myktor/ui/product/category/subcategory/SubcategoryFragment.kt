@@ -58,7 +58,8 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
             onItemClick = {},
             onLongClick = {}
         )
-        binding.productRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+//        binding.productRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.productRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.productRecyclerView.adapter = productsAdapter
     }
 

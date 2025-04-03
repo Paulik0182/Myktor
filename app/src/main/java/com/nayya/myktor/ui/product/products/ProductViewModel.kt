@@ -40,10 +40,6 @@ class ProductViewModel : ViewModel() {
         _filteredProducts.postValue(filtered)
     }
 
-    fun setProducts(products: List<Product>) {
-        _products.value = products
-    }
-
     fun fetchProducts() {
         viewModelScope.launch {
             try {

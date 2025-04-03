@@ -1,13 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardProduct"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:orientation="vertical">
+    android:layout_margin="8dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="12dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true">
 
-    <TextView
-        android:id="@+id/tvProductName"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"/>
-</LinearLayout>
+        android:padding="12dp">
+
+        <!-- Изображение -->
+        <ImageView
+            android:id="@+id/ivProductImage"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:scaleType="centerCrop"
+            android:background="@color/white"
+            android:contentDescription="@string/product_image" />
+
+        <!-- Сердечко -->
+        <ImageView
+            android:id="@+id/ivFavorite"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:contentDescription="@string/favorite"
+            android:src="@drawable/ic_favorite_border" />
+
+        <!-- Название -->
+        <TextView
+            android:id="@+id/tvProductName"
+            android:layout_below="@id/ivProductImage"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
+        <!-- Блок: Рейтинг и цена (временно скрыт) -->
+        <!-- rating/price TextViews — если решим активировать позже -->
+        <LinearLayout
+            android:id="@+id/llRatingPrice"
+            android:layout_below="@id/tvProductName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+        </LinearLayout>
+
+        <!-- Кнопка "Заказать" -->
+        <Button
+            android:id="@+id/btnOrder"
+            android:layout_below="@id/tvProductName"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="@string/order"
+            android:layout_marginTop="12dp"
+            android:visibility="visible"
+            android:backgroundTint="@color/purple_500"
+            android:textColor="@android:color/white"
+            android:drawableStart="@drawable/ic_cart"
+            android:drawablePadding="8dp"/>
+
+        <!-- Счётчик -->
+        <LinearLayout
+            android:id="@+id/llCounter"
+            android:layout_below="@id/tvProductName"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/btnMinus"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_minus"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/minus" />
+
+            <TextView
+                android:id="@+id/tvCounter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:paddingHorizontal="16dp" />
+
+            <ImageButton
+                android:id="@+id/btnPlus"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_plus"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/plus" />
+        </LinearLayout>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

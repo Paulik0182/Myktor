@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentProductsBinding
@@ -46,7 +47,8 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
             productDel.id?.let { viewModel.deleteProduct(it) }
         }
 
-        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+//        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.recyclerView.adapter = adapter
 
         // Наблюдение за отфильтрованным списком
