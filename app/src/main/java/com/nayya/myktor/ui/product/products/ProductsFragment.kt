@@ -9,10 +9,8 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentProductsBinding
-import com.nayya.myktor.domain.ProductEntity
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.utils.viewBinding
 import kotlinx.coroutines.launch
@@ -52,14 +50,15 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.recyclerView.adapter = adapter
 
-        val animation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_fall_down)
+        val animation =
+            AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_fall_down)
         binding.recyclerView.layoutAnimation = animation
-        binding.recyclerView.scheduleLayoutAnimation()
-
 
         // Наблюдение за отфильтрованным списком
         viewModel.filteredProducts.observe(viewLifecycleOwner) { products ->
             adapter.updateList(products)
+            // Здесь вручную запускаем анимацию
+            binding.recyclerView.scheduleLayoutAnimation()
         }
 
         if (passedProducts != null && passedProducts!!.isNotEmpty()) {
@@ -78,6 +77,9 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 
         setFragmentResultListener("product_updated") { _, _ ->
             viewModel.fetchProducts()
+
+            // Здесь вручную запускаем анимацию
+            binding.recyclerView.scheduleLayoutAnimation()
         }
 
         binding.addProductButton.setOnClickListener {
@@ -103,7 +105,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
         @JvmStatic
         fun newInstance(
             products: List<Product> = emptyList(),
-            subcategoryId: Long? = null
+            subcategoryId: Long? = null,
         ) = ProductsFragment().apply {
             arguments = Bundle().apply {
                 putSerializable(ARG_PRODUCTS, ArrayList(products))

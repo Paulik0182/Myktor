@@ -5,6 +5,7 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -52,6 +53,10 @@ class ProductsAdapter(
                     if (isSelected) R.drawable.ic_favorite_border else R.drawable.ic_favorite_filled
                 )
                 it.tag = !isSelected
+
+                // Анимация
+                val animation = AnimationUtils.loadAnimation(it.context, R.anim.heart_pop)
+                it.startAnimation(animation)
             }
 
             // Нажатие на сам item (пока редактирование)
