@@ -3,6 +3,7 @@ package com.nayya.myktor.ui.product.products
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
@@ -50,6 +51,11 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 //        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.recyclerView.adapter = adapter
+
+        val animation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_fall_down)
+        binding.recyclerView.layoutAnimation = animation
+        binding.recyclerView.scheduleLayoutAnimation()
+
 
         // Наблюдение за отфильтрованным списком
         viewModel.filteredProducts.observe(viewLifecycleOwner) { products ->

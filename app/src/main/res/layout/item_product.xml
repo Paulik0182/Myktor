@@ -8,7 +8,8 @@
     app:cardElevation="4dp"
     app:cardCornerRadius="12dp"
     android:foreground="?android:attr/selectableItemBackground"
-    android:clickable="true">
+    android:clickable="true"
+    android:stateListAnimator="@animator/card_pressed_anim">
 
     <RelativeLayout
         android:layout_width="match_parent"

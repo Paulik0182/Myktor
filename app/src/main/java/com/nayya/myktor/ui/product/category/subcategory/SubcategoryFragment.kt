@@ -3,15 +3,14 @@ package com.nayya.myktor.ui.product.category.subcategory
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentSubcategoryBinding
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.domain.productentity.Subcategory
-import com.nayya.myktor.ui.product.products.ProductsAdapter
 import com.nayya.myktor.utils.viewBinding
 
 class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
@@ -87,6 +86,12 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
             this.layoutManager = layoutManager
             this.adapter = combinedAdapter
         }
+
+        // Анимация появления элементов списка
+        val animation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_fall_down)
+        binding.productRecyclerView.layoutAnimation = animation
+        binding.productRecyclerView.scheduleLayoutAnimation()
+
 
 //        val subcategories = category.subcategories.orEmpty()
 //        val productsWithoutSub = allProducts.filter { product ->

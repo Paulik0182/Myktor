@@ -12,6 +12,7 @@ import com.nayya.myktor.databinding.ItemProductBinding
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.domain.productentity.Subcategory
 import android.util.Base64
+import android.view.animation.AnimationUtils
 import android.widget.PopupMenu
 
 class CombinedAdapter(
@@ -113,6 +114,10 @@ class CombinedAdapter(
                     if (isSelected) R.drawable.ic_favorite_border else R.drawable.ic_favorite_filled
                 )
                 it.tag = !isSelected
+
+                // Анимация
+                val animation = AnimationUtils.loadAnimation(it.context, R.anim.heart_pop)
+                it.startAnimation(animation)
             }
 
             binding.cardProduct.setOnClickListener {
