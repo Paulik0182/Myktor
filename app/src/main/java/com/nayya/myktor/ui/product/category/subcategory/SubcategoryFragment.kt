@@ -73,7 +73,7 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
                 getController().openProductsBySubcategory(sub.id ?: return@CombinedAdapter, allProducts)
             },
             onProductClick = { product ->
-                // TODO: редактирование
+                getController().openProductFragment(product)
             },
             onProductLongClick = { product ->
                 // TODO: удаление
@@ -137,6 +137,7 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
 
     interface Controller {
         fun openProductsBySubcategory(subcategoryId: Long, products: List<Product>)
+        fun openProductFragment(product: Product)
     }
 
     override fun onAttach(context: Context) {

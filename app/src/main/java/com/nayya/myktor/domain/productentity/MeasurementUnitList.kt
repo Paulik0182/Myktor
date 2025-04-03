@@ -8,4 +8,4 @@ data class MeasurementUnitList(
     val name: String,
     val abbreviation: String,
     val translations: List<MeasurementUnitTranslation> = emptyList()
-)
+) : java.io.Serializable

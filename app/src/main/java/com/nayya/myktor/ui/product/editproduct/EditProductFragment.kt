@@ -56,31 +56,6 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
                     return@setOnClickListener
                 }
 
-//                viewModel.saveProduct(
-//                    productId,
-//                    name,
-//                    description,
-//                    price,
-//                    stockQuantity = 0, // добавить выбор количества на складе
-//                    minStockQuantity = 0, // добавить ввод минимального количества
-//                    productCodes = emptyList(), // Добавить ввод штрих-кодов
-//                    isDemanded = true, // Добавить чекбокс
-//                    productLinks = emptyList(), // Пока заглушка, добавить UI
-//                    locations = emptyList(), // Пока заглушка, добавить UI
-//                    images = emptyList(), // Пока заглушка, добавить UI
-//                    categories = emptyList(), // Пока заглушка, добавить UI
-//                    subcategories = emptyList(), // Пока заглушка, добавить UI
-//                    onSuccess = {
-//                        setFragmentResult("product_updated", Bundle())
-//                        parentFragmentManager.popBackStack()
-//                        Toast.makeText(requireContext(), "Продукт сохранен", Toast.LENGTH_SHORT)
-//                            .show()
-//                    },
-//                    onError = {
-//                        Toast.makeText(requireContext(), "Ошибка сохранения", Toast.LENGTH_SHORT)
-//                            .show()
-//                    }
-//                )
             } else {
                 Toast.makeText(requireContext(), "Заполните все поля", Toast.LENGTH_SHORT).show()
             }

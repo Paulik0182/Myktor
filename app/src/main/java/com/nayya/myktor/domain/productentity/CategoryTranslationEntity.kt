@@ -8,4 +8,4 @@ data class CategoryTranslationEntity(
     val categoryId: Long,
     val languageCode: String, // код перевода. Например: ru, pl, en
     val name: String // сам перевод категории
-)
+) : java.io.Serializable

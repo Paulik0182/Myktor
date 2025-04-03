@@ -10,4 +10,4 @@ data class ProductLink(
     val urlId: Long?,
     val urlName: String?,
     val url: List<UrlEntity> = emptyList()
-)
+) : java.io.Serializable

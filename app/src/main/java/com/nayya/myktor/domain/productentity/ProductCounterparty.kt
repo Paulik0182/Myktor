@@ -16,4 +16,4 @@ data class ProductCounterparty(
     val measurementUnitList: MeasurementUnitList?,
     val measurementUnit: String?,
     val measurementUnitAbbreviation: String?
-)
+) : java.io.Serializable

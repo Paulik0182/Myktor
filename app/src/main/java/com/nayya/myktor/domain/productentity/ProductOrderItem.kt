@@ -13,4 +13,4 @@ data class ProductOrderItem(
     val measurementUnitList: MeasurementUnitList?,
     val measurementUnit: String?,
     val measurementUnitAbbreviation: String?
-)
+) : java.io.Serializable

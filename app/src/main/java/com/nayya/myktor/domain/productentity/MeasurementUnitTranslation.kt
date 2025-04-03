@@ -9,4 +9,4 @@ data class MeasurementUnitTranslation(
     val languageCode: String,
     val name: String,
     val abbreviation: String?,
-)
+) : java.io.Serializable

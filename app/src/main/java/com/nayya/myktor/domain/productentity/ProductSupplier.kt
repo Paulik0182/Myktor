@@ -11,4 +11,4 @@ data class ProductSupplier(
 
     val supplierId: Long,
     val supplierName: String
-)
+) : java.io.Serializable

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Верхняя панель -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_back"
+                android:contentDescription="@string/back"/>
+
+            <ImageButton
+                android:id="@+id/btnFavorite"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/ic_favorite_border"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/favorite"/>
+
+            <ImageButton
+                android:id="@+id/btnEdit"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_toStartOf="@id/btnFavorite"
+                android:src="@drawable/ic_edit"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/edit_product"/>
+        </RelativeLayout>
+
+        <!-- Галерея -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/imageViewPager"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="12dp"
+            android:clipToPadding="false"/>
+
+        <TextView
+            android:id="@+id/tvImageCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:text="1/1"
+            android:textColor="@color/grey_text"/>
+
+        <!-- Название -->
+        <TextView
+            android:id="@+id/tvProductName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"/>
+
+        <!-- Описание -->
+        <TextView
+            android:id="@+id/tvProductDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/grey_text"/>
+
+        <!-- Цена и единица измерения -->
+        <TextView
+            android:id="@+id/tvPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Категории и подкатегории -->
+        <TextView
+            android:id="@+id/tvCategories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/grey_text"/>
+
+        <!-- Склады -->
+        <TextView
+            android:id="@+id/tvStockInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/grey_text"/>
+
+        <!-- Коды -->
+        <TextView
+            android:id="@+id/tvCodes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/grey_text"/>
+
+        <!-- Ссылки -->
+        <TextView
+            android:id="@+id/tvLinks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:autoLink="web"
+            android:textColor="@color/purple_500"/>
+
+        <!-- Кнопка "В корзину" и счётчик -->
+        <LinearLayout
+            android:id="@+id/layoutCart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnAddToCart"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:backgroundTint="@color/purple_500"
+                android:textColor="@android:color/white"
+                android:text="@string/add_to_cart"
+                android:drawableStart="@drawable/ic_cart"
+                android:drawablePadding="8dp"/>
+
+            <!-- Эта часть будет видна после добавления -->
+            <LinearLayout
+                android:id="@+id/layoutCounter"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:id="@+id/btnMinus"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_minus"/>
+
+                <TextView
+                    android:id="@+id/tvCounter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1"
+                    android:textSize="16sp"
+                    android:layout_marginHorizontal="16dp"/>
+
+                <ImageButton
+                    android:id="@+id/btnPlus"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_plus"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

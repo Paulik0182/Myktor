@@ -6,6 +6,8 @@
     <color name="green">#87F86F</color>
     <color name="gray_placeholder">#C6C5C5</color>
     <color name="purple_500">#6200EE</color>
+    <color name="orange_500">#FF5722</color>
+    <color name="grey_text">#666666</color>
 
 
 </resources>

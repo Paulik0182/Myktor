@@ -11,4 +11,10 @@
     <string name="minus">Минус</string>
     <string name="product_image">Изображение товара</string>
 
+    <string name="add_to_cart">В корзину</string>
+    <string name="in_cart">В корзине</string>
+    <string name="edit_product">Редактировать</string>
+    <string name="product_added">Добавлен %1$d товар(ов)</string>
+    <string name="back">Назад</string>
+
 </resources>

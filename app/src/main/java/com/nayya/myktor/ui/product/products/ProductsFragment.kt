@@ -40,7 +40,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
         adapter = ProductsAdapter(
             emptyList(),
             onItemClick = { product ->
-                getController().openEditProductFragment(product)
+                getController().openProductFragment(product)
             }
         ) { productDel ->
             productDel.id?.let { viewModel.deleteProduct(it) }
@@ -83,14 +83,14 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
         }
 
         binding.addProductButton.setOnClickListener {
-            getController().openEditProductFragment(null)
+//            getController().openEditProductFragment(null)
         }
     }
 
     private fun getController(): Controller = activity as Controller
 
     interface Controller {
-        fun openEditProductFragment(product: Product?)
+        fun openProductFragment(product: Product)
     }
 
     override fun onAttach(context: Context) {

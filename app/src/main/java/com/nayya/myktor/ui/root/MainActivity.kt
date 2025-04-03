@@ -16,6 +16,7 @@ import com.nayya.myktor.ui.product.editproduct.EditProductFragment
 import com.nayya.myktor.ui.product.editsupplier.EditSupplierFragment
 import com.nayya.myktor.ui.product.orders.OrdersFragment
 import com.nayya.myktor.ui.product.products.ProductsFragment
+import com.nayya.myktor.ui.product.productview.ViewProductFragment
 import com.nayya.myktor.ui.product.suppliers.SuppliersFragment
 import com.nayya.myktor.ui.test.RequestFragment
 import com.nayya.myktor.utils.ViewBindingActivity
@@ -32,7 +33,8 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     EditSupplierFragment.Controller,
     EditProductFragment.Controller,
     CategoriesFragment.Controller,
-    SubcategoryFragment.Controller {
+    SubcategoryFragment.Controller,
+    ViewProductFragment.Controller {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,15 +83,14 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         swapFragment(EditOrderFragment.newInstance(orderEntity?.id))
     }
 
-    override fun openEditProductFragment(product: Product?) {
-        swapFragment(EditProductFragment.newInstance(product))
-    }
-
     override fun openSubcategoryFragment(category: CategoryEntity, products: List<Product>) {
         swapFragment(SubcategoryFragment.newInstance(category, products))
     }
 
     override fun openProductsBySubcategory(subcategoryId: Long, products: List<Product>) {
         swapFragment(ProductsFragment.newInstance(products, subcategoryId))
+    }
+    override fun openProductFragment(product: Product) {
+        swapFragment(ViewProductFragment.newInstance(product))
     }
 }

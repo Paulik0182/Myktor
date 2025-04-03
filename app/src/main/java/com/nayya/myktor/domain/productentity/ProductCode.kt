@@ -8,4 +8,4 @@ data class ProductCode(
     val codId: Long?,
     val codeName: String,
     val code: List<Code> = emptyList()
-)
+) : java.io.Serializable

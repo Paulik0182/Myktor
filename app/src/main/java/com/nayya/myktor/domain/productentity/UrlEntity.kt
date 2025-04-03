@@ -6,4 +6,4 @@ import kotlinx.serialization.Serializable
 data class UrlEntity(
     val id: Long? = null,
     val url: String
-)
+) : java.io.Serializable
