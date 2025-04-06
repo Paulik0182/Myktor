@@ -76,7 +76,9 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
 
             // Кнопка "редактировать"
             binding.btnEdit.setOnClickListener {
-                Toast.makeText(requireContext(), "Нажата кнопка редактирования", Toast.LENGTH_SHORT).show()
+                product?.id?.let { id ->
+                    getController().openEditProductFragment(id)
+                }
             }
 
             // Кнопка "сердечко"
@@ -121,6 +123,7 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
     private fun getController(): Controller = activity as Controller
 
     interface Controller {
+        fun openEditProductFragment(productId: Long)
     }
 
     override fun onAttach(context: Context) {
@@ -151,4 +154,3 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
         }
     }
 }
-

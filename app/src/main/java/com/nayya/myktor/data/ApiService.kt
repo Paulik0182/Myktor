@@ -5,6 +5,7 @@ import com.nayya.myktor.domain.OrderEntity
 import com.nayya.myktor.domain.ProductEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
+import com.nayya.myktor.domain.productentity.ProductCreateRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -37,11 +38,14 @@ interface ApiService {
 
     // Добавление нового продукта
     @POST("/products")
-    suspend fun addProduct(@Body product: Product)
+    suspend fun addProduct(@Body product: ProductCreateRequest)
+
+    @GET("categories/all")
+    suspend fun getAllCategories(): List<CategoryEntity>
 
     // Обновление данных о продукте
     @PUT("/products/{id}")
-    suspend fun updateProduct(@Path("id") id: Long, @Body product: Product)
+    suspend fun updateProduct(@Path("id") id: Long, @Body product: ProductCreateRequest)
 
     // Получение списка поставщиков
     @GET("/counterparties")

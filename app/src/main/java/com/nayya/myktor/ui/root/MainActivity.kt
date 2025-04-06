@@ -93,4 +93,8 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     override fun openProductFragment(product: Product) {
         swapFragment(ViewProductFragment.newInstance(product))
     }
+
+    override fun openEditProductFragment(productId: Long) {
+        swapFragment(EditProductFragment.newInstance(productId))
+    }
 }

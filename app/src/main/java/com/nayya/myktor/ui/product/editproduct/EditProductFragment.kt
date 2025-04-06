@@ -3,68 +3,141 @@ package com.nayya.myktor.ui.product.editproduct
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResult
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
+import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.databinding.FragmentEditProductBinding
-import com.nayya.myktor.domain.ProductEntity
-import com.nayya.myktor.domain.productentity.Product
+import com.nayya.myktor.domain.productentity.MeasurementUnitList
+import com.nayya.myktor.ui.product.category.categorypicker.CategoryPickerBottomSheet
 import com.nayya.myktor.ui.product.products.ProductViewModel
 import com.nayya.myktor.utils.viewBinding
-import java.math.BigDecimal
 
 class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
 
     private val binding by viewBinding<FragmentEditProductBinding>()
 
     private val productViewModel: ProductViewModel by activityViewModels()
-
-    private val viewModel: EditProductViewModel by lazy {
-        EditProductViewModel(productViewModel)
-    }
+    private lateinit var viewModel: EditProductViewModel
 
     private var productId: Long? = null
+
+    private val linksAdapter = LinksAdapter(
+        onLinkChanged = { index, text -> viewModel.updateLink(index, text) },
+        onAddClicked = { viewModel.addLink() },
+        onRemoveClicked = { index -> viewModel.removeLink(index) }
+    )
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        productId = arguments?.getLong(ARG_PRODUCT_ID)
+
+        viewModel = EditProductViewModel(RetrofitInstance.api, productViewModel)
+        productId?.let { viewModel.loadProduct(it) }
+
+        viewModel.fetchCategories()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (arguments?.containsKey(ARG_PRODUCT_ID) == true) {
-            productId = arguments?.getLong(ARG_PRODUCT_ID)
+        binding.rvLinks.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvLinks.adapter = linksAdapter
+
+        // Spinner для единиц измерения
+        val defaultUnits = listOf(
+            MeasurementUnitList(1, "Штуки", "шт."),
+            MeasurementUnitList(2, "Килограммы", "кг"),
+            MeasurementUnitList(3, "Литры", "л")
+        )
+
+        viewModel.setUnits(defaultUnits)
+
+        viewModel.units.observe(viewLifecycleOwner) { units ->
+            val unitNames = units.map { "${it.name} (${it.abbreviation})" }
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, unitNames)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.spinnerUnits.adapter = adapter
+
+            val selectedIndex = units.indexOfFirst { it.id == viewModel.selectedUnitId.value }
+            if (selectedIndex >= 0) binding.spinnerUnits.setSelection(selectedIndex)
+
+            binding.spinnerUnits.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?, view: View?, position: Int, id: Long
+                ) {
+                    viewModel.selectedUnitId.value = units[position].id
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
         }
 
-        val productName = arguments?.getString(ARG_PRODUCT_NAME)
-        val productDescription = arguments?.getString(ARG_PRODUCT_DESCRIPTION)
-        val productPrice = arguments?.getString(ARG_PRODUCT_PRICE)?.let { BigDecimal(it) }
+        viewModel.product.observe(viewLifecycleOwner) { product ->
+            binding.productNameEditText.setText(product.name)
+            binding.descriptionEditText.setText(product.description)
+            binding.priceEditText.setText(product.price.toPlainString())
+        }
 
-        binding.productNameEditText.setText(productName ?: "")
-        binding.descriptionEditText.setText(productDescription ?: "")
-        binding.priceEditText.setText(productPrice?.toPlainString() ?: "")
+        viewModel.links.observe(viewLifecycleOwner) {
+            linksAdapter.submitList(it.toList())
+        }
+
+        binding.clCategoryPicker.setOnClickListener {
+            val dialog = CategoryPickerBottomSheet.newInstance(
+                categories = viewModel.categories.value ?: emptyList(),
+                selectedCategoryIds = viewModel.selectedCategoryIds,
+                selectedSubcategoryIds = viewModel.selectedSubcategoryIds
+            )
+            dialog.setOnApplyListener { selectedCats, selectedSubs ->
+                viewModel.setCategorySelection(selectedCats.toList(), selectedSubs.toList())
+            }
+            dialog.show(parentFragmentManager, "CategoryPickerBottomSheet")
+        }
 
         binding.saveButton.setOnClickListener {
             val name = binding.productNameEditText.text.toString()
             val description = binding.descriptionEditText.text.toString()
             val priceText = binding.priceEditText.text.toString()
 
-            if (name.isNotEmpty() && description.isNotEmpty() && priceText.isNotEmpty()) {
-                val price = try {
-                    BigDecimal(priceText)
-                } catch (e: NumberFormatException) {
-                    Toast.makeText(requireContext(), "Не верный формат цены", Toast.LENGTH_SHORT)
-                        .show()
-                    return@setOnClickListener
-                }
-
-            } else {
+            if (name.isBlank() || description.isBlank() || priceText.isBlank()) {
                 Toast.makeText(requireContext(), "Заполните все поля", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            val price = priceText.toBigDecimalOrNull()
+            if (price == null) {
+                Toast.makeText(requireContext(), "Некорректная цена", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            viewModel.saveProduct(
+                name = name,
+                description = description,
+                price = price,
+                onSuccess = {
+                    Toast.makeText(requireContext(), "Сохранено", Toast.LENGTH_SHORT).show()
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                },
+                onError = {
+                    Toast.makeText(requireContext(), "Ошибка: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
+
+        binding.btnAddLink.setOnClickListener {
+            viewModel.addLink()
         }
     }
 
     private fun getController(): Controller = activity as Controller
 
-    interface Controller
+    interface Controller {
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -72,23 +145,14 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
     }
 
     companion object {
-
         private const val ARG_PRODUCT_ID = "product_id"
-        private const val ARG_PRODUCT_NAME = "product_name"
-        private const val ARG_PRODUCT_DESCRIPTION = "product_description"
-        private const val ARG_PRODUCT_PRICE = "product_price"
 
-        fun newInstance(product: Product? = null): EditProductFragment {
-            val fragment = EditProductFragment()
-            val args = Bundle()
-            product?.let {
-                it.id?.let { it1 -> args.putLong(ARG_PRODUCT_ID, it1) }
-                args.putString(ARG_PRODUCT_NAME, it.name)
-                args.putString(ARG_PRODUCT_DESCRIPTION, it.description)
-                args.putString(ARG_PRODUCT_PRICE, it.price.toPlainString())
+        fun newInstance(productId: Long? = null): EditProductFragment {
+            return EditProductFragment().apply {
+                arguments = Bundle().apply {
+                    productId?.let { putLong(ARG_PRODUCT_ID, it) }
+                }
             }
-            fragment.arguments = args
-            return fragment
         }
     }
 }

@@ -1,82 +1,152 @@
 package com.nayya.myktor.ui.product.editproduct
 
-import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nayya.myktor.data.ApiService
 import com.nayya.myktor.data.RetrofitInstance
-import com.nayya.myktor.domain.ProductCodeEntity
-import com.nayya.myktor.domain.ProductEntity
-import com.nayya.myktor.domain.ProductImageEntity
-import com.nayya.myktor.domain.ProductLinkEntity
-import com.nayya.myktor.domain.WarehouseLocationEntity
+import com.nayya.myktor.domain.productentity.CategoryEntity
+import com.nayya.myktor.domain.productentity.MeasurementUnitList
 import com.nayya.myktor.domain.productentity.Product
-import com.nayya.myktor.domain.productentity.ProductCode
-import com.nayya.myktor.domain.productentity.ProductLink
+import com.nayya.myktor.domain.productentity.ProductCreateRequest
+import com.nayya.myktor.domain.productentity.ProductLinkRequest
 import com.nayya.myktor.ui.product.products.ProductViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 
 class EditProductViewModel(
+    private val api: ApiService,
     private val productViewModel: ProductViewModel,
 ) : ViewModel() {
 
+    private var editingProduct: Product? = null
+
+    val units = MutableLiveData<List<MeasurementUnitList>>()
+    val selectedUnitId = MutableLiveData<Long>()
+
+    val links = MutableLiveData<MutableList<String>>(mutableListOf())
+
+    val product = MutableLiveData<Product>()
+
+    var selectedCategoryIds: List<Long> = emptyList()
+        private set
+    var selectedSubcategoryIds: List<Long> = emptyList()
+        private set
+
+    private val _categories = MutableLiveData<List<CategoryEntity>>()
+    val categories: LiveData<List<CategoryEntity>> get() = _categories
+
+    fun loadProduct(productId: Long) {
+        viewModelScope.launch {
+            try {
+                val loaded = RetrofitInstance.api.getProductById(productId)
+                editingProduct = loaded
+                product.postValue(loaded)
+
+                selectedUnitId.postValue(loaded.measurementUnitId)
+                links.postValue(
+                    loaded.productLinks?.mapNotNull { it.urlName }?.toMutableList()
+                        ?: mutableListOf()
+                )
+                selectedCategoryIds = loaded.categoryIds ?: emptyList()
+                selectedSubcategoryIds = loaded.subcategoryIds ?: emptyList()
+            } catch (e: Exception) {
+                // обработка ошибки
+            }
+        }
+    }
+
+    fun setUnits(unitsList: List<MeasurementUnitList>) {
+        //Здесть получаем по запросу данные меры измерения
+        units.value = unitsList
+    }
+
+    fun updateLink(index: Int, value: String) {
+        val list = links.value ?: mutableListOf()
+        if (index in list.indices) {
+            list[index] = value
+            links.value = list
+        }
+    }
+
+    fun addLink() {
+        if ((links.value?.size ?: 0) < 4) {
+            val updated = links.value ?: mutableListOf()
+            updated.add("")
+            links.value = updated
+        }
+    }
+
+    fun removeLink(index: Int) {
+        val updated = links.value ?: return
+        if (index in updated.indices) {
+            updated.removeAt(index)
+            links.value = updated
+        }
+    }
+
+    fun setCategorySelection(categoryIds: List<Long>, subcategoryIds: List<Long>) {
+        selectedCategoryIds = categoryIds
+        selectedSubcategoryIds = subcategoryIds
+    }
+
+    fun fetchCategories() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.api.getAllCategories()
+                _categories.postValue(response)
+            } catch (e: Exception) {
+                _categories.postValue(emptyList())
+            }
+        }
+    }
+
+    private fun buildCreateRequest(
+        name: String,
+        description: String,
+        price: BigDecimal,
+    ): ProductCreateRequest {
+        return ProductCreateRequest(
+            name = name,
+            description = description,
+            price = price,
+            hasSuppliers = false,
+            supplierCount = 0,
+            totalStockQuantity = 0,
+            minStockQuantity = 0,
+            isDemanded = false,
+            measurementUnitId = selectedUnitId.value ?: 1L,
+            productCodes = emptyList(),
+            productImages = emptyList(),
+            productLinks = links.value?.map {
+                ProductLinkRequest(url = it)
+            } ?: emptyList(),
+            productCounterparties = emptyList(),
+            productSuppliers = emptyList(),
+            categories = selectedCategoryIds,
+            subcategories = selectedSubcategoryIds
+        )
+    }
+
     fun saveProduct(
-        product: Product,
+        name: String,
+        description: String,
+        price: BigDecimal,
         onSuccess: () -> Unit,
         onError: (Throwable) -> Unit,
     ) {
         viewModelScope.launch {
             try {
-                val productRequest = Product(
-                    id = product.id,
-                    name = product.name,
-                    description = product.description,
-                    price = product.price,
-                    hasSuppliers = false,
-                    supplierCount = 0,
-                    totalStockQuantity = product.totalStockQuantity,
-                    minStockQuantity = product.minStockQuantity,
+                val request = buildCreateRequest(name, description, price)
 
-                    isDemanded = product.isDemanded,
-                    measurementUnitId = product.measurementUnitId,
-                    measurementUnitList = product.measurementUnitList,
-                    measurementUnit = product.measurementUnit,
-                    measurementUnitAbbreviation = product.measurementUnitAbbreviation,
+                editingProduct?.id?.let {
+                    api.updateProduct(it, request)
+                } ?: api.addProduct(request)
 
-                    productCodes = product.productCodes,
-                    productLinks = product.productLinks,
-                    productImages = product.productImages,
-                    productCounterparties = product.productCounterparties,
-                    productSuppliers = product.productSuppliers,
-                    measurementUnits = product.measurementUnits,
-                    productOrderItem = product.productOrderItem,
-                    categories = product.categories,
-                    subcategoryIds = product.subcategoryIds,
-                    categoryIds = product.categoryIds,
-                    subcategories = product.subcategories
-                )
-
-                Log.d("API", "Отправка запроса: $productRequest")
-
-                if (product.id == null) {
-                    RetrofitInstance.api.addProduct(productRequest)
-                    Log.d("API", "Продукт добавлен")
-                } else {
-                    RetrofitInstance.api.updateProduct(
-                        product.id,
-                        productRequest
-                    )
-                    Log.d("API", "Продукт обновлен")
-                }
-
-                withContext(Dispatchers.Main) {
-                    productViewModel.fetchProducts()
-                    onSuccess()
-                }
+                productViewModel.fetchProducts()
+                onSuccess()
             } catch (e: Exception) {
-                Log.e("API", "Ошибка при сохранении продукта", e)
                 onError(e)
             }
         }
