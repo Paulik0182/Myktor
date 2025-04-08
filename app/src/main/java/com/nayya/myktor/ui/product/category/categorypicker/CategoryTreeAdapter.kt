@@ -18,7 +18,7 @@ class CategoryTreeAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemCount(): Int {
-        return categories.sumOf { 1 + it.subcategories.size }
+        return categories.sumOf { 1 + (it.subcategories.size ?: 0) }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -69,8 +69,15 @@ class CategoryTreeAdapter(
         private val checkbox: CheckBox = view.findViewById(R.id.checkbox)
 
         fun bind(category: CategoryEntity) {
+            checkbox.setOnCheckedChangeListener(null) // отключаем временно
+
+            val isSelected = selectedCategories.contains(category.id)
+            if (checkbox.isChecked != isSelected) {
+                checkbox.isChecked = isSelected
+            }
+
             checkbox.text = category.name
-            checkbox.isChecked = selectedCategories.contains(category.id)
+
             checkbox.setOnCheckedChangeListener { _, isChecked ->
                 category.id?.let { onCategoryChecked(it, isChecked) }
             }
@@ -81,8 +88,15 @@ class CategoryTreeAdapter(
         private val checkbox: CheckBox = view.findViewById(R.id.checkbox)
 
         fun bind(subcategory: Subcategory) {
+            checkbox.setOnCheckedChangeListener(null) // отключаем временно
+
+            val isSelected = selectedSubcategories.contains(subcategory.id)
+            if (checkbox.isChecked != isSelected) {
+                checkbox.isChecked = isSelected
+            }
+
             checkbox.text = subcategory.name
-            checkbox.isChecked = selectedSubcategories.contains(subcategory.id)
+
             checkbox.setOnCheckedChangeListener { _, isChecked ->
                 subcategory.id?.let { onSubcategoryChecked(it, isChecked) }
             }
