@@ -1,11 +1,13 @@
 package com.nayya.myktor.ui.root
 
 import android.os.Bundle
+import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
+import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ActivityMainBinding
 import com.nayya.myktor.domain.CounterpartyEntity
 import com.nayya.myktor.domain.OrderEntity
-import com.nayya.myktor.domain.ProductEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.ui.product.AccountingProductsFragment
@@ -38,8 +40,60 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onRootBottomNavBar()
+
+        val bottomNav = binding.bottomNavigation
+
+        // Пример: badge на корзину
+        val cartBadge = bottomNav.getOrCreateBadge(R.id.nav_cart)
+        cartBadge.isVisible = true
+        cartBadge.number = 5 // любое число
+
+        // Пример: badge на кошелек
+        val walletBadge = bottomNav.getOrCreateBadge(R.id.nav_wallet)
+        walletBadge.isVisible = true
+        walletBadge.number = 2
+
         if (savedInstanceState == null) {
-            swapFragment(RootFragment.newInstance())
+            binding.bottomNavigation.selectedItemId = R.id.nav_categories
+            swapFragment(CategoriesFragment.newInstance())
+        }
+    }
+
+    private fun onRootBottomNavBar() {
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            binding.bottomNavigation.post {
+                val view = binding.bottomNavigation.findViewById<View>(item.itemId)
+                view?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_up))
+            }
+            when (item.itemId) {
+                R.id.nav_search -> {
+                    swapFragment(ProductsFragment.newInstance())
+                    true
+                }
+
+                R.id.nav_categories -> {
+                    swapFragment(CategoriesFragment.newInstance())
+                    true
+                }
+
+                R.id.nav_wallet -> {
+                    // открыть кошелек
+                    true
+                }
+
+                R.id.nav_cart -> {
+                    // открыть корзину
+                    true
+                }
+
+                R.id.nav_profile -> {
+                    swapFragment(AccountingProductsFragment.newInstance())
+                    true
+                }
+
+                else -> false
+            }
         }
     }
 
@@ -47,6 +101,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         supportFragmentManager
             .beginTransaction()
             .add(binding.container.id, fragment, TAG_ROOT_CONTAINER_FRAGMENT)
+//            .replace(binding.container.id, fragment)
             .addToBackStack(null)
             .commit()
     }
@@ -55,6 +110,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         swapFragment(RequestFragment.newInstance())
     }
 
+    // TODO переделать. удалить
     override fun openProductAccounting() {
         swapFragment(AccountingProductsFragment.newInstance())
     }
@@ -63,10 +119,12 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         swapFragment(OrdersFragment.newInstance())
     }
 
+    // TODO переделать. удалить
     override fun openProduct() {
         swapFragment(ProductsFragment.newInstance())
     }
 
+    // TODO переделать. удалить
     override fun openCategory() {
         swapFragment(CategoriesFragment.newInstance())
     }
@@ -90,6 +148,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     override fun openProductsBySubcategory(subcategoryId: Long, products: List<Product>) {
         swapFragment(ProductsFragment.newInstance(products, subcategoryId))
     }
+
     override fun openProductFragment(product: Product) {
         swapFragment(ViewProductFragment.newInstance(product))
     }

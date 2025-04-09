@@ -81,10 +81,6 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
             // Здесь вручную запускаем анимацию
             binding.recyclerView.scheduleLayoutAnimation()
         }
-
-        binding.addProductButton.setOnClickListener {
-//            getController().openEditProductFragment(null)
-        }
     }
 
     private fun getController(): Controller = activity as Controller

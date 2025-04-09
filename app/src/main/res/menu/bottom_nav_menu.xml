@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_search"
+        android:icon="@drawable/ic_search"
+        android:title="Поиск" />
+
+    <item
+        android:id="@+id/nav_categories"
+        android:icon="@drawable/ic_categories"
+        android:title="Категории" />
+
+    <item
+        android:id="@+id/nav_wallet"
+        android:icon="@drawable/ic_wallet"
+        android:title="Чаты" />
+
+    <item
+        android:id="@+id/nav_cart"
+        android:icon="@drawable/ic_cart_menu"
+        android:title="Корзина" />
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_profile"
+        android:title="Профиль" />
+</menu>
