@@ -2,6 +2,7 @@ package com.nayya.myktor.ui.product.category.subcategory
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
@@ -35,10 +36,61 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
         super.onViewCreated(view, savedInstanceState)
 
         val subcategories = category.subcategories.orEmpty()
+        val categoryId = category.id ?: return
+        val subcategoryIdsOfThisCategory = category.subcategories.orEmpty()
+            .mapNotNull { it.id }
+            .toSet()
+
         val productsWithoutSub = allProducts.filter { product ->
-            val categoryId = category.id ?: return@filter false
-            product.categoryIds.orEmpty().contains(categoryId) &&
-                    product.subcategoryIds.orEmpty().isEmpty()
+            val productCategoryIds = product.categoryIds.orEmpty()
+            val productSubcategoryIds = product.subcategoryIds.orEmpty()
+
+            // Собираем связи categoryId → subcategoryId (или null)
+            val links = productCategoryIds.associateWith { catId ->
+                product.subcategories.orEmpty()
+                    .firstOrNull { it.categoryId == catId }?.id
+            }.toList()
+
+            val currentCategoryLinks = links.filter { it.first == categoryId }
+
+            Log.d("FilterDebug", "📦 ${product.name}")
+            Log.d("FilterDebug", " - categories: $productCategoryIds")
+            Log.d("FilterDebug", " - subcategories: $productSubcategoryIds")
+            Log.d("FilterDebug", " - links: $links")
+            Log.d("FilterDebug", " - currentCategoryLinks: $currentCategoryLinks")
+            Log.d("FilterDebug", " - subIds of current category: $subcategoryIdsOfThisCategory")
+
+            if (productCategoryIds.size != productSubcategoryIds.size) {
+                Log.d("FilterDebug", "💥 [${product.name}] categoryIds.size != subcategoryIds.size → ${productCategoryIds.size} != ${productSubcategoryIds.size}")
+            }
+
+            if (currentCategoryLinks.isEmpty()) {
+                Log.d("FilterDebug", "❌ ${product.name} — нет связи с категорией ${category.name}")
+                return@filter false
+            }
+
+            val hasSubInThisCategory = currentCategoryLinks.any { (_, subId) ->
+                val issue = when {
+                    subId == null -> {
+                        // это ок — это то, что мы и ищем
+                        false
+                    }
+                    !subcategoryIdsOfThisCategory.contains(subId) -> {
+                        Log.d("FilterDebug", "💥 ${product.name} — subId $subId НЕ входит в подкатегории категории ${category.name}")
+                        true
+                    }
+                    else -> true
+                }
+                issue
+            }
+
+            return@filter if (hasSubInThisCategory) {
+                Log.d("FilterDebug", "❌ ${product.name} — привязан к подкатегории текущей категории ${category.name}")
+                false
+            } else {
+                Log.d("FilterDebug", "✅ ${product.name} — привязан к категории ${category.name} БЕЗ подкатегорий")
+                true
+            }
         }
 
         // Создаём единый список: подкатегории → разделитель → продукты
@@ -91,46 +143,6 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
         val animation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_fall_down)
         binding.productRecyclerView.layoutAnimation = animation
         binding.productRecyclerView.scheduleLayoutAnimation()
-
-
-//        val subcategories = category.subcategories.orEmpty()
-//        val productsWithoutSub = allProducts.filter { product ->
-//            val categoryId = category.id ?: return@filter false
-//            product.categoryIds.orEmpty().contains(categoryId) &&
-//                    product.subcategoryIds.orEmpty().isEmpty()
-//        }
-//
-//        val combinedItems = mutableListOf<CombinedItem>()
-//
-//        if (subcategories.isNotEmpty()) {
-//            combinedItems.addAll(subcategories.map { CombinedItem.SubcategoryItem(it) })
-//        }
-//
-//        if (subcategories.isNotEmpty() && productsWithoutSub.isNotEmpty()) {
-//            combinedItems.add(CombinedItem.Divider) // разделитель
-//        }
-//
-//        combinedItems.addAll(productsWithoutSub.map { CombinedItem.ProductItem(it) })
-//
-//        val adapter = CombinedAdapter(
-//            combinedItems,
-//            onSubcategoryClick = { sub -> getController().openProductsBySubcategory(sub.id ?: return@CombinedAdapter, allProducts) },
-//            onProductClick = { product -> /* редактирование */ },
-//            onProductLongClick = { product -> /* удаление */ }
-//        )
-//
-//        binding.subcategoryRecyclerView.visibility = View.GONE
-//        val layoutManager = GridLayoutManager(requireContext(), 2)
-//        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-//            override fun getSpanSize(position: Int): Int {
-//                return when (combinedItems[position]) {
-//                    is CombinedItem.ProductItem -> 1
-//                    else -> 2
-//                }
-//            }
-//        }
-//        binding.productRecyclerView.layoutManager = layoutManager
-//        binding.productRecyclerView.adapter = adapter
     }
 
     private fun getController(): Controller = activity as Controller
