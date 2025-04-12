@@ -87,12 +87,29 @@
             android:layout_marginTop="8dp"/>
 
         <!-- Категории и подкатегории -->
-        <TextView
-            android:id="@+id/tvCategories"
+        <FrameLayout
+            android:id="@+id/flCategoriesContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="@color/grey_text"/>
+            android:layout_marginTop="8dp">
+
+            <LinearLayout
+                android:id="@+id/layoutCategories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="48dp"/>
+
+            <TextView
+                android:id="@+id/btnToggleCategories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:padding="4dp"
+                android:text="Ещё"
+                android:textColor="@color/dark_green"
+                android:visibility="gone"/>
+        </FrameLayout>
 
         <!-- Склады -->
         <TextView

@@ -61,7 +61,10 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
             Log.d("FilterDebug", " - subIds of current category: $subcategoryIdsOfThisCategory")
 
             if (productCategoryIds.size != productSubcategoryIds.size) {
-                Log.d("FilterDebug", "💥 [${product.name}] categoryIds.size != subcategoryIds.size → ${productCategoryIds.size} != ${productSubcategoryIds.size}")
+                Log.d(
+                    "FilterDebug",
+                    "💥 [${product.name}] categoryIds.size != subcategoryIds.size → ${productCategoryIds.size} != ${productSubcategoryIds.size}"
+                )
             }
 
             if (currentCategoryLinks.isEmpty()) {
@@ -75,20 +78,31 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
                         // это ок — это то, что мы и ищем
                         false
                     }
+
                     !subcategoryIdsOfThisCategory.contains(subId) -> {
-                        Log.d("FilterDebug", "💥 ${product.name} — subId $subId НЕ входит в подкатегории категории ${category.name}")
+                        Log.d(
+                            "FilterDebug",
+                            "💥 ${product.name} — subId $subId НЕ входит в подкатегории категории ${category.name}"
+                        )
                         true
                     }
+
                     else -> true
                 }
                 issue
             }
 
             return@filter if (hasSubInThisCategory) {
-                Log.d("FilterDebug", "❌ ${product.name} — привязан к подкатегории текущей категории ${category.name}")
+                Log.d(
+                    "FilterDebug",
+                    "❌ ${product.name} — привязан к подкатегории текущей категории ${category.name}"
+                )
                 false
             } else {
-                Log.d("FilterDebug", "✅ ${product.name} — привязан к категории ${category.name} БЕЗ подкатегорий")
+                Log.d(
+                    "FilterDebug",
+                    "✅ ${product.name} — привязан к категории ${category.name} БЕЗ подкатегорий"
+                )
                 true
             }
         }
@@ -122,7 +136,10 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
         combinedAdapter = CombinedAdapter(
             combinedItems,
             onSubcategoryClick = { sub ->
-                getController().openProductsBySubcategory(sub.id ?: return@CombinedAdapter, allProducts)
+                getController().openProductsBySubcategory(
+                    sub.id ?: return@CombinedAdapter,
+                    allProducts
+                )
             },
             onProductClick = { product ->
                 getController().openProductFragment(product)
@@ -140,7 +157,8 @@ class SubcategoryFragment : Fragment(R.layout.fragment_subcategory) {
         }
 
         // Анимация появления элементов списка
-        val animation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_fall_down)
+        val animation =
+            AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_fall_down)
         binding.productRecyclerView.layoutAnimation = animation
         binding.productRecyclerView.scheduleLayoutAnimation()
     }

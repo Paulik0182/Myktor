@@ -13,4 +13,7 @@
     <color name="bottom_nav_icon_tint">#A0A0A0</color> <!-- обычный цвет -->
     <color name="bottom_nav_selected">#6A0DAD</color> <!-- активный -->
 
+    <!-- Окно с информацией о Продукте -->
+    <color name="dark_green">#2E7D32</color>
+
 </resources>

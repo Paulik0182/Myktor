@@ -6,15 +6,6 @@ import android.util.Base64
 
 class ViewProductViewModel : ViewModel() {
 
-    fun getCategoryText(product: Product): String {
-        val categories = product.categories.orEmpty().joinToString(", ") { it.name }
-        val subcategories = product.subcategories.orEmpty().joinToString(", ") { it.name }
-        return buildString {
-            append("Категории: $categories")
-            if (subcategories.isNotBlank()) append("\nПодкатегории: $subcategories")
-        }
-    }
-
     fun getStockInfo(product: Product): String {
         val unit = product.measurementUnitAbbreviation.orEmpty()
         return "На складе: ${product.totalStockQuantity} $unit"

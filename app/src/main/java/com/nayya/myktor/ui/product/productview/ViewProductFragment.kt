@@ -1,6 +1,8 @@
 package com.nayya.myktor.ui.product.productview
 
+import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -10,7 +12,9 @@ import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentViewProductBinding
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.utils.viewBinding
-import android.util.Base64
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.viewpager2.widget.ViewPager2
 
@@ -21,6 +25,9 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
 
     private var product: Product? = null
     private var count = 0
+
+    private var isExpanded = false
+    private val maxVisibleLines = 4
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +50,7 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
             binding.tvPrice.text = "$price $unit"
 
             // Категории
-            binding.tvCategories.text = viewModel.getCategoryText(prod)
+            displayCategoriesHierarchically(prod)
 
             // Склад
             binding.tvStockInfo.text = viewModel.getStockInfo(prod)
@@ -117,6 +124,87 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
                     Toast.makeText(requireContext(), "Заказан $count шт.", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+    }
+
+    private fun displayCategoriesHierarchically(product: Product) {
+        val container = binding.layoutCategories
+        val toggleButton = binding.btnToggleCategories
+        container.removeAllViews()
+
+        val categoryMap = product.categories.orEmpty().associateBy { it.id }
+        val subByCategory = product.subcategories.orEmpty().groupBy { it.categoryId }
+
+        // Заголовок
+        val tvHeader = TextView(requireContext()).apply {
+            text = "Категории и подкатегории"
+            setTypeface(null, Typeface.BOLD)
+            setTextColor(ContextCompat.getColor(context, R.color.grey_text))
+            setPadding(0, 0, 0, 8)
+        }
+        container.addView(tvHeader)
+
+        product.categoryIds.forEach { catId ->
+            val category = categoryMap[catId] ?: return@forEach
+            val tvCategory = TextView(requireContext()).apply {
+                text = "- ${category.name}"
+                setTextColor(ContextCompat.getColor(context, R.color.grey_text))
+            }
+            container.addView(tvCategory)
+
+            subByCategory[catId]?.forEach { sub ->
+                val tvSub = TextView(requireContext()).apply {
+                    text = "\t\t${sub.name}" // визуальный отступ
+                    setTextColor(ContextCompat.getColor(context, R.color.grey_text))
+                }
+                container.addView(tvSub)
+            }
+        }
+
+        // После отрисовки — проверим, нужно ли обрезать
+        container.post {
+            val fullHeight = container.height
+            container.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+            val headerHeight = container.getChildAt(0)?.height ?: 0
+            val lineHeight = container.getChildAt(1)?.height ?: 0
+            val visibleHeight = headerHeight + lineHeight * maxVisibleLines
+
+            if (fullHeight > visibleHeight) {
+                container.layoutParams.height = visibleHeight
+                container.requestLayout()
+                toggleButton.visibility = View.VISIBLE
+            }
+        }
+
+        toggleButton.setOnClickListener {
+            isExpanded = !isExpanded
+
+            val initialHeight = container.height
+            val targetHeight = if (isExpanded) {
+                ViewGroup.LayoutParams.WRAP_CONTENT.also {
+                    container.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    container.measure(
+                        View.MeasureSpec.makeMeasureSpec(container.width, View.MeasureSpec.EXACTLY),
+                        View.MeasureSpec.UNSPECIFIED
+                    )
+                }
+                container.measuredHeight
+            } else {
+                val headerHeight = container.getChildAt(0)?.height ?: 0
+                val rowHeight = container.getChildAt(1)?.height ?: 0
+                headerHeight + rowHeight * maxVisibleLines
+            }
+
+            val animator = ValueAnimator.ofInt(initialHeight, targetHeight)
+            animator.addUpdateListener {
+                val value = it.animatedValue as Int
+                container.layoutParams.height = value
+                container.requestLayout()
+            }
+            animator.duration = 250
+            animator.start()
+
+            toggleButton.text = if (isExpanded) "Свернуть" else "Ещё"
         }
     }
 
