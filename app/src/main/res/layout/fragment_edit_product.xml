@@ -53,20 +53,30 @@
             android:gravity="center_vertical"
             android:layout_marginTop="12dp">
 
-            <TextView
-                android:id="@+id/tvCategories"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <!-- Категории и подкатегории -->
+            <FrameLayout
+                android:id="@+id/flCategoriesContainer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Категории и подкатегории"
-                android:textColor="@color/black"/>
+                android:layout_marginTop="8dp">
 
-            <ImageView
-                android:id="@+id/ivEditCategories"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_edit"
-                android:contentDescription="Редактировать"/>
+                <LinearLayout
+                    android:id="@+id/layoutCategories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="48dp"/>
+
+                <TextView
+                    android:id="@+id/btnToggleCategories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:padding="4dp"
+                    android:text="Ещё"
+                    android:textColor="@color/dark_green"
+                    android:visibility="gone"/>
+            </FrameLayout>
         </LinearLayout>
 
         <!-- Ссылки -->
