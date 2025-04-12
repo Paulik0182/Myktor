@@ -2,15 +2,11 @@ package com.nayya.myktor.ui.product.editproduct
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Typeface
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -24,6 +20,7 @@ import com.nayya.myktor.domain.productentity.MeasurementUnitList
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.ui.product.category.categorypicker.CategoryPickerBottomSheet
 import com.nayya.myktor.ui.product.products.ProductViewModel
+import com.nayya.myktor.utils.LocaleUtils.getChildAtOrNull
 import com.nayya.myktor.utils.viewBinding
 
 class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
@@ -70,22 +67,24 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
 
         viewModel.units.observe(viewLifecycleOwner) { units ->
             val unitNames = units.map { "${it.name} (${it.abbreviation})" }
-            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, unitNames)
+            val adapter =
+                ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, unitNames)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             binding.spinnerUnits.adapter = adapter
 
             val selectedIndex = units.indexOfFirst { it.id == viewModel.selectedUnitId.value }
             if (selectedIndex >= 0) binding.spinnerUnits.setSelection(selectedIndex)
 
-            binding.spinnerUnits.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?, view: View?, position: Int, id: Long
-                ) {
-                    viewModel.selectedUnitId.value = units[position].id
-                }
+            binding.spinnerUnits.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?, view: View?, position: Int, id: Long,
+                    ) {
+                        viewModel.selectedUnitId.value = units[position].id
+                    }
 
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
-            }
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                }
         }
 
         viewModel.product.observe(viewLifecycleOwner) { product ->
@@ -107,6 +106,10 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
             )
             dialog.setOnApplyListener { selectedCats, selectedSubs ->
                 viewModel.setCategorySelection(selectedCats.toList(), selectedSubs.toList())
+
+                isExpanded = false
+                val updated = viewModel.buildPreviewProduct()
+                displayCategoriesHierarchically(updated)
             }
             dialog.show(parentFragmentManager, "CategoryPickerBottomSheet")
         }
@@ -136,7 +139,8 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
                     requireActivity().onBackPressedDispatcher.onBackPressed()
                 },
                 onError = {
-                    Toast.makeText(requireContext(), "Ошибка: ${it.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Ошибка: ${it.message}", Toast.LENGTH_SHORT)
+                        .show()
                 }
             )
         }
@@ -149,14 +153,15 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
     private fun displayCategoriesHierarchically(product: Product) {
         val container = binding.layoutCategories
         val toggleButton = binding.btnToggleCategories
-        container.removeViews(1, container.childCount - 1) // удалим всё после заголовка
+
+        container.removeViews(1, container.childCount - 1)
         toggleButton.visibility = View.GONE
 
         val categoryMap = product.categories.orEmpty().associateBy { it.id }
         val subByCategory = product.subcategories.orEmpty().groupBy { it.categoryId }
         val categoryIds = product.categoryIds.orEmpty()
 
-        // Если нет категорий вообще — покажем "Нет категорий"
+        // Если нет категорий вообще
         if (categoryIds.isEmpty()) {
             val tvEmpty = TextView(requireContext()).apply {
                 text = "Нет категорий"
@@ -166,6 +171,7 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
             return
         }
 
+        // Добавляем категории и подкатегории
         categoryIds.forEach { catId ->
             val category = categoryMap[catId] ?: return@forEach
             val tvCategory = TextView(requireContext()).apply {
@@ -176,56 +182,69 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
 
             subByCategory[catId]?.forEach { sub ->
                 val tvSub = TextView(requireContext()).apply {
-                    text = "\t\t${sub.name}" // визуальный отступ
+                    text = "\t\t${sub.name}"
                     setTextColor(ContextCompat.getColor(context, R.color.grey_text))
                 }
                 container.addView(tvSub)
             }
         }
 
-        // После отрисовки — проверим, нужно ли обрезать
-        container.post {
-            val fullHeight = container.height
+        // Сначала сбрасываем флаг
+        isExpanded = false
+
+        // Задержка + measure вместо .height
+        container.postDelayed({
             container.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-            val headerHeight = container.getChildAt(0)?.height ?: 0
-            val lineHeight = container.getChildAt(1)?.height ?: 0
+            container.measure(
+                View.MeasureSpec.makeMeasureSpec(container.width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.UNSPECIFIED
+            )
+            val measuredFullHeight = container.measuredHeight
+
+            val headerHeight = container.getChildAtOrNull(0)?.measuredHeight ?: 0
+            val lineHeight = container.getChildAtOrNull(1)?.measuredHeight ?: 0
             val visibleHeight = headerHeight + lineHeight * maxVisibleLines
 
-            if (fullHeight > visibleHeight) {
+            // Применим обрезку если нужно
+            if (measuredFullHeight > visibleHeight) {
                 container.layoutParams.height = visibleHeight
-                container.requestLayout()
                 toggleButton.visibility = View.VISIBLE
+                toggleButton.text = "Ещё"
+            } else {
+                toggleButton.visibility = View.GONE
             }
-        }
+
+            container.requestLayout()
+        }, 30) // 30–50 мс достаточно
 
         toggleButton.setOnClickListener {
-            isExpanded = !isExpanded
-
             val initialHeight = container.height
-            val targetHeight = if (isExpanded) {
-                ViewGroup.LayoutParams.WRAP_CONTENT.also {
-                    container.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                    container.measure(
-                        View.MeasureSpec.makeMeasureSpec(container.width, View.MeasureSpec.EXACTLY),
-                        View.MeasureSpec.UNSPECIFIED
-                    )
-                }
+
+            val targetHeight = if (!isExpanded) {
+                // Разворачиваем
+                container.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                container.measure(
+                    View.MeasureSpec.makeMeasureSpec(container.width, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.UNSPECIFIED
+                )
                 container.measuredHeight
             } else {
-                val headerHeight = container.getChildAt(0)?.height ?: 0
-                val rowHeight = container.getChildAt(1)?.height ?: 0
-                headerHeight + rowHeight * maxVisibleLines
+                // Сворачиваем
+                val headerHeight = container.getChildAtOrNull(0)?.measuredHeight ?: 0
+                val lineHeight = container.getChildAtOrNull(1)?.measuredHeight ?: 0
+                headerHeight + lineHeight * maxVisibleLines
             }
 
-            val animator = ValueAnimator.ofInt(initialHeight, targetHeight)
-            animator.addUpdateListener {
-                val value = it.animatedValue as Int
-                container.layoutParams.height = value
-                container.requestLayout()
+            ValueAnimator.ofInt(initialHeight, targetHeight).apply {
+                duration = 250
+                addUpdateListener {
+                    container.layoutParams.height = it.animatedValue as Int
+                    container.requestLayout()
+                }
+                start()
             }
-            animator.duration = 250
-            animator.start()
 
+            isExpanded = !isExpanded
             toggleButton.text = if (isExpanded) "Свернуть" else "Ещё"
         }
     }

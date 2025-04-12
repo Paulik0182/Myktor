@@ -151,4 +151,56 @@ class EditProductViewModel(
             }
         }
     }
+
+    fun buildPreviewProduct(): Product {
+        val current = editingProduct
+        return if (current != null) {
+            current.copy(
+                categoryIds = selectedCategoryIds,
+                subcategoryIds = selectedSubcategoryIds,
+                categories = categories.value ?: emptyList(), // ← ВАЖНО
+                subcategories = categories.value
+                    ?.flatMap { it.subcategories.orEmpty() }
+                    ?.filter { selectedSubcategoryIds.contains(it.id) }
+                    ?: emptyList(),
+                productCodes = current.productCodes ?: emptyList(),
+                productLinks = current.productLinks ?: emptyList(),
+                productImages = current.productImages ?: emptyList(),
+                productCounterparties = current.productCounterparties ?: emptyList(),
+                productSuppliers = current.productSuppliers ?: emptyList(),
+                measurementUnits = current.measurementUnits ?: emptyList(),
+                productOrderItem = current.productOrderItem ?: emptyList()
+            )
+        } else {
+            Product(
+                id = null,
+                name = "",
+                description = "",
+                price = BigDecimal.ZERO,
+                hasSuppliers = false,
+                supplierCount = 0,
+                totalStockQuantity = 0,
+                minStockQuantity = 0,
+                isDemanded = false,
+                measurementUnitId = 1,
+                measurementUnitList = null,
+                measurementUnit = null,
+                measurementUnitAbbreviation = null,
+                productCodes = emptyList(),
+                productLinks = emptyList(),
+                productImages = emptyList(),
+                productCounterparties = emptyList(),
+                productSuppliers = emptyList(),
+                measurementUnits = emptyList(),
+                productOrderItem = emptyList(),
+                categories = categories.value ?: emptyList(),
+                subcategoryIds = selectedSubcategoryIds,
+                categoryIds = selectedCategoryIds,
+                subcategories = categories.value
+                    ?.flatMap { it.subcategories.orEmpty() }
+                    ?.filter { selectedSubcategoryIds.contains(it.id) }
+                    ?: emptyList()
+            )
+        }
+    }
 }
