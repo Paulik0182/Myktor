@@ -99,7 +99,7 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
             linksAdapter.submitList(it.toList())
         }
 
-        binding.clCategoryPicker.setOnClickListener {
+        binding.ivEditCategories.setOnClickListener {
             val dialog = CategoryPickerBottomSheet.newInstance(
                 categories = viewModel.categories.value ?: emptyList(),
                 selectedCategoryIds = viewModel.selectedCategoryIds,
@@ -149,48 +149,10 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
     private fun displayCategoriesHierarchically(product: Product) {
         val container = binding.layoutCategories
         val toggleButton = binding.btnToggleCategories
-        container.removeAllViews()
+        container.removeViews(1, container.childCount - 1) // удалим всё после заголовка
 
         val categoryMap = product.categories.orEmpty().associateBy { it.id }
         val subByCategory = product.subcategories.orEmpty().groupBy { it.categoryId }
-
-        // Заголовок с иконкой редактирования
-        val headerLayout = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        }
-
-        val tvHeader = TextView(requireContext()).apply {
-            text = "Категории и подкатегории"
-            setTypeface(null, Typeface.BOLD)
-            setTextColor(ContextCompat.getColor(context, R.color.grey_text))
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-        }
-
-        val editIcon = ImageView(requireContext()).apply {
-            setImageResource(R.drawable.ic_edit)
-            setColorFilter(ContextCompat.getColor(context, R.color.grey_text))
-            setOnClickListener {
-                val dialog = CategoryPickerBottomSheet.newInstance(
-                    categories = viewModel.categories.value ?: emptyList(),
-                    selectedCategoryIds = viewModel.selectedCategoryIds,
-                    selectedSubcategoryIds = viewModel.selectedSubcategoryIds
-                )
-                dialog.setOnApplyListener { selectedCats, selectedSubs ->
-                    viewModel.setCategorySelection(selectedCats.toList(), selectedSubs.toList())
-                }
-                dialog.show(parentFragmentManager, "CategoryPickerBottomSheet")
-            }
-        }
-
-        headerLayout.addView(tvHeader)
-        headerLayout.addView(editIcon)
-        container.addView(headerLayout)
-
 
         product.categoryIds.forEach { catId ->
             val category = categoryMap[catId] ?: return@forEach
