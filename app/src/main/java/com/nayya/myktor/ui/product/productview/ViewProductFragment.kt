@@ -131,9 +131,11 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
         val container = binding.layoutCategories
         val toggleButton = binding.btnToggleCategories
         container.removeAllViews()
+        toggleButton.visibility = View.GONE
 
         val categoryMap = product.categories.orEmpty().associateBy { it.id }
         val subByCategory = product.subcategories.orEmpty().groupBy { it.categoryId }
+        val categoryIds = product.categoryIds.orEmpty()
 
         // Заголовок
         val tvHeader = TextView(requireContext()).apply {
@@ -144,7 +146,18 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
         }
         container.addView(tvHeader)
 
-        product.categoryIds.forEach { catId ->
+        // Если нет категорий вообще — покажем "Нет категорий"
+        if (categoryIds.isEmpty()) {
+            val tvEmpty = TextView(requireContext()).apply {
+                text = "Нет категорий"
+                setTextColor(ContextCompat.getColor(context, R.color.grey_text))
+            }
+            container.addView(tvEmpty)
+            return
+        }
+
+        // Строим дерево
+        categoryIds.forEach { catId ->
             val category = categoryMap[catId] ?: return@forEach
             val tvCategory = TextView(requireContext()).apply {
                 text = "- ${category.name}"

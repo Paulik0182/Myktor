@@ -150,11 +150,23 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
         val container = binding.layoutCategories
         val toggleButton = binding.btnToggleCategories
         container.removeViews(1, container.childCount - 1) // удалим всё после заголовка
+        toggleButton.visibility = View.GONE
 
         val categoryMap = product.categories.orEmpty().associateBy { it.id }
         val subByCategory = product.subcategories.orEmpty().groupBy { it.categoryId }
+        val categoryIds = product.categoryIds.orEmpty()
 
-        product.categoryIds.forEach { catId ->
+        // Если нет категорий вообще — покажем "Нет категорий"
+        if (categoryIds.isEmpty()) {
+            val tvEmpty = TextView(requireContext()).apply {
+                text = "Нет категорий"
+                setTextColor(ContextCompat.getColor(context, R.color.grey_text))
+            }
+            container.addView(tvEmpty)
+            return
+        }
+
+        categoryIds.forEach { catId ->
             val category = categoryMap[catId] ?: return@forEach
             val tvCategory = TextView(requireContext()).apply {
                 text = "- ${category.name}"
