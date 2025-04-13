@@ -13,6 +13,7 @@ import com.nayya.myktor.databinding.FragmentViewProductBinding
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.utils.viewBinding
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
@@ -42,7 +43,7 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
         product?.let { prod ->
             // Название и описание
             binding.tvProductName.text = prod.name
-            binding.tvProductDescription.text = prod.description
+            setupDescription(prod)
 
             // Цена
             val price = prod.price.toPlainString()
@@ -56,7 +57,7 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
             binding.tvStockInfo.text = viewModel.getStockInfo(prod)
 
             // Коды
-            binding.tvCodes.text = viewModel.getCodesText(prod)
+            setupCodes(prod)
 
             // Ссылки
             binding.tvLinks.text = viewModel.getLinksText(prod)
@@ -121,11 +122,54 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
                     showAddToCart()
                 } else {
                     updateCounter()
-                    Toast.makeText(requireContext(), "Заказан $count шт.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Заказан $count шт.", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
     }
+
+    private fun setupCodes(product: Product) {
+        val codesText = viewModel.getCodesText(product)
+        binding.tvCodes.text = codesText
+
+        binding.tvCodes.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                binding.tvCodes.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                if (binding.tvCodes.lineCount > 1) {
+                    binding.btnMoreCodes.visibility = View.VISIBLE
+                }
+            }
+        })
+
+        binding.btnMoreCodes.setOnClickListener {
+            CodesBottomSheetDialog.newInstance(
+                product.productCodes?.map { it.codeName } ?: emptyList()
+            ).show(parentFragmentManager, "CodesBottomSheetDialog")
+        }
+    }
+
+    private fun setupDescription(product: Product) {
+        val description = product.description.orEmpty()
+        binding.tvProductDescription.text = description
+
+        binding.tvProductDescription.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                binding.tvProductDescription.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                if (binding.tvProductDescription.lineCount > 1) {
+                    binding.btnMoreDescription.visibility = View.VISIBLE
+                }
+            }
+        })
+
+        binding.btnMoreDescription.setOnClickListener {
+            DescriptionBottomSheetDialog.newInstance(description)
+                .show(parentFragmentManager, "DescriptionBottomSheetDialog")
+        }
+    }
+
 
     private fun displayCategoriesHierarchically(product: Product) {
         val container = binding.layoutCategories

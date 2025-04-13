@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Поиск кода"
+        android:inputType="number"
+        android:maxLength="15"
+        android:drawableEnd="@drawable/ic_clear"
+        android:drawablePadding="8dp"
+        android:background="@drawable/edit_text_background"
+        android:padding="8dp"
+        android:drawableTint="@color/grey_text" />
+
+    <TextView
+        android:id="@+id/tvEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Такого кода нет"
+        android:textColor="@color/grey_text"
+        android:visibility="gone"
+        android:gravity="center"
+        android:paddingTop="12dp" />
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:overScrollMode="ifContentScrolls"
+        android:scrollbars="vertical" />
+</LinearLayout>
+

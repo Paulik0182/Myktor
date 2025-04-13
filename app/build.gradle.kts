@@ -55,7 +55,8 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
 
     // Material
-    implementation("com.google.android.material:material:1.12.0")
+//    implementation("com.google.android.material:material:1.12.0")
+    implementation("com.google.android.material:material:1.9.0")
 
     // Ktor клиент для Android
     implementation("io.ktor:ktor-client-android:2.3.0")

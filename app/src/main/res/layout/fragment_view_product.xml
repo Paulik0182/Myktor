@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
 
     <LinearLayout
-        android:orientation="vertical"
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <!-- Верхняя панель -->
         <RelativeLayout
@@ -21,26 +20,26 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_back"
-                android:contentDescription="@string/back"/>
+                android:contentDescription="@string/back"
+                android:src="@drawable/ic_back" />
 
             <ImageButton
                 android:id="@+id/btnFavorite"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_alignParentEnd="true"
-                android:src="@drawable/ic_favorite_border"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/favorite"/>
+                android:contentDescription="@string/favorite"
+                android:src="@drawable/ic_favorite_border" />
 
             <ImageButton
                 android:id="@+id/btnEdit"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_toStartOf="@id/btnFavorite"
-                android:src="@drawable/ic_edit"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/edit_product"/>
+                android:contentDescription="@string/edit_product"
+                android:src="@drawable/ic_edit" />
         </RelativeLayout>
 
         <!-- Галерея -->
@@ -49,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="12dp"
-            android:clipToPadding="false"/>
+            android:clipToPadding="false" />
 
         <TextView
             android:id="@+id/tvImageCounter"
@@ -58,33 +57,52 @@
             android:layout_gravity="center"
             android:layout_marginTop="4dp"
             android:text="1/1"
-            android:textColor="@color/grey_text"/>
+            android:textColor="@color/grey_text" />
 
         <!-- Название -->
         <TextView
             android:id="@+id/tvProductName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="12dp"/>
+            android:textStyle="bold" />
 
         <!-- Описание -->
-        <TextView
-            android:id="@+id/tvProductDescription"
+        <FrameLayout
+            android:id="@+id/flDescriptionContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="@color/grey_text"/>
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/tvProductDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/grey_text" />
+
+            <TextView
+                android:id="@+id/btnMoreDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:padding="4dp"
+                android:text="Подробнее"
+                android:layout_marginTop="32dp"
+                android:textColor="@color/dark_green"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <!-- Цена и единица измерения -->
         <TextView
             android:id="@+id/tvPrice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
+            android:layout_marginTop="8dp"
             android:textSize="18sp"
-            android:layout_marginTop="8dp"/>
+            android:textStyle="bold" />
 
         <!-- Категории и подкатегории -->
         <FrameLayout
@@ -97,8 +115,8 @@
                 android:id="@+id/layoutCategories"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginEnd="48dp"/>
+                android:layout_marginEnd="48dp"
+                android:orientation="vertical" />
 
             <TextView
                 android:id="@+id/btnToggleCategories"
@@ -108,7 +126,7 @@
                 android:padding="4dp"
                 android:text="Ещё"
                 android:textColor="@color/dark_green"
-                android:visibility="gone"/>
+                android:visibility="gone" />
         </FrameLayout>
 
         <!-- Склады -->
@@ -117,15 +135,33 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textColor="@color/grey_text"/>
+            android:textColor="@color/grey_text" />
 
         <!-- Коды -->
-        <TextView
-            android:id="@+id/tvCodes"
+        <LinearLayout
+            android:id="@+id/llCodesContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textColor="@color/grey_text"/>
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvCodes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/grey_text" />
+
+            <TextView
+                android:id="@+id/btnMoreCodes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:text="Подробнее"
+                android:textColor="@color/dark_green"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <!-- Ссылки -->
         <TextView
@@ -134,7 +170,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:autoLink="web"
-            android:textColor="@color/purple_500"/>
+            android:textColor="@color/purple_500" />
 
         <!-- Кнопка "В корзину" и счётчик -->
         <LinearLayout
@@ -142,18 +178,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnAddToCart"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:backgroundTint="@color/purple_500"
-                android:textColor="@android:color/white"
-                android:text="@string/add_to_cart"
                 android:drawableStart="@drawable/ic_cart"
-                android:drawablePadding="8dp"/>
+                android:drawablePadding="8dp"
+                android:text="@string/add_to_cart"
+                android:textColor="@android:color/white" />
 
             <!-- Эта часть будет видна после добавления -->
             <LinearLayout
@@ -169,22 +205,22 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_minus"/>
+                    android:src="@drawable/ic_minus" />
 
                 <TextView
                     android:id="@+id/tvCounter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
                     android:text="1"
-                    android:textSize="16sp"
-                    android:layout_marginHorizontal="16dp"/>
+                    android:textSize="16sp" />
 
                 <ImageButton
                     android:id="@+id/btnPlus"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_plus"/>
+                    android:src="@drawable/ic_plus" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

@@ -3,6 +3,8 @@ package com.nayya.myktor.ui.product.productview
 import androidx.lifecycle.ViewModel
 import com.nayya.myktor.domain.productentity.Product
 import android.util.Base64
+import androidx.core.text.bold
+import androidx.core.text.buildSpannedString
 
 class ViewProductViewModel : ViewModel() {
 
@@ -11,9 +13,15 @@ class ViewProductViewModel : ViewModel() {
         return "На складе: ${product.totalStockQuantity} $unit"
     }
 
-    fun getCodesText(product: Product): String {
-        return product.productCodes.orEmpty().joinToString(", ") { it.codeName }.let {
-            if (it.isNotBlank()) "Коды: $it" else ""
+    fun getCodesText(product: Product): CharSequence {
+        val codesList = product.productCodes.orEmpty()
+            .mapNotNull { it.codeName?.takeIf { name -> name.isNotBlank() } }
+
+        if (codesList.isEmpty()) return ""
+
+        return buildSpannedString {
+            bold { append("Коды: ") }
+            append(codesList.joinToString(", "))
         }
     }
 
