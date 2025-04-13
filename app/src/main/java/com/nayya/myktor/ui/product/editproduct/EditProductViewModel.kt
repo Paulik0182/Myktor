@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.nayya.myktor.data.ApiService
 import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.domain.productentity.CategoryEntity
+import com.nayya.myktor.domain.productentity.CurrencyResponse
 import com.nayya.myktor.domain.productentity.MeasurementUnitList
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.domain.productentity.ProductCreateRequest
@@ -37,6 +38,9 @@ class EditProductViewModel(
     private val _categories = MutableLiveData<List<CategoryEntity>>()
     val categories: LiveData<List<CategoryEntity>> get() = _categories
 
+    val currencies = MutableLiveData<List<CurrencyResponse>>() // Для выпадающего списка
+    val selectedCurrencyId = MutableLiveData<Long>() // Выбранная валюта
+
     fun loadProduct(productId: Long) {
         viewModelScope.launch {
             try {
@@ -49,6 +53,8 @@ class EditProductViewModel(
                     loaded.productLinks?.mapNotNull { it.urlName }?.toMutableList()
                         ?: mutableListOf()
                 )
+                selectedCurrencyId.postValue(loaded.currencyId ?: 1L)
+
                 selectedCategoryIds = loaded.categoryIds ?: emptyList()
                 selectedSubcategoryIds = loaded.subcategoryIds ?: emptyList()
             } catch (e: Exception) {
@@ -102,6 +108,10 @@ class EditProductViewModel(
         }
     }
 
+    fun setCurrencies(currencyList: List<CurrencyResponse>) {
+        currencies.value = currencyList
+    }
+
     private fun buildCreateRequest(
         name: String,
         description: String,
@@ -117,6 +127,7 @@ class EditProductViewModel(
             minStockQuantity = 0,
             isDemanded = false,
             measurementUnitId = selectedUnitId.value ?: 1L,
+            currencyId = selectedCurrencyId.value ?: 1L,
             productCodes = emptyList(),
             productImages = emptyList(),
             productLinks = links.value?.map {
@@ -155,6 +166,8 @@ class EditProductViewModel(
     fun buildPreviewProduct(): Product {
         val current = editingProduct
         return if (current != null) {
+            val currency = currencies.value?.firstOrNull { it.id == selectedCurrencyId.value }
+
             current.copy(
                 categoryIds = selectedCategoryIds,
                 subcategoryIds = selectedSubcategoryIds,
@@ -169,9 +182,15 @@ class EditProductViewModel(
                 productCounterparties = current.productCounterparties ?: emptyList(),
                 productSuppliers = current.productSuppliers ?: emptyList(),
                 measurementUnits = current.measurementUnits ?: emptyList(),
-                productOrderItem = current.productOrderItem ?: emptyList()
+                productOrderItem = current.productOrderItem ?: emptyList(),
+                currencyCode = currency?.code,
+                currencySymbol = currency?.symbol,
+                currencyName = currency?.name,
+                currencyId = currency?.id
             )
         } else {
+            val currency = currencies.value?.firstOrNull { it.id == selectedCurrencyId.value }
+
             Product(
                 id = null,
                 name = "",
@@ -199,7 +218,11 @@ class EditProductViewModel(
                 subcategories = categories.value
                     ?.flatMap { it.subcategories.orEmpty() }
                     ?.filter { selectedSubcategoryIds.contains(it.id) }
-                    ?: emptyList()
+                    ?: emptyList(),
+                currencyCode = currency?.code,
+                currencySymbol = currency?.symbol,
+                currencyName = currency?.name,
+                currencyId = currency?.id
             )
         }
     }

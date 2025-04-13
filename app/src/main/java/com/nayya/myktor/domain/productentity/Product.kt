@@ -38,5 +38,10 @@ data class Product(
     val categories: List<CategoryEntity> = emptyList(), // Категории - многоязычность
     val subcategoryIds: List<Long> = emptyList(), // список подкатегорий (для фильтра)
     val categoryIds: List<Long> = emptyList(), // список категорий (для фильтра)
-    val subcategories: List<Subcategory> = emptyList()
+    val subcategories: List<Subcategory> = emptyList(),
+
+    val currencyCode: String?,
+    val currencySymbol: String?,
+    val currencyName: String?,
+    val currencyId: Long?,
 ) : java.io.Serializable

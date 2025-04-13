@@ -47,8 +47,9 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
 
             // Цена
             val price = prod.price.toPlainString()
-            val unit = prod.measurementUnitAbbreviation.orEmpty()
-            binding.tvPrice.text = "$price $unit"
+            val currency = prod.currencySymbol ?: prod.currencyCode ?: ""
+//            val currency = prod.currencySymbol.orEmpty()
+            binding.tvPrice.text = "$price $currency"
 
             // Категории
             displayCategoriesHierarchically(prod)
