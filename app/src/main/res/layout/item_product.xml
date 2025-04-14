@@ -21,7 +21,7 @@
             android:id="@+id/ivProductImage"
             android:layout_width="match_parent"
             android:layout_height="160dp"
-            android:scaleType="centerCrop"
+            android:scaleType="centerInside"
             android:background="@color/white"
             android:contentDescription="@string/product_image" />
 

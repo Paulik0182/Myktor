@@ -77,7 +77,7 @@ class CombinedAdapter(
         fun bind(subcategory: Subcategory) {
             binding.titleTextView.text = subcategory.name
             Glide.with(binding.imageView.context)
-                .load(subcategory.imageUrl)
+                .load(BASE_URL + subcategory.imageUrl)
                 .placeholder(R.drawable.placeholder_image)
                 .into(binding.imageView)
 

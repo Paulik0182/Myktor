@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nayya.myktor.R
+import com.nayya.myktor.data.BASE_URL
 import com.nayya.myktor.databinding.ItemCategorySubcategoryBinding
 import com.nayya.myktor.domain.productentity.Subcategory
 
@@ -24,7 +25,7 @@ class SubcategoryAdapter(
             binding.titleTextView.text = subcategory.name
 
             Glide.with(binding.imageView.context)
-                .load(subcategory.imageUrl)
+                .load(BASE_URL + subcategory.imageUrl)
                 .placeholder(R.drawable.placeholder_image)
                 .error(R.drawable.placeholder_image)
                 .transition(DrawableTransitionOptions.withCrossFade())

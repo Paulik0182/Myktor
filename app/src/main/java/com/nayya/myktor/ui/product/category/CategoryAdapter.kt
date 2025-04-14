@@ -8,6 +8,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.R
+import com.nayya.myktor.data.BASE_URL
 import com.nayya.myktor.databinding.ItemCategorySubcategoryBinding
 
 class CategoryAdapter(
@@ -24,7 +25,7 @@ class CategoryAdapter(
             binding.titleTextView.text = categoryEntity.name
 
             Glide.with(binding.imageView.context)
-                .load(categoryEntity.imageUrl)
+                .load(BASE_URL + categoryEntity.imageUrl)
                 .placeholder(R.drawable.placeholder_image)
                 .error(R.drawable.placeholder_image)
                 .transition(DrawableTransitionOptions.withCrossFade())

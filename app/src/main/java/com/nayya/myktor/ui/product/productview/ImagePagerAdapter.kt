@@ -19,7 +19,7 @@ class ImagePagerAdapter(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            scaleType = ImageView.ScaleType.CENTER_CROP
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
         return ViewHolder(imageView)
     }
