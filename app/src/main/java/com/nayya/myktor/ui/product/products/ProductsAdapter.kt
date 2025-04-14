@@ -1,7 +1,6 @@
 package com.nayya.myktor.ui.product.products
 
 import android.annotation.SuppressLint
-import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +9,7 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.nayya.myktor.R
+import com.nayya.myktor.data.BASE_URL
 import com.nayya.myktor.databinding.ItemProductBinding
 import com.nayya.myktor.domain.productentity.Product
 
@@ -31,15 +31,14 @@ class ProductsAdapter(
         ) {
             binding.tvProductName.text = product.name
 
-            val imageBase64 = product.productImages ?: emptyList()
+            val productImages = product.productImages ?: emptyList()
 
             // Заглушка (временно)
-            if (!imageBase64.isNullOrEmpty()) {
-                val base64 = imageBase64.first().imageBase64
-                val decoded = Base64.decode(base64, Base64.DEFAULT)
+            if (!productImages.isNullOrEmpty()) {
+                val imageUrl = productImages.first().imageUrl
                 Glide.with(binding.ivProductImage.context)
                     .asBitmap()
-                    .load(decoded)
+                    .load(BASE_URL + imageUrl)
                     .placeholder(R.drawable.ic_placeholder)
                     .into(binding.ivProductImage)
             } else {

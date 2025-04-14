@@ -64,7 +64,7 @@ class ViewProductFragment : Fragment(R.layout.fragment_view_product) {
             binding.tvLinks.text = viewModel.getLinksText(prod)
 
             // Изображения
-            val images = viewModel.getDecodedImages(prod)
+            val images = viewModel.getImageUrls(prod)
             val imageAdapter = ImagePagerAdapter(images)
             binding.imageViewPager.adapter = imageAdapter
 

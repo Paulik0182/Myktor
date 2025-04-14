@@ -11,9 +11,9 @@ import com.nayya.myktor.databinding.ItemCategorySubcategoryBinding
 import com.nayya.myktor.databinding.ItemProductBinding
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.domain.productentity.Subcategory
-import android.util.Base64
 import android.view.animation.AnimationUtils
 import android.widget.PopupMenu
+import com.nayya.myktor.data.BASE_URL
 
 class CombinedAdapter(
     private val items: List<CombinedItem>,
@@ -95,13 +95,12 @@ class CombinedAdapter(
         fun bind(product: Product) {
             binding.tvProductName.text = product.name
 
-            val imageBase64 = product.productImages ?: emptyList()
-            if (imageBase64.isNotEmpty()) {
-                val base64 = imageBase64.first().imageBase64
-                val decoded = Base64.decode(base64, Base64.DEFAULT)
+            val productImages = product.productImages ?: emptyList()
+            if (productImages.isNotEmpty()) {
+                val imageUrl = productImages.first().imageUrl
                 Glide.with(binding.ivProductImage.context)
                     .asBitmap()
-                    .load(decoded)
+                    .load(BASE_URL + imageUrl)
                     .placeholder(R.drawable.ic_placeholder)
                     .into(binding.ivProductImage)
             } else {

@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class ProductImage(
     val id: Long? = null,
     val productId: Long,
-    val imageBase64: String // Изображение в base64
+    val imageUrl: String, // путь к файлу (локальный или полный URL)
+    val position: Int?
 ) : java.io.Serializable

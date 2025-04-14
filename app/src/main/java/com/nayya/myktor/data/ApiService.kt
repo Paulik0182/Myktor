@@ -2,15 +2,21 @@ package com.nayya.myktor.data
 
 import com.nayya.myktor.domain.CounterpartyEntity
 import com.nayya.myktor.domain.OrderEntity
-import com.nayya.myktor.domain.ProductEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.domain.productentity.ProductCreateRequest
+import com.nayya.myktor.domain.productentity.ProductImage
+import okhttp3.MultipartBody
+import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -46,6 +52,44 @@ interface ApiService {
     // Обновление данных о продукте
     @PUT("/products/{id}")
     suspend fun updateProduct(@Path("id") id: Long, @Body product: ProductCreateRequest)
+
+    @Multipart
+    @POST("/products/{id}/images")
+    suspend fun uploadProductImage(
+        @Path("id") productId: Long,
+        @Part image: MultipartBody.Part
+    ): ResponseBody
+
+    @GET("/products/{id}/images")
+    suspend fun getProductImages(@Path("id") productId: Long): List<ProductImage>
+
+    @GET("/products/{id}/images/{imageId}")
+    suspend fun getProductImage(
+        @Path("id") productId: Long,
+        @Path("imageId") imageId: Long
+    ): ResponseBody
+
+    @DELETE("/products/{id}/images/{imageId}")
+    suspend fun deleteProductImage(
+        @Path("id") productId: Long,
+        @Path("imageId") imageId: Long
+    ): ResponseBody
+
+    // изменение порядка изображений
+    @POST("/products/{id}/images/reorder")
+    suspend fun reorderProductImagesPost(
+        @Path("id") productId: Long,
+        @Body imageIds: List<Long>
+    ): Response<ResponseBody>
+
+    // PATCH и POST делают одно и то же — просто поддержка двух методов. Можно использовать любой.
+    @PATCH("/products/{id}/images")
+    suspend fun reorderProductImagesPatch(
+        @Path("id") productId: Long,
+        @Body imageIds: List<Long>
+    ): Response<ResponseBody>
+
+
 
     // Получение списка поставщиков
     @GET("/counterparties")

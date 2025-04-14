@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
 import com.nayya.myktor.R
 import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.databinding.FragmentEditProductBinding
@@ -20,6 +21,7 @@ import com.nayya.myktor.domain.productentity.MeasurementUnitList
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.ui.product.category.categorypicker.CategoryPickerBottomSheet
 import com.nayya.myktor.ui.product.products.ProductViewModel
+import com.nayya.myktor.ui.product.productview.ImagePagerAdapter
 import com.nayya.myktor.utils.LocaleUtils.getChildAtOrNull
 import com.nayya.myktor.utils.viewBinding
 
@@ -92,6 +94,20 @@ class EditProductFragment : Fragment(R.layout.fragment_edit_product) {
             binding.descriptionEditText.setText(product.description)
             binding.priceEditText.setText(product.price.toPlainString())
             displayCategoriesHierarchically(product)
+
+            val imageUrls = product.productImages.orEmpty().mapNotNull { it.imageUrl }
+            val imageAdapter = ImagePagerAdapter(imageUrls)
+            binding.viewPagerImages.adapter = imageAdapter
+
+            binding.tvImageCounter.text = if (imageUrls.isNotEmpty()) "1/${imageUrls.size}" else ""
+
+            binding.viewPagerImages.registerOnPageChangeCallback(object :
+                ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    binding.tvImageCounter.text = "${position + 1}/${imageUrls.size}"
+                }
+            })
         }
 
         viewModel.links.observe(viewLifecycleOwner) {
