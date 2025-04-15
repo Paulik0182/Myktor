@@ -11,6 +11,11 @@ import com.nayya.myktor.R
 
 class DescriptionBottomSheetDialog : BottomSheetDialogFragment() {
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogTheme_Compat)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

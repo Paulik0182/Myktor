@@ -19,6 +19,16 @@ class CodesBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var adapter: ArrayAdapter<String>
     private lateinit var originalCodes: List<String>
 
+    /**
+     * У стандартного BottomSheetDialogFragment есть проблемы с анимацыей. Баг - эффект двойного
+     * закрытия BottomSheet.
+     * Лечится переопределением стиля. Нужно отключить анимацию. При необходимости задать анимацию в ручную.
+     */
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogTheme_Compat)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
