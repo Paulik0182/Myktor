@@ -3,7 +3,7 @@ package com.nayya.myktor.domain.productentity
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ProductLink(
+data class LinkEntity(
     val id: Long? = null,
     val productId: Long?,
     val counterpartyId: Long?,

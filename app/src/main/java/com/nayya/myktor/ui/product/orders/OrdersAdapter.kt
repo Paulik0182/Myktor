@@ -7,7 +7,7 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ItemOrderBinding
-import com.nayya.myktor.domain.OrderEntity
+import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 
 class OrdersAdapter(
     private var items: List<OrderEntity>,

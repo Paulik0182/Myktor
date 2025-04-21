@@ -38,6 +38,7 @@ data class ProductImageRequest(
 
 @Serializable
 data class ProductCounterpartyRequest(
+    val productId: Long,
     val counterpartyId: Long,
     val stockQuantity: Int,
     val role: String,
@@ -47,4 +48,8 @@ data class ProductCounterpartyRequest(
 )
 
 @Serializable
-data class ProductSupplierRequest(val supplierId: Long)
+data class ProductSupplierRequest(
+    val productId: Long,
+    val counterpartyId: Long
+)
+

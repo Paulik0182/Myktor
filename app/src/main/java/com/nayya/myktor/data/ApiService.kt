@@ -1,7 +1,7 @@
 package com.nayya.myktor.data
 
-import com.nayya.myktor.domain.CounterpartyEntity
-import com.nayya.myktor.domain.OrderEntity
+import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
+import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.domain.productentity.ProductCreateRequest
@@ -92,37 +92,37 @@ interface ApiService {
 
 
     // Получение списка поставщиков
-    @GET("/counterparties")
-    suspend fun getSuppliers(): List<CounterpartyEntity>
+    @GET("/counterparties/all")
+    suspend fun getCounterparties(): List<CounterpartyEntity>
 
     @GET("/counterparties/{id}")
-    suspend fun getCounterpartyById(@Path("id") id: Int): CounterpartyEntity
+    suspend fun getCounterpartyById(@Path("id") id: Long): CounterpartyEntity
 
     // Удаление поставщика
     @DELETE("/counterparties/{id}")
-    suspend fun deleteSupplier(@Path("id") id: Int)
+    suspend fun deleteCounterparty(@Path("id") id: Long)
 
     // Добавление нового поставщика
     @POST("/counterparties")
-    suspend fun addSupplier(@Body counterpartyEntity: CounterpartyEntity)
+    suspend fun addCounterparty(@Body counterpartyEntity: CounterpartyEntity)
 
     // Обновление данных поставщика
     @PUT("/counterparties/{id}")
-    suspend fun updateSupplier(@Path("id") id: Int, @Body counterpartyEntity: CounterpartyEntity)
+    suspend fun updateCounterparty(@Path("id") id: Long, @Body counterpartyEntity: CounterpartyEntity)
 
     // Получение списка заказов
     @GET("/orders")
     suspend fun getOrders(): List<OrderEntity>
 
     @GET("/orders/{id}")
-    suspend fun getOrderDetails(@Path("id") id: Int): OrderEntity
+    suspend fun getOrderDetails(@Path("id") id: Long): OrderEntity
 
     @POST("/orders")
     suspend fun createOrder(@Body order: OrderEntity)
 
     @PUT("/orders/{id}")
-    suspend fun updateOrder(@Path("id") id: Int, @Body order: OrderEntity)
+    suspend fun updateOrder(@Path("id") id: Long, @Body order: OrderEntity)
 
     @DELETE("/orders/{id}")
-    suspend fun deleteOrder(@Path("id") id: Int)
+    suspend fun deleteOrder(@Path("id") id: Long)
 }

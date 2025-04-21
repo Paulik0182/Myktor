@@ -29,7 +29,7 @@ data class Product(
     val measurementUnitAbbreviation: String?,
 
     val productCodes: List<ProductCode> = emptyList(), // список кодов товара (штрих-коды, QR-коды).
-    val productLinks: List<ProductLink> = emptyList(), // список интернет-ссылок.
+    val productLinks: List<LinkEntity> = emptyList(), // список интернет-ссылок.
     val productImages: List<ProductImage> = emptyList(), // для картинок
     val productCounterparties: List<ProductCounterparty> = emptyList(), // Информация о складах, контрагентах
     val productSuppliers: List<ProductSupplier> = emptyList(), // Информация о Поставщике, контрагентах

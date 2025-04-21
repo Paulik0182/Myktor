@@ -6,8 +6,8 @@ import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ActivityMainBinding
-import com.nayya.myktor.domain.CounterpartyEntity
-import com.nayya.myktor.domain.OrderEntity
+import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
+import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.ui.product.AccountingProductsFragment
@@ -19,7 +19,8 @@ import com.nayya.myktor.ui.product.editsupplier.EditSupplierFragment
 import com.nayya.myktor.ui.product.orders.OrdersFragment
 import com.nayya.myktor.ui.product.products.ProductsFragment
 import com.nayya.myktor.ui.product.productview.ViewProductFragment
-import com.nayya.myktor.ui.product.suppliers.SuppliersFragment
+import com.nayya.myktor.ui.product.counterparties.CounterpartiesFragment
+import com.nayya.myktor.ui.profile.ProfileFragment
 import com.nayya.myktor.ui.test.RequestFragment
 import com.nayya.myktor.utils.ViewBindingActivity
 
@@ -31,12 +32,13 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     AccountingProductsFragment.Controller,
     OrdersFragment.Controller,
     ProductsFragment.Controller,
-    SuppliersFragment.Controller,
+    CounterpartiesFragment.Controller,
     EditSupplierFragment.Controller,
     EditProductFragment.Controller,
     CategoriesFragment.Controller,
     SubcategoryFragment.Controller,
-    ViewProductFragment.Controller {
+    ViewProductFragment.Controller,
+    ProfileFragment.Controller {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +80,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
                 }
 
                 R.id.nav_wallet -> {
+                    swapFragment(AccountingProductsFragment.newInstance())
                     // открыть кошелек
                     true
                 }
@@ -88,7 +91,8 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
                 }
 
                 R.id.nav_profile -> {
-                    swapFragment(AccountingProductsFragment.newInstance())
+                    swapFragment(ProfileFragment.newInstance())
+                    // Профиль
                     true
                 }
 
@@ -130,7 +134,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     }
 
     override fun openSuppliers() {
-        swapFragment(SuppliersFragment.newInstance())
+        swapFragment(CounterpartiesFragment.newInstance())
     }
 
     override fun openEditSupplierFragment(supplier: CounterpartyEntity?) {

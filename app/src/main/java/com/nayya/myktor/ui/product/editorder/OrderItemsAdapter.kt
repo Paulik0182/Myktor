@@ -7,16 +7,16 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.nayya.myktor.databinding.ItemOrderItemBinding
-import com.nayya.myktor.domain.OrderItemEntity
+import com.nayya.myktor.domain.counterpartyentity.OrderItem
 
 class OrderItemsAdapter(
-    private var items: List<OrderItemEntity>,
+    private var items: List<OrderItem>,
 ) : RecyclerView.Adapter<OrderItemsAdapter.ViewHolder>() {
 
     class ViewHolder(private val binding: ItemOrderItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(
-            item: OrderItemEntity,
+            item: OrderItem,
             onQuantityChange: (Int) -> Unit,
             onDelete: () -> Unit,
         ) {
@@ -49,7 +49,7 @@ class OrderItemsAdapter(
                 items = items.toMutableList().apply {
                     this[position] = this[position].copy(
                         quantity = newQuantity,
-                        supplierName = this[position].supplierName ?: "" // Защита от null
+//                        supplierName = this[position].supplierName ?: "" // Защита от null
                     )
                 }
             },
@@ -65,15 +65,15 @@ class OrderItemsAdapter(
     override fun getItemCount() = items.size
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateList(newItems: List<OrderItemEntity>) {
+    fun updateList(newItems: List<OrderItem>) {
         items = newItems
         notifyDataSetChanged()
     }
 
-    fun getItems(): List<OrderItemEntity> = items
+    fun getItems(): List<OrderItem> = items
 
     @SuppressLint("NotifyDataSetChanged")
-    fun addItem(item: OrderItemEntity) {
+    fun addItem(item: OrderItem) {
         items = items + item
         notifyDataSetChanged()
     }

@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nayya.myktor.data.RetrofitInstance
-import com.nayya.myktor.domain.ProductEntity
 import com.nayya.myktor.domain.productentity.Product
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -1,19 +1,20 @@
-package com.nayya.myktor.ui.product.suppliers
+package com.nayya.myktor.ui.product.counterparties
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ItemSupplierBinding
-import com.nayya.myktor.domain.CounterpartyEntity
+import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 
-class SuppliersAdapter(
+class CounterpartiesAdapter(
     private var items: List<CounterpartyEntity>,
     private val onItemClick: (CounterpartyEntity) -> Unit,
     private val onLongClick: (CounterpartyEntity) -> Unit,
-) : RecyclerView.Adapter<SuppliersAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<CounterpartiesAdapter.ViewHolder>() {
 
     class ViewHolder(private val binding: ItemSupplierBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -22,7 +23,18 @@ class SuppliersAdapter(
             onItemClick: (CounterpartyEntity) -> Unit,
             onLongClick: (CounterpartyEntity) -> Unit,
         ) {
-            binding.tvSupplierName.text = counterpartyEntity.name
+            Log.d("SUPPLIERS", "✅ ЛОГ 5 Отображается контрагент: ${counterpartyEntity.shortName}")
+
+            try {
+                val firstName = counterpartyEntity.firstName
+                val lastName = counterpartyEntity.lastName
+
+                binding.tvSupplierName.text =
+                    counterpartyEntity.companyName ?: "$firstName $lastName"
+            } catch (e: Exception) {
+                e.printStackTrace()
+                binding.tvSupplierName.text = "Неизвестный контрагент"
+            }
 
             binding.root.setOnClickListener {
                 onItemClick(counterpartyEntity)
@@ -59,10 +71,16 @@ class SuppliersAdapter(
         )
     }
 
-    override fun getItemCount() = items.size
+    override fun getItemCount(): Int {
+        val count = items.size
+        Log.d("SUPPLIERS", "✅ ЛОГ 4 Adapter getItemCount: $count")
+        return count
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateList(newItems: List<CounterpartyEntity>) {
+        Log.d("SUPPLIERS", "✅ ЛОГ 3 Adapter получил ${newItems.size} элементов")
+
         items = newItems
         notifyDataSetChanged()
     }

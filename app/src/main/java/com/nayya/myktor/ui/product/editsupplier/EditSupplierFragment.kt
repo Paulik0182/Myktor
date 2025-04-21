@@ -9,27 +9,27 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentEditSupplierBinding
-import com.nayya.myktor.domain.CounterpartyEntity
-import com.nayya.myktor.ui.product.suppliers.SupplierViewModel
+import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
+import com.nayya.myktor.ui.product.counterparties.CounterpartyViewModel
 import com.nayya.myktor.utils.viewBinding
 
 class EditSupplierFragment : Fragment(R.layout.fragment_edit_supplier) {
 
     private val binding by viewBinding<FragmentEditSupplierBinding>()
 
-    private val supplierViewModel: SupplierViewModel by activityViewModels()
+    private val counterpartyViewModel: CounterpartyViewModel by activityViewModels()
 
     private val viewModel: EditSupplierViewModel by lazy {
-        EditSupplierViewModel(supplierViewModel)
+        EditSupplierViewModel(counterpartyViewModel)
     }
 
-    private var supplierId: Int? = null
+    private var supplierId: Long? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         if (arguments?.containsKey(ARG_SUPPLIER_ID) == true) {
-            supplierId = arguments?.getInt(ARG_SUPPLIER_ID)
+            supplierId = arguments?.getLong(ARG_SUPPLIER_ID)
         }
 
         val supplierName = arguments?.getString(ARG_SUPPLIER_NAME)
@@ -85,8 +85,8 @@ class EditSupplierFragment : Fragment(R.layout.fragment_edit_supplier) {
             val fragment = EditSupplierFragment()
             val args = Bundle()
             counterpartyEntity?.let {
-                it.id?.let { it1 -> args.putInt(ARG_SUPPLIER_ID, it1) }
-                args.putString(ARG_SUPPLIER_NAME, it.name)
+                it.id?.let { it1 -> args.putLong(ARG_SUPPLIER_ID, it1) }
+                args.putString(ARG_SUPPLIER_NAME, it.companyName)
                 args.putString(ARG_SUPPLIER_TYPE, it.type)
             }
             fragment.arguments = args

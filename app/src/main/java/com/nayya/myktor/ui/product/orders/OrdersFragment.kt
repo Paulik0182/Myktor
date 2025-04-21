@@ -10,7 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentOrdersBinding
-import com.nayya.myktor.domain.OrderEntity
+import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.utils.viewBinding
 import kotlinx.coroutines.launch
 

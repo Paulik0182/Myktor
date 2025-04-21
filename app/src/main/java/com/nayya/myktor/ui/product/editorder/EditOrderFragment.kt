@@ -10,8 +10,9 @@ import androidx.fragment.app.setFragmentResult
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentEditOrderBinding
-import com.nayya.myktor.domain.OrderEntity
-import com.nayya.myktor.domain.OrderItemEntity
+import com.nayya.myktor.domain.counterpartyentity.OrderEntity
+import com.nayya.myktor.domain.counterpartyentity.OrderItem
+import com.nayya.myktor.domain.productentity.MeasurementUnitList
 import com.nayya.myktor.ui.product.orders.OrderViewModel
 import com.nayya.myktor.utils.viewBinding
 
@@ -23,7 +24,7 @@ class EditOrderFragment : Fragment(R.layout.fragment_edit_order) {
         EditOrderViewModel(orderViewModel)
     }
 
-    private var orderId: Int? = null
+    private var orderId: Long? = null
     private var order: OrderEntity? = null
     private lateinit var adapter: OrderItemsAdapter
 
@@ -35,7 +36,7 @@ class EditOrderFragment : Fragment(R.layout.fragment_edit_order) {
         binding.orderItemsRecyclerView.adapter = adapter
 
         if (arguments?.containsKey(ARG_ORDER_ID) == true) {
-            orderId = arguments?.getInt(ARG_ORDER_ID)
+            orderId = arguments?.getLong(ARG_ORDER_ID)
         }
 
         orderId?.let {
@@ -54,11 +55,19 @@ class EditOrderFragment : Fragment(R.layout.fragment_edit_order) {
         }
 
         binding.addItemButton.setOnClickListener {
-            val newItem = OrderItemEntity(
+            val newItem = OrderItem(
                 orderId = orderId ?: 0,
-                productId = 2, // Нужно заменить на выбор товара
-                supplierId = 1,
-                quantity = 1
+                productId = 2, // Заглушка
+                productName = "Заглушка: Товар 2",
+                quantity = 1,
+                measurementUnitId = 1, // Заглушка ID единицы измерения
+                measurementUnitList = MeasurementUnitList(
+                    id = 1,
+                    name = "Штуки",
+                    abbreviation = "шт"
+                ),
+                measurementUnit = "Штуки",
+                measurementUnitAbbreviation = "шт"
             )
             adapter.addItem(newItem)
         }
@@ -88,10 +97,10 @@ class EditOrderFragment : Fragment(R.layout.fragment_edit_order) {
     companion object {
         private const val ARG_ORDER_ID = "order_id"
 
-        fun newInstance(orderId: Int? = null): EditOrderFragment {
+        fun newInstance(orderId: Long? = null): EditOrderFragment {
             val fragment = EditOrderFragment()
             val args = Bundle()
-            orderId?.let { args.putInt(ARG_ORDER_ID, it) }
+            orderId?.let { args.putLong(ARG_ORDER_ID, it) }
             fragment.arguments = args
             return fragment
         }

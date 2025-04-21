@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nayya.myktor.data.RetrofitInstance
-import com.nayya.myktor.domain.OrderEntity
+import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,7 +28,7 @@ class OrderViewModel : ViewModel() {
     }
 
     fun orderDetails(
-        orderId: Int,
+        orderId: Long,
     ) {
         viewModelScope.launch {
             try {
