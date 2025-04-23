@@ -2,7 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="gray">#DCDCDC</color>
+    <color name="gray">#EDE9E9</color>
     <color name="green">#87F86F</color>
     <color name="gray_placeholder">#C6C5C5</color>
     <color name="purple_500">#6200EE</color>
@@ -15,5 +15,7 @@
 
     <!-- Окно с информацией о Продукте -->
     <color name="dark_green">#2E7D32</color>
+
+    <color name="light_gray">#E0E0E0</color>
 
 </resources>

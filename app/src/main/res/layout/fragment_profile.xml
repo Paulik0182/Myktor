@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nsvRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header: Avatar + Nickname -->
+        <LinearLayout
+            android:id="@+id/clHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="16dp">
+
+            <ImageView
+                android:id="@+id/ivAvatar"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_placeholder_user_orig"
+                android:background="@drawable/bg_circle"
+                android:contentDescription="avatar" />
+
+            <TextView
+                android:id="@+id/tvNickname"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:text="Павел"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/ivNotifications"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_notification"
+                android:contentDescription="notifications" />
+        </LinearLayout>
+
+        <!-- RecyclerView для пунктов меню -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvProfileMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false" />
+
+        <LinearLayout
+            android:id="@+id/footerSocial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingTop="16dp"
+            android:paddingBottom="32dp">
+
+            <ImageView
+                android:id="@+id/ivTelegram"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_telegram"
+                android:contentDescription="Telegram" />
+
+            <ImageView
+                android:id="@+id/ivFacebook"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_facebook"
+                android:contentDescription="Facebook" />
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

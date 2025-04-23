@@ -3,6 +3,7 @@ package com.nayya.myktor.ui.root
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ActivityMainBinding
@@ -21,6 +22,7 @@ import com.nayya.myktor.ui.product.products.ProductsFragment
 import com.nayya.myktor.ui.product.productview.ViewProductFragment
 import com.nayya.myktor.ui.product.counterparties.CounterpartiesFragment
 import com.nayya.myktor.ui.profile.ProfileFragment
+import com.nayya.myktor.ui.profile.ProfileMenuType
 import com.nayya.myktor.ui.test.RequestFragment
 import com.nayya.myktor.utils.ViewBindingActivity
 
@@ -159,5 +161,9 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
     override fun openEditProductFragment(productId: Long) {
         swapFragment(EditProductFragment.newInstance(productId))
+    }
+
+    override fun onProfileMenuItemClicked(item: ProfileMenuType) {
+        Toast.makeText(this, "Нажато: ${item.title}", Toast.LENGTH_SHORT).show()
     }
 }
