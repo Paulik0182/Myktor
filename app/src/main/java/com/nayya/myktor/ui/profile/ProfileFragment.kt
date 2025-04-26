@@ -38,11 +38,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         viewModel.loadCounterparty(counterpartyId = 19L)
 
         binding.ivTelegram.setOnClickListener {
-            openUrl("https://t.me/your_channel")
+            openUrl("https://t.me/your_channel") // TODO заменить на свой канал
         }
 
         binding.ivFacebook.setOnClickListener {
-            openUrl("https://facebook.com/your_page")
+            openUrl("https://facebook.com/your_page") // TODO заменить на свой канал
         }
     }
 
@@ -53,22 +53,26 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun observeViewModel() {
         viewModel.counterparty.observe(viewLifecycleOwner) { counterparty ->
-            if (!counterparty.imagePath.isNullOrBlank()) {
-                Glide.with(requireContext())
-                    .load(counterparty.imagePath)
-                    .placeholder(
-                        if (counterparty.isLegalEntity) R.drawable.ic_profile_placeholder_firm_orig
-                        else R.drawable.ic_profile_placeholder_user_orig
-                    )
-                    .circleCrop()
-                    .into(binding.ivAvatar)
+            val placeholderRes = if (counterparty.isLegalEntity) {
+                R.drawable.ic_profile_placeholder_firm_orig
             } else {
-                val placeholder = if (counterparty.isLegalEntity) {
-                    R.drawable.ic_profile_placeholder_firm_orig
-                } else {
-                    R.drawable.ic_profile_placeholder_user_orig
-                }
-                binding.ivAvatar.setImageResource(placeholder)
+                R.drawable.ic_profile_placeholder_user_orig
+            }
+
+            Glide.with(requireContext())
+                .load(counterparty.imagePath.takeIf { !it.isNullOrBlank() } ?: placeholderRes)
+                .placeholder(placeholderRes)
+                .circleCrop()
+                .into(binding.ivAvatar)
+
+            binding.tvCompanyName.apply {
+                visibility = if (counterparty.isLegalEntity) View.VISIBLE else View.GONE
+                text = counterparty.companyName
+            }
+
+            binding.tvFirstName.apply {
+                visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
+                text = counterparty.firstName
             }
 
             binding.tvNickname.text = counterparty.shortName
@@ -76,7 +80,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         viewModel.menuItems.observe(viewLifecycleOwner) { menuItems ->
             Log.d("DEBUG", "Menu size: ${menuItems.size}")
-            adapter.updateItems(menuItems) // ✅ Только обновляем, НЕ пересоздаём адаптер!
+            adapter.updateItems(menuItems)
         }
     }
 
