@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import com.google.android.material.card.MaterialCardView
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -73,6 +75,30 @@ class ProfileMenuAdapter(
             val params = itemView.layoutParams as ViewGroup.MarginLayoutParams
             params.topMargin = topMargin
             itemView.layoutParams = params
+        }
+
+        init {
+            card.setOnTouchListener { v, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        v.animate()
+                            .scaleX(0.95f)
+                            .scaleY(0.95f)
+                            .setDuration(100)
+                            .setInterpolator(DecelerateInterpolator())
+                            .start()
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        v.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(100)
+                            .setInterpolator(DecelerateInterpolator())
+                            .start()
+                    }
+                }
+                false
+            }
         }
     }
 
