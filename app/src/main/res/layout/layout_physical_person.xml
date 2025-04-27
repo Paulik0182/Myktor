@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:id="@+id/layoutPhysicalPerson"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_horizontal"
+            android:text="Адрес"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:id="@+id/etCountry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Страна"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <EditText
+            android:id="@+id/etCity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Город"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <EditText
+            android:id="@+id/etStreet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Улица"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <EditText
+            android:id="@+id/etHouseNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Дом"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <EditText
+            android:id="@+id/etLocationNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Квартира / офис"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <EditText
+            android:id="@+id/etEntranceNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Подъезд"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <EditText
+            android:id="@+id/etFloor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Этаж"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <EditText
+            android:id="@+id/etNumberIntercom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Домофон"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <EditText
+            android:id="@+id/etAddressComment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Комментарий к адресу"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:inputType="textMultiLine"/>
+
+    </LinearLayout>
+
+</merge>

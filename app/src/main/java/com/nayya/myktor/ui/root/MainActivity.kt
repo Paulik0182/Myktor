@@ -23,6 +23,7 @@ import com.nayya.myktor.ui.product.productview.ViewProductFragment
 import com.nayya.myktor.ui.product.counterparties.CounterpartiesFragment
 import com.nayya.myktor.ui.profile.ProfileFragment
 import com.nayya.myktor.ui.profile.ProfileMenuType
+import com.nayya.myktor.ui.profile.detailscounterparty.CounterpartyDetailsFragment
 import com.nayya.myktor.ui.test.RequestFragment
 import com.nayya.myktor.utils.ViewBindingActivity
 
@@ -161,6 +162,10 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
     override fun openEditProductFragment(productId: Long) {
         swapFragment(EditProductFragment.newInstance(productId))
+    }
+
+    override fun openCounterpartyDetails(counterpartyId: Long) {
+        swapFragment(CounterpartyDetailsFragment.newInstance(counterpartyId))
     }
 
     override fun onProfileMenuItemClicked(item: ProfileMenuType) {

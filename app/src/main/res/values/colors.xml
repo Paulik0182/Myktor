@@ -8,6 +8,8 @@
     <color name="purple_500">#6200EE</color>
     <color name="orange_500">#FF5722</color>
     <color name="grey_text">#666666</color>
+    <color name="red">#FF001E</color>
+    <color name="blue">#1555FA</color>
 
     <!-- Menu -->
     <color name="bottom_nav_icon_tint">#A0A0A0</color> <!-- обычный цвет -->

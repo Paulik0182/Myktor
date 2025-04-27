@@ -76,6 +76,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             }
 
             binding.tvNickname.text = counterparty.shortName
+
+            binding.llTextContainer.setOnClickListener {
+                counterparty.id?.let { counterpartyId ->
+                    getController().openCounterpartyDetails(
+                        counterpartyId
+                    )
+                }
+            }
         }
 
         viewModel.menuItems.observe(viewLifecycleOwner) { menuItems ->
@@ -87,6 +95,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private fun getController(): Controller = activity as Controller
 
     interface Controller {
+        fun openCounterpartyDetails(counterpartyId: Long)
         fun onProfileMenuItemClicked(item: ProfileMenuType)
     }
 
