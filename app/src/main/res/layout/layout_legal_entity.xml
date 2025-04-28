@@ -44,23 +44,47 @@
         android:id="@+id/etCompanyName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:cursorVisible="false"
+        android:textSize="16sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:hint="Название компании"/>
 
     <EditText
         android:id="@+id/etType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:cursorVisible="false"
+        android:textSize="16sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:hint="Тип компании"/>
 
     <EditText
         android:id="@+id/etNIP"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:cursorVisible="false"
+        android:textSize="16sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:hint="NIP"/>
 
     <EditText
         android:id="@+id/etKRS"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:cursorVisible="false"
+        android:textSize="16sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:hint="KRS"/>
 </LinearLayout>

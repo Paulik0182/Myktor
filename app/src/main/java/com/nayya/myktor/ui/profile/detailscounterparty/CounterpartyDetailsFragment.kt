@@ -66,11 +66,21 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
         if (isEditMode) {
             binding.toolbar.btnEdit.setImageResource(R.drawable.ic_edit_red)
             binding.toolbar.tvTitle.text = "Редактирование"
-            binding.toolbar.tvTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+            binding.toolbar.tvTitle.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.red
+                )
+            )
         } else {
             binding.toolbar.btnEdit.setImageResource(R.drawable.ic_edit)
             binding.toolbar.tvTitle.text = ""
-            binding.toolbar.tvTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+            binding.toolbar.tvTitle.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.black
+                )
+            )
             // Тут позже добавить проверку "Есть несохранённые изменения"
         }
     }
@@ -91,6 +101,8 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
         viewModel.isEditMode.observe(viewLifecycleOwner) { isEditMode ->
             updateToolbarState(isEditMode)
             updateEditableState(isEditMode)
+            updateEditableStateEditText(isEditMode)
+            updateEditableStateCheckBoxes(isEditMode)
         }
     }
 
@@ -109,15 +121,15 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
 
         binding.tvFirstName.apply {
             visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-            text = counterparty.firstName
+            setText(counterparty.firstName)
         }
 
         binding.tvLastName.apply {
             visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-            text = counterparty.lastName
+            setText(counterparty.lastName)
         }
 
-        binding.tvShortName.text = counterparty.shortName
+        binding.tvShortName.setText(counterparty.shortName)
 
         bindCounterparty(counterparty)
     }
@@ -125,12 +137,6 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
     private fun bindCounterparty(counterparty: CounterpartyEntity) {
         contactsBinding.cardActionContainer.visibility = View.VISIBLE
         addressesBinding.cardActionContainer.visibility = View.VISIBLE
-
-        // TODO Положить логику на эти кнопки. При режиме редактирования не должнобыть кнопок
-        //  btnLogout, btnDeleteAccount. А в обычном режиме не должно быть кнопки btnSaveData
-        binding.btnLogout.visibility = View.VISIBLE
-        binding.btnDeleteAccount.visibility = View.VISIBLE
-        binding.btnSaveData.visibility = View.VISIBLE
 
         if (counterparty.isLegalEntity) {
             bankBinding.cardActionContainer.visibility = View.VISIBLE
@@ -195,6 +201,15 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
                 ContextCompat.getColorStateList(requireContext(), R.color.switch_thumb_color)
             binding.scEntityStatus.trackTintList =
                 ContextCompat.getColorStateList(requireContext(), R.color.switch_track_color)
+
+
+            contactsBinding.btnEdit.visibility = View.VISIBLE
+            addressesBinding.btnEdit.visibility = View.VISIBLE
+            bankBinding.btnEdit.visibility = View.VISIBLE
+            binding.btnSaveData.visibility = View.VISIBLE
+            binding.btnLogout.visibility = View.GONE
+            binding.btnDeleteAccount.visibility = View.GONE
+
             // Когда редактируем — слушаем изменения
             binding.scEntityStatus.setOnCheckedChangeListener { _, isChecked ->
                 binding.scEntityStatus.text = if (isChecked) {
@@ -206,6 +221,14 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
                 viewModel.setHasUnsavedChanges(true) // <-- СТАВИМ, ЧТО ЕСТЬ ИЗМЕНЕНИЯ
             }
         } else {
+
+            contactsBinding.btnEdit.visibility = View.GONE
+            addressesBinding.btnEdit.visibility = View.GONE
+            bankBinding.btnEdit.visibility = View.GONE
+            binding.btnSaveData.visibility = View.GONE
+            binding.btnLogout.visibility = View.VISIBLE
+            binding.btnDeleteAccount.visibility = View.VISIBLE
+
             binding.scEntityStatus.thumbTintList = ContextCompat.getColorStateList(
                 requireContext(),
                 R.color.switch_thumb_color_disabled
@@ -216,6 +239,71 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
             )
             // Когда НЕ редактируем — убираем слушатель, чтобы не сработал зря
             binding.scEntityStatus.setOnCheckedChangeListener(null)
+        }
+    }
+
+    private fun updateEditableStateEditText(isEditable: Boolean) {
+        val nameEditTexts = listOf(
+            binding.tvShortName,
+            binding.tvFirstName,
+            binding.tvLastName
+        )
+
+        val firmEditTexts = listOf(
+            legalEntityBinding.etCompanyName,
+            legalEntityBinding.etType,
+            legalEntityBinding.etNIP,
+            legalEntityBinding.etKRS,
+        )
+
+        val textColor = if (isEditable) {
+            ContextCompat.getColor(requireContext(), R.color.black)
+        } else {
+            ContextCompat.getColor(requireContext(), R.color.light_gray)
+        }
+
+        nameEditTexts.forEach { editText ->
+            editText.apply {
+                isEnabled = isEditable
+                isFocusable = isEditable
+                isFocusableInTouchMode = isEditable
+                isCursorVisible = isEditable
+                setTextColor(textColor)
+            }
+        }
+
+        firmEditTexts.forEach { editText ->
+            editText.apply {
+                isEnabled = isEditable
+                isFocusable = isEditable
+                isFocusableInTouchMode = isEditable
+                isCursorVisible = isEditable
+                setTextColor(textColor)
+            }
+        }
+
+        legalEntityBinding.etCompanyName.minLines = if (isEditable) 2 else 1
+    }
+
+    private fun updateEditableStateCheckBoxes(isEditable: Boolean) {
+        val checkBoxes = listOf(
+            legalEntityBinding.cbSupplier,
+            legalEntityBinding.cbWarehouse,
+            legalEntityBinding.cbCustomer
+        )
+
+        val textColor = if (isEditable) {
+            ContextCompat.getColor(requireContext(), R.color.black)
+        } else {
+            ContextCompat.getColor(requireContext(), R.color.black)
+        }
+
+        checkBoxes.forEach { checkBox ->
+            checkBox.apply {
+                isEnabled = isEditable
+                isClickable = isEditable
+                setTextColor(textColor)
+            }
         }
     }
 

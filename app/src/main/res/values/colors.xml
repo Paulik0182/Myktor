@@ -18,7 +18,8 @@
     <!-- Окно с информацией о Продукте -->
     <color name="dark_green">#2E7D32</color>
 
-    <color name="light_gray">#E0E0E0</color>
+    <!-- Дефолтные цвета элементов при недоступности -->
+    <color name="light_gray">#9E9E9E</color>
 
     <!-- Для SwitchCompat -->
 

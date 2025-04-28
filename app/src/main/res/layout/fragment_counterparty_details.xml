@@ -56,35 +56,51 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView
+                    <EditText
                         android:id="@+id/tvShortName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:cursorVisible="false"
                         android:ellipsize="end"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:hint="Short Name"
                         android:maxLines="1"
-                        android:textColor="@color/black"
+                        android:textColor="@color/light_gray"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView
+                    <EditText
                         android:id="@+id/tvFirstName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:cursorVisible="false"
                         android:ellipsize="end"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:hint="First Name"
                         android:maxLines="1"
+                        android:paddingTop="5dp"
+                        android:textColor="@color/light_gray"
                         android:textSize="14sp"
                         android:visibility="gone"
                         tools:visibility="visible" />
 
-                    <TextView
+                    <EditText
                         android:id="@+id/tvLastName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:cursorVisible="false"
                         android:ellipsize="end"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:hint="Last Name"
                         android:maxLines="1"
+                        android:paddingTop="5dp"
+                        android:textColor="@color/light_gray"
                         android:textSize="14sp"
                         android:visibility="gone"
                         tools:visibility="visible" />

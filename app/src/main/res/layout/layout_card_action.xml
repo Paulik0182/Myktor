@@ -50,7 +50,7 @@
             android:cursorVisible="false"
             android:inputType="text"
             app:layout_constraintStart_toEndOf="@id/ivActionIcon"
-            app:layout_constraintEnd_toStartOf="@id/ivActionArrow"
+            app:layout_constraintEnd_toStartOf="@id/btnEdit"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/tvDescription"/>
 
@@ -68,20 +68,22 @@
             android:visibility="gone"
             android:background="@android:color/transparent"
             app:layout_constraintStart_toEndOf="@id/ivActionIcon"
-            app:layout_constraintEnd_toStartOf="@id/ivActionArrow"
+            app:layout_constraintEnd_toStartOf="@id/btnEdit"
             app:layout_constraintTop_toBottomOf="@+id/tvActionTitle"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <ImageView
-            android:id="@+id/ivActionArrow"
+        <ImageButton
+            android:id="@+id/btnEdit"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/edit_product"
+            android:padding="8dp"
             android:src="@drawable/ic_edit"
-            android:contentDescription="@null"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
