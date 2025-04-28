@@ -41,7 +41,8 @@ abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
 
     private fun adjustBottomNavigation() {
         val bottomNav = requireActivity().findViewById<View>(R.id.bottom_navigation)
-        val coordinator = requireActivity().findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
+        val coordinator =
+            requireActivity().findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
         val container = requireActivity().findViewById<View>(R.id.container)
 
         if (hideBottomNavigation) {
@@ -55,7 +56,6 @@ abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
 
                 }
                 .start()
-
 
         } else {
             bottomNav.visibility = View.VISIBLE
@@ -72,4 +72,12 @@ abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
             }
         }
     }
+
+    protected inline fun <reified T : Controller> requireController(): T {
+        val controller = activity as? T
+        return controller
+            ?: error("${activity} must implement ${T::class.java.simpleName}")
+    }
+
+    interface Controller
 }

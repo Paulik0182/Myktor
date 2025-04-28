@@ -12,7 +12,6 @@ import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentProfileBinding
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.viewBinding
-
 class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
     private val binding by viewBinding<FragmentProfileBinding>()
@@ -27,7 +26,7 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
         super.onViewCreated(view, savedInstanceState)
 
         adapter = ProfileMenuAdapter { menu ->
-            getController().onProfileMenuItemClicked(menu)
+            requireController<ProfileFragment.Controller>().onProfileMenuItemClicked(menu)
         }
         binding.rvProfileMenu.layoutManager = LinearLayoutManager(requireContext())
 
@@ -79,9 +78,7 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
             binding.llTextContainer.setOnClickListener {
                 counterparty.id?.let { counterpartyId ->
-                    getController().openCounterpartyDetails(
-                        counterpartyId
-                    )
+                    requireController<ProfileFragment.Controller>().openCounterpartyDetails(counterpartyId)
                 }
             }
         }
@@ -92,16 +89,9 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
         }
     }
 
-    private fun getController(): Controller = activity as Controller
-
-    interface Controller {
+    interface Controller: BaseFragment.Controller {
         fun openCounterpartyDetails(counterpartyId: Long)
         fun onProfileMenuItemClicked(item: ProfileMenuType)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        getController()
     }
 
     companion object {
