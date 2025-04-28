@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.nayya.myktor.R
@@ -12,9 +11,11 @@ import com.nayya.myktor.databinding.FragmentCounterpartyDetailsBinding
 import com.nayya.myktor.databinding.LayoutCardActionBinding
 import com.nayya.myktor.databinding.LayoutLegalEntityBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
+import com.nayya.myktor.ui.root.BaseFragment
+import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.viewBinding
 
-class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_details) {
+class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_details) {
 
     private val binding by viewBinding<FragmentCounterpartyDetailsBinding>()
     private lateinit var viewModel: CounterpartyDetailsViewModel
@@ -25,6 +26,9 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
     private lateinit var bankBinding: LayoutCardActionBinding
 
     private var counterpartyId: Long? = null
+
+    // Для того чтобы скрыть нижнюю навигацию и персчитать размеры container
+    override val hideBottomNavigation = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +53,7 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
 
     private fun setupToolbar() {
         binding.toolbar.btnBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            goBack()
         }
 
         binding.toolbar.btnEdit.setOnClickListener {

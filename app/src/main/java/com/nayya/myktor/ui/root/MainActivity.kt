@@ -5,6 +5,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ActivityMainBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
@@ -61,7 +62,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
         if (savedInstanceState == null) {
             binding.bottomNavigation.selectedItemId = R.id.nav_categories
-            swapFragment(CategoriesFragment.newInstance())
+            openRootFragment(CategoriesFragment.newInstance())
         }
     }
 
@@ -73,17 +74,17 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
             }
             when (item.itemId) {
                 R.id.nav_search -> {
-                    swapFragment(ProductsFragment.newInstance())
+                    openRootFragment(ProductsFragment.newInstance())
                     true
                 }
 
                 R.id.nav_categories -> {
-                    swapFragment(CategoriesFragment.newInstance())
+                    openRootFragment(CategoriesFragment.newInstance())
                     true
                 }
 
                 R.id.nav_wallet -> {
-                    swapFragment(AccountingProductsFragment.newInstance())
+                    openRootFragment(AccountingProductsFragment.newInstance())
                     // открыть кошелек
                     true
                 }
@@ -94,7 +95,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
                 }
 
                 R.id.nav_profile -> {
-                    swapFragment(ProfileFragment.newInstance())
+                    openRootFragment(ProfileFragment.newInstance())
                     // Профиль
                     true
                 }
@@ -102,6 +103,20 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
                 else -> false
             }
         }
+    }
+
+    private fun openRootFragment(fragment: Fragment) {
+        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        supportFragmentManager.beginTransaction()
+            .replace(binding.container.id, fragment)
+            .commit()
+    }
+
+    private fun openChildFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .add(binding.container.id, fragment, TAG_ROOT_CONTAINER_FRAGMENT)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun swapFragment(fragment: Fragment) {
@@ -114,58 +129,58 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     }
 
     override fun openTestCollServer() {
-        swapFragment(RequestFragment.newInstance())
+        openChildFragment(RequestFragment.newInstance())
     }
 
     // TODO переделать. удалить
     override fun openProductAccounting() {
-        swapFragment(AccountingProductsFragment.newInstance())
+        openChildFragment(AccountingProductsFragment.newInstance())
     }
 
     override fun openOrders() {
-        swapFragment(OrdersFragment.newInstance())
+        openChildFragment(OrdersFragment.newInstance())
     }
 
     // TODO переделать. удалить
     override fun openProduct() {
-        swapFragment(ProductsFragment.newInstance())
+        openChildFragment(ProductsFragment.newInstance())
     }
 
     // TODO переделать. удалить
     override fun openCategory() {
-        swapFragment(CategoriesFragment.newInstance())
+        openChildFragment(CategoriesFragment.newInstance())
     }
 
     override fun openSuppliers() {
-        swapFragment(CounterpartiesFragment.newInstance())
+        openChildFragment(CounterpartiesFragment.newInstance())
     }
 
     override fun openEditSupplierFragment(supplier: CounterpartyEntity?) {
-        swapFragment(EditSupplierFragment.newInstance(supplier))
+        openChildFragment(EditSupplierFragment.newInstance(supplier))
     }
 
     override fun openEditOrderFragment(orderEntity: OrderEntity?) {
-        swapFragment(EditOrderFragment.newInstance(orderEntity?.id))
+        openChildFragment(EditOrderFragment.newInstance(orderEntity?.id))
     }
 
     override fun openSubcategoryFragment(category: CategoryEntity, products: List<Product>) {
-        swapFragment(SubcategoryFragment.newInstance(category, products))
+        openChildFragment(SubcategoryFragment.newInstance(category, products))
     }
 
     override fun openProductsBySubcategory(subcategoryId: Long, products: List<Product>) {
-        swapFragment(ProductsFragment.newInstance(products, subcategoryId))
+        openChildFragment(ProductsFragment.newInstance(products, subcategoryId))
     }
 
     override fun openProductFragment(product: Product) {
-        swapFragment(ViewProductFragment.newInstance(product))
+        openChildFragment(ViewProductFragment.newInstance(product))
     }
 
     override fun openEditProductFragment(productId: Long) {
-        swapFragment(EditProductFragment.newInstance(productId))
+        openChildFragment(EditProductFragment.newInstance(productId))
     }
 
     override fun openCounterpartyDetails(counterpartyId: Long) {
-        swapFragment(CounterpartyDetailsFragment.newInstance(counterpartyId))
+        openChildFragment(CounterpartyDetailsFragment.newInstance(counterpartyId))
     }
 
     override fun onProfileMenuItemClicked(item: ProfileMenuType) {

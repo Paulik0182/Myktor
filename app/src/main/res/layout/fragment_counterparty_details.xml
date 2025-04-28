@@ -5,7 +5,7 @@
     android:id="@+id/clRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray">
+    android:background="@color/white">
 
     <include
         android:id="@+id/toolbar"
@@ -147,7 +147,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:backgroundTint="@color/gray"
+                android:backgroundTint="@color/white"
                 android:text="Выйти из аккаунта"
                 android:textColor="@color/blue"
                 android:visibility="gone"
@@ -157,7 +157,7 @@
                 android:id="@+id/btnDeleteAccount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/gray"
+                android:backgroundTint="@color/white"
                 android:text="Удалить личный кабинет"
                 android:textColor="@color/red"
                 android:visibility="gone"
