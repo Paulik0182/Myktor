@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="#66FF0000" android:state_checked="true" /> <!-- полупрозрачный красный -->
+    <item android:color="#6600FF00" android:state_checked="false" /> <!-- полупрозрачный зелёный -->
+</selector>

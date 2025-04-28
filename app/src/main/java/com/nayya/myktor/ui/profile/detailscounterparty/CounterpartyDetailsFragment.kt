@@ -1,7 +1,9 @@
 package com.nayya.myktor.ui.profile.detailscounterparty
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
@@ -23,8 +25,6 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
     private lateinit var bankBinding: LayoutCardActionBinding
 
     private var counterpartyId: Long? = null
-
-    private var isEditMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,48 +53,73 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
         }
 
         binding.toolbar.btnEdit.setOnClickListener {
-            toggleEditMode()
+            if (viewModel.hasUnsavedChanges.value == true) {
+                // Показать диалог: Сохранить изменения или отменить
+                showUnsavedChangesDialog()
+            } else {
+                viewModel.toggleEditMode()
+            }
         }
     }
 
-    private fun toggleEditMode() {
-        isEditMode = !isEditMode
-        binding.root.isEnabled = isEditMode
-        updateEditableState()
-    }
-
-    private fun updateEditableState() {
-
+    private fun updateToolbarState(isEditMode: Boolean) {
+        if (isEditMode) {
+            binding.toolbar.btnEdit.setImageResource(R.drawable.ic_edit_red)
+            binding.toolbar.tvTitle.text = "Редактирование"
+            binding.toolbar.tvTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+        } else {
+            binding.toolbar.btnEdit.setImageResource(R.drawable.ic_edit)
+            binding.toolbar.tvTitle.text = ""
+            binding.toolbar.tvTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+            // Тут позже добавить проверку "Есть несохранённые изменения"
+        }
     }
 
     private fun observeViewModel() {
+        observeCounterparty()
+        observeEditMode()
+    }
+
+    private fun observeCounterparty() {
         viewModel.counterparty.observe(viewLifecycleOwner) { counterparty ->
-            val placeholderRes = if (counterparty.isLegalEntity) {
-                R.drawable.ic_profile_placeholder_firm_orig
-            } else {
-                R.drawable.ic_profile_placeholder_user_orig
-            }
-
-            Glide.with(requireContext())
-                .load(counterparty.imagePath.takeIf { !it.isNullOrBlank() } ?: placeholderRes)
-                .placeholder(placeholderRes)
-                .circleCrop()
-                .into(binding.ivAvatar)
-
-            binding.tvFirstName.apply {
-                visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-                text = counterparty.firstName
-            }
-
-            binding.tvLastName.apply {
-                visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-                text = counterparty.lastName
-            }
-
-            binding.tvShortName.text = counterparty.shortName
-
-            bindCounterparty(counterparty)
+            updateEditableState(viewModel.isEditMode.value ?: false)
+            updateCounterpartyInfo(counterparty)
         }
+    }
+
+    private fun observeEditMode() {
+        viewModel.isEditMode.observe(viewLifecycleOwner) { isEditMode ->
+            updateToolbarState(isEditMode)
+            updateEditableState(isEditMode)
+        }
+    }
+
+    private fun updateCounterpartyInfo(counterparty: CounterpartyEntity) {
+        val placeholderRes = if (counterparty.isLegalEntity) {
+            R.drawable.ic_profile_placeholder_firm_orig
+        } else {
+            R.drawable.ic_profile_placeholder_user_orig
+        }
+
+        Glide.with(requireContext())
+            .load(counterparty.imagePath.takeIf { !it.isNullOrBlank() } ?: placeholderRes)
+            .placeholder(placeholderRes)
+            .circleCrop()
+            .into(binding.ivAvatar)
+
+        binding.tvFirstName.apply {
+            visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
+            text = counterparty.firstName
+        }
+
+        binding.tvLastName.apply {
+            visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
+            text = counterparty.lastName
+        }
+
+        binding.tvShortName.text = counterparty.shortName
+
+        bindCounterparty(counterparty)
     }
 
     private fun bindCounterparty(counterparty: CounterpartyEntity) {
@@ -153,6 +178,58 @@ class CounterpartyDetailsFragment : Fragment(R.layout.fragment_counterparty_deta
                 ?.let { addressesBinding.tvActionTitle.setText(it) }
                 ?: run { addressesBinding.tvActionTitle.hint = "Адрес" }
         }
+
+        binding.scEntityStatus.isChecked = counterparty.isLegalEntity
+        binding.scEntityStatus.text = if (counterparty.isLegalEntity) {
+            "Юридическое лицо"
+        } else {
+            "Физическое лицо"
+        }
+    }
+
+    private fun updateEditableState(isEditMode: Boolean) {
+        binding.scEntityStatus.isEnabled = isEditMode
+
+        if (isEditMode) {
+            binding.scEntityStatus.thumbTintList =
+                ContextCompat.getColorStateList(requireContext(), R.color.switch_thumb_color)
+            binding.scEntityStatus.trackTintList =
+                ContextCompat.getColorStateList(requireContext(), R.color.switch_track_color)
+            // Когда редактируем — слушаем изменения
+            binding.scEntityStatus.setOnCheckedChangeListener { _, isChecked ->
+                binding.scEntityStatus.text = if (isChecked) {
+                    "Юридическое лицо"
+                } else {
+                    "Физическое лицо"
+                }
+
+                viewModel.setHasUnsavedChanges(true) // <-- СТАВИМ, ЧТО ЕСТЬ ИЗМЕНЕНИЯ
+            }
+        } else {
+            binding.scEntityStatus.thumbTintList = ContextCompat.getColorStateList(
+                requireContext(),
+                R.color.switch_thumb_color_disabled
+            )
+            binding.scEntityStatus.trackTintList = ContextCompat.getColorStateList(
+                requireContext(),
+                R.color.switch_track_color_disabled
+            )
+            // Когда НЕ редактируем — убираем слушатель, чтобы не сработал зря
+            binding.scEntityStatus.setOnCheckedChangeListener(null)
+        }
+    }
+
+    private fun showUnsavedChangesDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Несохранённые изменения")
+            .setMessage("Вы хотите сохранить изменения?")
+            .setPositiveButton("Сохранить") { _, _ ->
+                viewModel.saveChanges()
+            }
+            .setNegativeButton("Отменить") { _, _ ->
+                viewModel.discardChanges()
+            }
+            .show()
     }
 
     companion object {

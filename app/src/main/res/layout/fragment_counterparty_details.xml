@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/btnSaveData"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
@@ -92,14 +92,18 @@
             </LinearLayout>
 
             <!-- Статус юридическое/физическое лицо -->
-            <TextView
-                android:id="@+id/tvEntityStatus"
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/scEntityStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:text="Юридическое лицо"
-                android:textSize="16sp" />
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:checked="true"
+                android:enabled="false"
+                android:text="Физическое лицо"
+                android:textSize="16sp"
+                app:thumbTint="@color/switch_thumb_color_disabled"
+                app:trackTint="@color/switch_track_color_disabled" />
 
             <!-- Контакты -->
             <include
@@ -109,7 +113,7 @@
             <!-- Для юр. лица -->
             <include
                 android:id="@+id/includeLegalEntity"
-                layout="@layout/layout_legal_entity"/>
+                layout="@layout/layout_legal_entity" />
 
             <!-- Адреса -->
             <include
