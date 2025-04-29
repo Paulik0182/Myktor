@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "MyKtor"
 include(":app")
- 
+include(":ui_components")

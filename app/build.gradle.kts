@@ -46,6 +46,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":ui_components"))
 
     implementation("androidx.core:core-ktx:1.5.7")
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
