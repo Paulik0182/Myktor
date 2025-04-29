@@ -3,6 +3,7 @@ package com.nayya.myktor.ui.profile.detailscounterparty
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
@@ -49,6 +50,12 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
         setupToolbar()
         observeViewModel()
+
+        binding.contactsInfo.apply {
+            setEditClickListener {
+                Toast.makeText(context, "Клик на редактирование", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupToolbar() {
@@ -139,21 +146,14 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     }
 
     private fun bindCounterparty(counterparty: CounterpartyEntity) {
-        contactsBinding.cardActionContainer.visibility = View.VISIBLE
+        binding.contactsInfo.visibility = View.VISIBLE
         addressesBinding.cardActionContainer.visibility = View.VISIBLE
 
         if (counterparty.isLegalEntity) {
             bankBinding.cardActionContainer.visibility = View.VISIBLE
             legalEntityBinding.layoutLegalEntity.visibility = View.VISIBLE
 
-            contactsBinding.tvActionTitle.apply {
-                val contactsInfo = counterparty.representativesContact?.firstOrNull()
-                if (contactsInfo.isNullOrBlank()) {
-                    hint = "Контакты"
-                } else {
-                    setText(contactsInfo)
-                }
-            }
+            binding.contactsInfo.text = counterparty.representativesContact?.firstOrNull()
 
             counterparty.addressesInformation?.firstOrNull()
                 ?.takeIf { it.isNotBlank() }
@@ -176,12 +176,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             legalEntityBinding.layoutLegalEntity.visibility = View.GONE
             bankBinding.cardActionContainer.visibility = View.GONE
 
-            val representativeInfo = counterparty.counterpartyContact?.firstOrNull()
-            if (representativeInfo.isNullOrBlank()) {
-                contactsBinding.tvActionTitle.hint = "Контакты"
-            } else {
-                contactsBinding.tvActionTitle.setText(representativeInfo)
-            }
+            binding.contactsInfo.text = counterparty.counterpartyContact?.firstOrNull()
 
             counterparty.addressesInformation?.firstOrNull()
                 ?.takeIf { it.isNotBlank() }
@@ -206,8 +201,13 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             binding.scEntityStatus.trackTintList =
                 ContextCompat.getColorStateList(requireContext(), R.color.switch_track_color)
 
+            binding.contactsInfo.apply {
+                showEditIcon = true
+                showDescriptionIcon = true
+                showDescriptionText = true
+                setInputTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+            }
 
-            contactsBinding.btnEdit.visibility = View.VISIBLE
             addressesBinding.btnEdit.visibility = View.VISIBLE
             bankBinding.btnEdit.visibility = View.VISIBLE
             binding.btnSaveData.visibility = View.VISIBLE
@@ -225,8 +225,18 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 viewModel.setHasUnsavedChanges(true) // <-- СТАВИМ, ЧТО ЕСТЬ ИЗМЕНЕНИЯ
             }
         } else {
+            binding.contactsInfo.apply {
+                showEditIcon = false
+                showDescriptionIcon = false
+                showDescriptionText = false
+                setInputTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        com.nayya.uicomponents.R.color.uiKitColorForegroundSecondary
+                    )
+                )
+            }
 
-            contactsBinding.btnEdit.visibility = View.GONE
             addressesBinding.btnEdit.visibility = View.GONE
             bankBinding.btnEdit.visibility = View.GONE
             binding.btnSaveData.visibility = View.GONE

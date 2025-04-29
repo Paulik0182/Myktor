@@ -5,8 +5,31 @@
 
     <declare-styleable name="CustomCardActionView">
 
-        <!-- Текст заголовка -->
-        <attr name="titleText" format="string" />
+        <!-- Текст -->
+        <attr name="inputText" format="string" />
+        <attr name="hintText" format="string" />
+        <!-- Цвет текста -->
+        <attr name="inputTextColor" format="color|reference" />
+
+        <!-- Цвет подсказки (hint) -->
+        <attr name="inputHintTextColor" format="color|reference" />
+
+        <attr name="inputTextSize" format="dimension" />
+        <attr name="inputTextStyle" format="enum">
+            <enum name="normal" value="0" />
+            <enum name="bold" value="1" />
+            <enum name="italic" value="2" />
+        </attr>
+        <attr name="inputTextAppearance" format="reference" />
+
+        <!-- Редактирование текста -->
+        <attr name="inputEnabled" format="boolean" />
+
+        <!-- Задать фон ввода -->
+        <attr name="inputBackground" format="reference" />
+
+        <!-- Задать фон карточки -->
+        <attr name="cardBackground" format="reference|color" />
 
         <!-- Текст описания -->
         <attr name="descriptionText" format="string" />
@@ -19,6 +42,8 @@
 
         <!-- Иконка карандаша -->
         <attr name="editIconRes" format="reference" />
+        <attr name="showEditIcon" format="boolean" />
+        <attr name="editIconEnabled" format="boolean" />
 
         <!-- Показать/скрыть иконку информации -->
         <attr name="showInfoIcon" format="boolean" />
@@ -32,6 +57,52 @@
         <!-- Показать/скрыть текст описания -->
         <attr name="showDescriptionText" format="boolean" />
 
-    </declare-styleable>
+        <!-- Обычная текстовая клавиатура -->
+        <!-- Без подсказок и автозамены -->
+        <!-- Клавиатура для Email (с @, .com) -->
+        <!-- Клавиатура только для ввода номера -->
+        <!-- Текст скрывается точками -->
+        <!-- Только цифры -->
+        <!-- Целые числа (+, -) -->
+        <!-- Цифры с точкой или запятой -->
+        <!-- Клавиатура для URL (с / и .com) -->
+        <attr name="inputType" format="enum">
+            <enum name="text" value="0" />
+            <enum name="textNoSuggestions" value="1" />
+            <enum name="textEmailAddress" value="2" />
+            <enum name="phone" value="3" />
+            <enum name="textPassword" value="4" />
+            <enum name="number" value="5" />
+            <enum name="numberSigned" value="6" />
+            <enum name="numberDecimal" value="7" />
+            <enum name="textUri" value="8" />
+        </attr>
 
+        <!-- Шрифт (fontFamily) -->
+        <attr name="inputFontFamily" format="reference|string" />
+
+        <!-- добавление клавиатурной кнопки Done / Next / Search и т.п.) -->
+        <attr name="inputImeOptions" format="enum">
+            <enum name="normal" value="1" />
+            <enum name="actionDone" value="6" />
+            <enum name="actionNext" value="5" />
+            <enum name="actionGo" value="2" />
+            <enum name="actionSearch" value="3" />
+            <enum name="actionSend" value="4" />
+        </attr>
+
+        <!-- Количество строк -->
+        <attr name="inputLines" format="integer" />
+
+        <attr name="inputMaxLength" format="integer" />
+
+        <!-- Обрезка текста с многоточием -->
+        <attr name="inputEllipsize" format="enum">
+            <enum name="none" value="0" />
+            <enum name="start" value="1" />
+            <enum name="middle" value="2" />
+            <enum name="end" value="3" />
+            <enum name="marquee" value="4" />
+        </attr>
+    </declare-styleable>
 </resources>

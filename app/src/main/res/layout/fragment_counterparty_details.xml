@@ -121,12 +121,29 @@
                 app:thumbTint="@color/switch_thumb_color_disabled"
                 app:trackTint="@color/switch_track_color_disabled" />
 
+            <com.nayya.uicomponents.CustomCardActionView
+                android:id="@+id/contactsInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:descriptionText="Особенность"
+                app:editIconRes="@drawable/ic_edit"
+                app:infoText="Контакты"
+                app:leftIconRes="@drawable/ic_about_app"
+                app:showDescriptionIcon="false"
+                app:showDescriptionText="false"
+                app:showInfoIcon="false"
+                app:showInfoText="false"
+                app:inputEnabled="false"
+                app:inputBackground="@color/white"
+                app:hintText="Контакты" />
+
             <!-- Контакты -->
+
+            <!-- Для юр. лица -->
             <include
                 android:id="@+id/includeContactsInfo"
                 layout="@layout/layout_card_action" />
 
-            <!-- Для юр. лица -->
             <include
                 android:id="@+id/includeLegalEntity"
                 layout="@layout/layout_legal_entity" />
