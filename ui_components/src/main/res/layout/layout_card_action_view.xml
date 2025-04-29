@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/btnView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardActionContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clActionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/ivInformationIcon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_outlined_info_circle"
+                android:tint="@color/uiKitColorForegroundSecondary"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@id/tvInformation"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvInformation" />
+
+
+            <TextView
+                android:id="@+id/tvInformation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:paddingVertical="8dp"
+                android:text="Information"
+                android:textColor="@color/uiKitColorForegroundSecondary"
+                app:layout_constraintStart_toEndOf="@id/ivInformationIcon"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_goneMarginStart="0dp" />
+
+            <View
+                android:id="@+id/vgInput"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_field_gray_cell"
+                app:layout_constraintBottom_toTopOf="@id/tvDescription"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_min="48dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvInformation" />
+
+            <ImageView
+                android:id="@+id/ivActionIcon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_about_app"
+                app:layout_constraintBottom_toBottomOf="@id/tvActionTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvActionTitle" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrierIconEnd"
+                android:layout_width="8dp"
+                android:layout_height="0dp"
+                app:barrierDirection="end"
+                app:constraint_referenced_ids="ivActionIcon" />
+
+            <TextView
+                android:id="@+id/tvActionTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginVertical="6dp"
+                android:background="@null"
+                android:gravity="center_vertical|start"
+                android:paddingVertical="6dp"
+                android:saveEnabled="false"
+                android:textColor="@color/black"
+                android:textColorHint="@color/input_right_color"
+                app:layout_constraintBottom_toBottomOf="@id/vgInput"
+                app:layout_constraintEnd_toStartOf="@+id/btnEdit"
+                app:layout_constraintStart_toEndOf="@id/barrierIconEnd"
+                app:layout_constraintTop_toTopOf="@id/vgInput"
+                tools:hint="Title" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etInputUser"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginVertical="6dp"
+                android:background="@null"
+                android:gravity="center_vertical|start"
+                android:imeOptions="actionDone"
+                android:inputType="textNoSuggestions"
+                android:paddingVertical="6dp"
+                android:saveEnabled="false"
+                android:textColorHint="@color/input_right_color"
+                android:textCursorDrawable="@drawable/cursor_drawable"
+                app:layout_constraintBottom_toBottomOf="@id/vgInput"
+                app:layout_constraintEnd_toStartOf="@+id/btnEdit"
+                app:layout_constraintStart_toEndOf="@id/barrierIconEnd"
+                app:layout_constraintTop_toTopOf="@id/vgInput"
+                tools:hint="Title" />
+
+            <ImageView
+                android:id="@+id/ivDescriptionIcon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/input_description_icon"
+                android:tint="@color/input_bottom_color"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/tvDescription"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvDescription"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tvDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:gravity="bottom"
+                android:maxLines="2"
+                android:paddingVertical="4dp"
+                android:text="Description"
+                android:textColor="@color/input_bottom_color"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ivDescriptionIcon"
+                app:layout_constraintTop_toBottomOf="@id/tvActionTitle"
+                tools:visibility="visible" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrierBottomCell"
+                android:layout_width="8dp"
+                android:layout_height="0dp"
+                app:barrierDirection="end"
+                app:constraint_referenced_ids="ivActionIcon, tvDescription, tvActionTitle" />
+
+            <ImageButton
+                android:id="@+id/btnEdit"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/edit_product"
+                android:src="@drawable/ic_edit"
+                app:layout_constraintBottom_toBottomOf="@id/tvActionTitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvActionTitle" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</merge>

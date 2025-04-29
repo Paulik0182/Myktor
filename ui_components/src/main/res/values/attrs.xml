@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Атрибуты для кастомного элемента CustomCardActionView -->
+
+    <declare-styleable name="CustomCardActionView">
+
+        <!-- Текст заголовка -->
+        <attr name="titleText" format="string" />
+
+        <!-- Текст описания -->
+        <attr name="descriptionText" format="string" />
+
+        <!-- Текст информации -->
+        <attr name="infoText" format="string" />
+
+        <!-- Иконка слева -->
+        <attr name="leftIconRes" format="reference" />
+
+        <!-- Иконка карандаша -->
+        <attr name="editIconRes" format="reference" />
+
+        <!-- Показать/скрыть иконку информации -->
+        <attr name="showInfoIcon" format="boolean" />
+
+        <!-- Показать/скрыть текст информации -->
+        <attr name="showInfoText" format="boolean" />
+
+        <!-- Показать/скрыть иконку описания -->
+        <attr name="showDescriptionIcon" format="boolean" />
+
+        <!-- Показать/скрыть текст описания -->
+        <attr name="showDescriptionText" format="boolean" />
+
+    </declare-styleable>
+
+</resources>

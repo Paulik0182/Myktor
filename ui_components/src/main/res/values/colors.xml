@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="uiKitColorDisabledTetriary">#FAFBFB</color>
+    <color name="uiKitColorBackgroundSecondary">#F5F6F7</color>
+
+    <color name="uiKitColorError">#EE2166</color>
+    <color name="uiKitColorForegroundSecondary">#9298A0</color>
+    <color name="uiKitColorForegroundLink">#A6C90D</color>
+
+    <!--Disabled-->
+    <color name="uiKitColorDisabledPrimary">#C8CBCF</color>
+
+</resources>
