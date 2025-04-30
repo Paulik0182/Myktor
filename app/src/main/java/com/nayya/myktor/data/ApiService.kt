@@ -1,5 +1,6 @@
 package com.nayya.myktor.data
 
+import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
@@ -125,4 +126,10 @@ interface ApiService {
 
     @DELETE("/orders/{id}")
     suspend fun deleteOrder(@Path("id") id: Long)
+
+    @PATCH("counterparties/{id}/contacts")
+    suspend fun patchContacts(
+        @Path("id") counterpartyId: Long,
+        @Body contacts: List<CounterpartyContactRequest>
+    ): Response<Unit>
 }

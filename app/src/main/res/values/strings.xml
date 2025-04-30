@@ -17,4 +17,12 @@
     <string name="product_added">Добавлен %1$d товар(ов)</string>
     <string name="back">Назад</string>
 
+
+    <string-array name="contact_type_entries">
+        <item>Телефон</item>
+        <item>Email</item>
+        <item>Факс</item>
+        <item>Другое</item>
+    </string-array>
+
 </resources>

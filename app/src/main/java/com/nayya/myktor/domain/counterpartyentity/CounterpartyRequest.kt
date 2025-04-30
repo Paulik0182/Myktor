@@ -43,8 +43,8 @@ data class RepresentativeRequest(
 
 @Serializable
 data class CounterpartyContactRequest(
-    val contactType: String?,
-    val contactValue: String?,
+    var contactType: String?,
+    var contactValue: String?,
     val countryCodeId: Long? = null,
     val representativeId: Long? = null,
 )

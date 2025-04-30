@@ -12,6 +12,7 @@ import com.nayya.myktor.databinding.FragmentCounterpartyDetailsBinding
 import com.nayya.myktor.databinding.LayoutCardActionBinding
 import com.nayya.myktor.databinding.LayoutLegalEntityBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
+import com.nayya.myktor.ui.profile.bottomsheet.ContactEditBottomSheetDialog
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.viewBinding
@@ -45,10 +46,17 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         setupToolbar()
         observeViewModel()
 
-        binding.contactsInfo.apply {
-            setEditClickListener {
-                Toast.makeText(context, "Клик на Контакт", Toast.LENGTH_SHORT).show()
-            }
+        binding.contactsInfo.setEditClickListener {
+            val dialog = ContactEditBottomSheetDialog()
+            dialog.setInitialData(
+                initialContacts = viewModel.counterparty.value?.counterpartyContacts ?: emptyList(),
+                counterpartyId = viewModel.counterparty.value?.id ?: return@setEditClickListener,
+                onSaveCallback = { id, updatedContacts ->
+                    viewModel.updateContacts(id, updatedContacts)
+                }
+            )
+
+            dialog.show(childFragmentManager, "edit_contacts")
         }
 
         binding.bankInfo.apply {
