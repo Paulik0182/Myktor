@@ -70,24 +70,7 @@ class CounterpartyDetailsViewModel : ViewModel() {
                     RetrofitInstance.api.patchContacts(counterpartyId, contacts)
                 }
                 setHasUnsavedChanges(true)
-                // Опционально: обнови LiveData
-                _counterparty.value = _counterparty.value?.copy(
-                    counterpartyContacts = contacts.map {
-                        CounterpartyContact(
-                            id = null, // если ID нет — пропускаем
-                            counterpartyId = counterpartyId,
-                            counterpartyName = null,
-                            contactType = it.contactType ?: "",
-                            contactValue = it.contactValue ?: "",
-                            countryCodeId = it.countryCodeId,
-                            countryName = null,
-                            countryPhoneCode = null,
-                            countryIsoCode = null,
-                            representativeId = null,
-                            representativeName = null
-                        )
-                    }
-                )
+                loadCounterpartyById(counterpartyId) // ← ВСЁ обновится через LiveData
             } catch (e: Exception) {
                 Log.e("ViewModel", "Ошибка обновления контактов: ${e.localizedMessage}", e)
             }

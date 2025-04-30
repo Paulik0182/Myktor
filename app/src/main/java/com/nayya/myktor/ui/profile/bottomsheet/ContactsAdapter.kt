@@ -18,7 +18,9 @@ class ContactsAdapter(
 ) : RecyclerView.Adapter<ContactsAdapter.ContactViewHolder>() {
 
     inner class ContactViewHolder(val binding: ItemContactEditBinding) :
-        RecyclerView.ViewHolder(binding.root)
+        RecyclerView.ViewHolder(binding.root) {
+        var currentWatcher: TextWatcher? = null
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {
         val binding = ItemContactEditBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -31,26 +33,34 @@ class ContactsAdapter(
         val contact = contacts[position]
 
         with(holder.binding) {
-            // Установка значения
+            // ❗ Удаляем предыдущий TextWatcher
+            holder.currentWatcher?.let {
+                etContactValue.removeTextChangedListener(it)
+            }
+
+            // Устанавливаем текст
             etContactValue.setText(contact.contactValue ?: "")
 
-            // Установка inputType
+            // Устанавливаем inputType
             etContactValue.inputType = when (contact.contactType) {
                 "email" -> InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
                 else -> InputType.TYPE_CLASS_PHONE
             }
 
-            // Слушатель изменения текста
-            etContactValue.addTextChangedListener(object : TextWatcher {
+            // ✅ Создаем и сохраняем TextWatcher
+            val watcher = object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
                     contact.contactValue = s?.toString()
                 }
 
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            })
+            }
 
-            // Установка типа (phone/email)
+            etContactValue.addTextChangedListener(watcher)
+            holder.currentWatcher = watcher
+
+            // Устанавливаем тип контакта (email / phone)
             spinnerContactType.setSelection(
                 when (contact.contactType) {
                     "email" -> 1
@@ -82,4 +92,3 @@ class ContactsAdapter(
         }
     }
 }
-

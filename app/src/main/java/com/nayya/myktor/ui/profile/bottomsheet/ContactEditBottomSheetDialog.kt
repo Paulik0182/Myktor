@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.BottomSheetEditContactsBinding
@@ -25,7 +25,7 @@ class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {
     fun setInitialData(
         initialContacts: List<CounterpartyContact>,
         counterpartyId: Long,
-        onSaveCallback: (Long, List<CounterpartyContactRequest>) -> Unit
+        onSaveCallback: (Long, List<CounterpartyContactRequest>) -> Unit,
     ) {
         Log.d("BottomSheetInit", "Пришло ${initialContacts.size} контактов") // ← ВОТ СЮДА!
 
@@ -46,12 +46,13 @@ class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val binding = BottomSheetEditContactsBinding.inflate(inflater, container, false)
 
         // Адаптер создаётся уже после заполнения contacts
         adapter = ContactsAdapter(contacts, ::onAddContact, ::onDeleteContact)
+        binding.rvContacts.layoutManager = LinearLayoutManager(requireContext())
         binding.rvContacts.adapter = adapter
 
         binding.tvTitle.text = "Контакты"
@@ -73,6 +74,9 @@ class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {
 
         binding.btnSave.setOnClickListener {
             onSave?.invoke(counterpartyId, contacts.toList())
+
+            // Сообщаем родительскому фрагменту, что контакты обновлены
+            parentFragmentManager.setFragmentResult("contacts_updated", Bundle())
             dismiss()
         }
 
