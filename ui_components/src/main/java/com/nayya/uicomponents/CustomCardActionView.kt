@@ -160,6 +160,11 @@ class CustomCardActionView @JvmOverloads constructor(
                 )
                 setInputHorizontallyScrolling(scrolling)
 
+                // ✩ Важно: отключаем singleLine, чтобы \n работал как перенос строки
+                // Некоторые inputType (например, textNoSuggestions) включают singleLine по умолчанию
+                binding.etInputUser.apply{
+                    isSingleLine = false
+                }
             } finally {
                 recycle()
             }

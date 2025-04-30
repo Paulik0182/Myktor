@@ -22,9 +22,6 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     private lateinit var viewModel: CounterpartyDetailsViewModel
 
     private lateinit var legalEntityBinding: LayoutLegalEntityBinding
-    private lateinit var contactsBinding: LayoutCardActionBinding
-    private lateinit var addressesBinding: LayoutCardActionBinding
-    private lateinit var bankBinding: LayoutCardActionBinding
 
     private var counterpartyId: Long? = null
 
@@ -44,16 +41,25 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         counterpartyId?.let { viewModel.loadCounterpartyById(it) }
 
         legalEntityBinding = LayoutLegalEntityBinding.bind(binding.includeLegalEntity.root)
-        contactsBinding = LayoutCardActionBinding.bind(binding.includeContactsInfo.root)
-        addressesBinding = LayoutCardActionBinding.bind(binding.includeAddressesInfo.root)
-        bankBinding = LayoutCardActionBinding.bind(binding.includeBankInfo.root)
 
         setupToolbar()
         observeViewModel()
 
         binding.contactsInfo.apply {
             setEditClickListener {
-                Toast.makeText(context, "Клик на редактирование", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Клик на Контакт", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.bankInfo.apply {
+            setEditClickListener {
+                Toast.makeText(context, "Клик на Банк", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.addressesInfo.apply {
+            setEditClickListener {
+                Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -147,23 +153,26 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
     private fun bindCounterparty(counterparty: CounterpartyEntity) {
         binding.contactsInfo.visibility = View.VISIBLE
-        addressesBinding.cardActionContainer.visibility = View.VISIBLE
+        binding.addressesInfo.visibility = View.VISIBLE
 
         if (counterparty.isLegalEntity) {
-            bankBinding.cardActionContainer.visibility = View.VISIBLE
+            binding.bankInfo.visibility = View.VISIBLE
             legalEntityBinding.layoutLegalEntity.visibility = View.VISIBLE
 
-            binding.contactsInfo.text = counterparty.representativesContact?.firstOrNull()
+            val contactText = counterparty.representativesContact
+                ?.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "\n")
+            binding.contactsInfo.text = contactText
 
-            counterparty.addressesInformation?.firstOrNull()
-                ?.takeIf { it.isNotBlank() }
-                ?.let { addressesBinding.tvActionTitle.setText(it) }
-                ?: run { addressesBinding.tvActionTitle.hint = "Адрес" }
+            val addressesText = counterparty.addressesInformation
+                ?.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "\n")
+            binding.addressesInfo.text = addressesText
 
-            with(bankBinding.tvActionTitle) {
-                val bankInfo = counterparty.bankAccountInformation?.firstOrNull()
-                if (bankInfo.isNullOrBlank()) hint = "Банковский счет" else setText(bankInfo)
-            }
+            val bankAccountText = counterparty.bankAccountInformation
+                ?.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "\n")
+            binding.bankInfo.text = bankAccountText
 
             legalEntityBinding.cbSupplier.isChecked = counterparty.isSupplier
             legalEntityBinding.cbWarehouse.isChecked = counterparty.isWarehouse
@@ -174,14 +183,17 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             legalEntityBinding.etKRS.setText(counterparty.krs)
         } else {
             legalEntityBinding.layoutLegalEntity.visibility = View.GONE
-            bankBinding.cardActionContainer.visibility = View.GONE
+            binding.bankInfo.visibility = View.GONE
 
-            binding.contactsInfo.text = counterparty.counterpartyContact?.firstOrNull()
+            val contactText = counterparty.counterpartyContact
+                ?.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "\n")
+            binding.contactsInfo.text = contactText
 
-            counterparty.addressesInformation?.firstOrNull()
-                ?.takeIf { it.isNotBlank() }
-                ?.let { addressesBinding.tvActionTitle.setText(it) }
-                ?: run { addressesBinding.tvActionTitle.hint = "Адрес" }
+            val addressesText = counterparty.addressesInformation
+                ?.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "\n")
+            binding.addressesInfo.text = addressesText
         }
 
         binding.scEntityStatus.isChecked = counterparty.isLegalEntity
@@ -203,13 +215,18 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
             binding.contactsInfo.apply {
                 showEditIcon = true
-                showDescriptionIcon = true
-                showDescriptionText = true
                 setInputTextColor(ContextCompat.getColor(requireContext(), R.color.black))
             }
 
-            addressesBinding.btnEdit.visibility = View.VISIBLE
-            bankBinding.btnEdit.visibility = View.VISIBLE
+            binding.addressesInfo.apply {
+                showEditIcon = true
+                setInputTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+            }
+            binding.bankInfo.apply {
+                showEditIcon = true
+                setInputTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+            }
+
             binding.btnSaveData.visibility = View.VISIBLE
             binding.btnLogout.visibility = View.GONE
             binding.btnDeleteAccount.visibility = View.GONE
@@ -227,8 +244,6 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         } else {
             binding.contactsInfo.apply {
                 showEditIcon = false
-                showDescriptionIcon = false
-                showDescriptionText = false
                 setInputTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -237,8 +252,26 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 )
             }
 
-            addressesBinding.btnEdit.visibility = View.GONE
-            bankBinding.btnEdit.visibility = View.GONE
+            binding.addressesInfo.apply {
+                showEditIcon = false
+                setInputTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        com.nayya.uicomponents.R.color.uiKitColorForegroundSecondary
+                    )
+                )
+            }
+
+            binding.bankInfo.apply {
+                showEditIcon = false
+                setInputTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        com.nayya.uicomponents.R.color.uiKitColorForegroundSecondary
+                    )
+                )
+            }
+
             binding.btnSaveData.visibility = View.GONE
             binding.btnLogout.visibility = View.VISIBLE
             binding.btnDeleteAccount.visibility = View.VISIBLE
