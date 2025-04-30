@@ -17,7 +17,7 @@ import com.nayya.uicomponents.databinding.LayoutCardActionViewBinding
 class CustomCardActionView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val binding = LayoutCardActionViewBinding.inflate(LayoutInflater.from(context), this)
@@ -34,13 +34,17 @@ class CustomCardActionView @JvmOverloads constructor(
                 isInputEnabled = getBoolean(R.styleable.CustomCardActionView_inputEnabled, true)
                 hint = getString(R.styleable.CustomCardActionView_hintText)
 
-                getResourceId(R.styleable.CustomCardActionView_inputBackground, 0).takeIf { it != 0 }?.let {
+                getResourceId(
+                    R.styleable.CustomCardActionView_inputBackground,
+                    0
+                ).takeIf { it != 0 }?.let {
                     setInputBackground(it)
                 }
 
-                getResourceId(R.styleable.CustomCardActionView_cardBackground, 0).takeIf { it != 0 }?.let {
-                    setCardBackground(it)
-                }
+                getResourceId(R.styleable.CustomCardActionView_cardBackground, 0).takeIf { it != 0 }
+                    ?.let {
+                        setCardBackground(it)
+                    }
 
                 description = getString(R.styleable.CustomCardActionView_descriptionText)
                 info = getString(R.styleable.CustomCardActionView_infoText)
@@ -50,8 +54,10 @@ class CustomCardActionView @JvmOverloads constructor(
 
                 showInfoIcon = getBoolean(R.styleable.CustomCardActionView_showInfoIcon, true)
                 showInfoText = getBoolean(R.styleable.CustomCardActionView_showInfoText, true)
-                showDescriptionIcon = getBoolean(R.styleable.CustomCardActionView_showDescriptionIcon, true)
-                showDescriptionText = getBoolean(R.styleable.CustomCardActionView_showDescriptionText, true)
+                showDescriptionIcon =
+                    getBoolean(R.styleable.CustomCardActionView_showDescriptionIcon, true)
+                showDescriptionText =
+                    getBoolean(R.styleable.CustomCardActionView_showDescriptionText, true)
 
                 showEditIcon = getBoolean(R.styleable.CustomCardActionView_showEditIcon, true)
 
@@ -69,22 +75,32 @@ class CustomCardActionView @JvmOverloads constructor(
 
                 // Appearance (если нужен внешний стиль)
                 if (hasValue(R.styleable.CustomCardActionView_inputTextAppearance)) {
-                    val appearance = getResourceId(R.styleable.CustomCardActionView_inputTextAppearance, 0)
+                    val appearance =
+                        getResourceId(R.styleable.CustomCardActionView_inputTextAppearance, 0)
                     if (appearance != 0) {
                         setInputTextAppearance(appearance)
                     }
                 }
 
-                when (getInt(R.styleable.CustomCardActionView_inputType, 1)) {
+                when (getInt(R.styleable.CustomCardActionView_inputType, 0)) {
                     0 -> binding.etInputUser.inputType = InputType.TYPE_CLASS_TEXT
                     1 -> binding.etInputUser.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-                    2 -> binding.etInputUser.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                    2 -> binding.etInputUser.inputType =
+                        InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+
                     3 -> binding.etInputUser.inputType = InputType.TYPE_CLASS_PHONE
-                    4 -> binding.etInputUser.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    4 -> binding.etInputUser.inputType =
+                        InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+
                     5 -> binding.etInputUser.inputType = InputType.TYPE_CLASS_NUMBER
-                    6 -> binding.etInputUser.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
-                    7 -> binding.etInputUser.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-                    8 -> binding.etInputUser.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+                    6 -> binding.etInputUser.inputType =
+                        InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
+
+                    7 -> binding.etInputUser.inputType =
+                        InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+
+                    8 -> binding.etInputUser.inputType =
+                        InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
                 }
 
                 if (hasValue(R.styleable.CustomCardActionView_inputFontFamily)) {
@@ -92,17 +108,26 @@ class CustomCardActionView @JvmOverloads constructor(
                     binding.etInputUser.typeface = Typeface.create(font, Typeface.NORMAL)
                 }
 
-                val ime = getInt(R.styleable.CustomCardActionView_inputImeOptions, EditorInfo.IME_ACTION_DONE)
+                val ime = getInt(
+                    R.styleable.CustomCardActionView_inputImeOptions,
+                    EditorInfo.IME_ACTION_DONE
+                )
                 binding.etInputUser.imeOptions = ime
 
 
                 if (hasValue(R.styleable.CustomCardActionView_inputLines)) {
-                    val lines = getInt(R.styleable.CustomCardActionView_inputLines, 1)
+                    val lines = getInt(R.styleable.CustomCardActionView_inputLines, 2)
                     binding.etInputUser.setLines(lines)
                 }
 
+                if (hasValue(R.styleable.CustomCardActionView_inputMaxLines)) {
+                    val lines = getInt(R.styleable.CustomCardActionView_inputMaxLines, 2)
+                    binding.etInputUser.maxLines = lines
+                }
+
                 if (hasValue(R.styleable.CustomCardActionView_inputMaxLength)) {
-                    val maxLength = getInt(R.styleable.CustomCardActionView_inputMaxLength, Int.MAX_VALUE)
+                    val maxLength =
+                        getInt(R.styleable.CustomCardActionView_inputMaxLength, Int.MAX_VALUE)
                     binding.etInputUser.filters = arrayOf(InputFilter.LengthFilter(maxLength))
                 }
 
@@ -126,7 +151,14 @@ class CustomCardActionView @JvmOverloads constructor(
                     binding.etInputUser.setHintTextColor(color)
                 }
 
-                isEditIconEnabled = getBoolean(R.styleable.CustomCardActionView_editIconEnabled, true)
+                isEditIconEnabled =
+                    getBoolean(R.styleable.CustomCardActionView_editIconEnabled, true)
+
+                val scrolling = getBoolean(
+                    R.styleable.CustomCardActionView_inputHorizontallyScrolling,
+                    false
+                )
+                setInputHorizontallyScrolling(scrolling)
 
             } finally {
                 recycle()
@@ -295,6 +327,7 @@ class CustomCardActionView @JvmOverloads constructor(
     fun setInputBackground(resourceId: Int) {
         binding.vgInput.setBackgroundResource(resourceId)
     }
+
     /**
      * ✩ Задать фон карточки
      */
@@ -329,4 +362,29 @@ class CustomCardActionView @JvmOverloads constructor(
     fun setInputHintTextColor(color: Int) {
         binding.etInputUser.setHintTextColor(color)
     }
+
+    fun setInputLines(lines: Int) {
+        binding.etInputUser.setLines(lines)
+    }
+
+    fun setInputMaxLines(lines: Int) {
+        binding.etInputUser.maxLines = lines
+    }
+
+    fun setInputMaxLength(length: Int) {
+        binding.etInputUser.filters = arrayOf(InputFilter.LengthFilter(length))
+    }
+
+    fun setInputHorizontallyScrolling(enabled: Boolean) {
+        binding.etInputUser.setHorizontallyScrolling(enabled)
+    }
+
+    private var _isHorizontallyScrolling = false
+
+    var isHorizontallyScrolling: Boolean
+        get() = _isHorizontallyScrolling
+        set(value) {
+            _isHorizontallyScrolling = value
+            binding.etInputUser.setHorizontallyScrolling(value)
+        }
 }

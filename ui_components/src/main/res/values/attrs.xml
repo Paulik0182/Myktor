@@ -8,11 +8,24 @@
         <!-- Текст -->
         <attr name="inputText" format="string" />
         <attr name="hintText" format="string" />
+
+        <!-- Количество строк -->
+        <attr name="inputLines" format="integer" />
+        <attr name="inputMaxLines" format="integer" />
+
+        <attr name="inputMaxLength" format="integer" />
+
+        <!-- Обрезка текста с многоточием -->
+        <attr name="inputEllipsize" format="enum">
+            <enum name="none" value="0" />
+            <enum name="start" value="1" />
+            <enum name="middle" value="2" />
+            <enum name="end" value="3" />
+            <enum name="marquee" value="4" />
+        </attr>
+
         <!-- Цвет текста -->
         <attr name="inputTextColor" format="color|reference" />
-
-        <!-- Цвет подсказки (hint) -->
-        <attr name="inputHintTextColor" format="color|reference" />
 
         <attr name="inputTextSize" format="dimension" />
         <attr name="inputTextStyle" format="enum">
@@ -20,10 +33,17 @@
             <enum name="bold" value="1" />
             <enum name="italic" value="2" />
         </attr>
+
         <attr name="inputTextAppearance" format="reference" />
+
+        <!-- Scrolling для текста -->
+        <attr name="inputHorizontallyScrolling" format="boolean" />
 
         <!-- Редактирование текста -->
         <attr name="inputEnabled" format="boolean" />
+
+        <!-- Цвет подсказки (hint) -->
+        <attr name="inputHintTextColor" format="color|reference" />
 
         <!-- Задать фон ввода -->
         <attr name="inputBackground" format="reference" />
@@ -89,20 +109,6 @@
             <enum name="actionGo" value="2" />
             <enum name="actionSearch" value="3" />
             <enum name="actionSend" value="4" />
-        </attr>
-
-        <!-- Количество строк -->
-        <attr name="inputLines" format="integer" />
-
-        <attr name="inputMaxLength" format="integer" />
-
-        <!-- Обрезка текста с многоточием -->
-        <attr name="inputEllipsize" format="enum">
-            <enum name="none" value="0" />
-            <enum name="start" value="1" />
-            <enum name="middle" value="2" />
-            <enum name="end" value="3" />
-            <enum name="marquee" value="4" />
         </attr>
     </declare-styleable>
 </resources>
