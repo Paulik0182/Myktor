@@ -5,13 +5,14 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentCounterpartyDetailsBinding
-import com.nayya.myktor.databinding.LayoutCardActionBinding
 import com.nayya.myktor.databinding.LayoutLegalEntityBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
+import com.nayya.myktor.ui.profile.bottomsheet.ContactEditBottomSheetDialog
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.viewBinding
@@ -45,10 +46,17 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         setupToolbar()
         observeViewModel()
 
-        binding.contactsInfo.apply {
-            setEditClickListener {
-                Toast.makeText(context, "Клик на Контакт", Toast.LENGTH_SHORT).show()
-            }
+        binding.contactsInfo.setEditClickListener {
+            val dialog = ContactEditBottomSheetDialog()
+            dialog.setInitialData(
+                initialContacts = viewModel.counterparty.value?.counterpartyContacts ?: emptyList(),
+                counterpartyId = viewModel.counterparty.value?.id ?: return@setEditClickListener,
+                onSaveCallback = { id, updatedContacts ->
+                    viewModel.updateContacts(id, updatedContacts)
+                }
+            )
+
+            dialog.show(childFragmentManager, "edit_contacts")
         }
 
         binding.bankInfo.apply {
@@ -61,6 +69,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             setEditClickListener {
                 Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        setFragmentResultListener("contacts_updated") { _, _ ->
+            counterpartyId?.let { viewModel.loadCounterpartyById(it) } // ← повторно загружаем с сервера
         }
     }
 
@@ -159,7 +171,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             binding.bankInfo.visibility = View.VISIBLE
             legalEntityBinding.layoutLegalEntity.visibility = View.VISIBLE
 
-            val contactText = counterparty.representativesContact
+            val contactText = counterparty.counterpartyContact
                 ?.takeIf { it.isNotEmpty() }
                 ?.joinToString(separator = "\n")
             binding.contactsInfo.text = contactText

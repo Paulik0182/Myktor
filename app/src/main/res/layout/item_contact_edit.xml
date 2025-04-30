@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="8dp"
+    android:gravity="center_vertical">
+
+    <!-- Тип контакта -->
+    <Spinner
+        android:id="@+id/spinnerContactType"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:entries="@array/contact_type_entries"
+        android:layout_marginEnd="8dp"
+        android:spinnerMode="dropdown" />
+
+    <!-- Код страны (если тип = phone) -->
+    <Spinner
+        android:id="@+id/spinnerCountryCode"
+        android:layout_width="70dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone" />
+
+    <!-- Значение -->
+    <EditText
+        android:id="@+id/etContactValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:inputType="text"
+        android:hint="Контакт" />
+
+    <!-- Кнопка удаления -->
+    <ImageButton
+        android:id="@+id/btnRemove"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_delete"
+        android:tint="@android:color/holo_red_light"
+        android:contentDescription="Удалить" />
+</LinearLayout>
