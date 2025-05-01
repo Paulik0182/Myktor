@@ -46,16 +46,26 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         setupToolbar()
         observeViewModel()
 
+        if (viewModel.countries.value.isNullOrEmpty()) {
+            viewModel.loadCountries()
+        }
+
         binding.contactsInfo.setEditClickListener {
+            val countries = viewModel.countries.value
+            if (countries.isNullOrEmpty()) {
+                Toast.makeText(context, "Список стран ещё загружается", Toast.LENGTH_SHORT).show()
+                return@setEditClickListener
+            }
+
             val dialog = ContactEditBottomSheetDialog()
             dialog.setInitialData(
                 initialContacts = viewModel.counterparty.value?.counterpartyContacts ?: emptyList(),
                 counterpartyId = viewModel.counterparty.value?.id ?: return@setEditClickListener,
+                countries = countries,
                 onSaveCallback = { id, updatedContacts ->
                     viewModel.updateContacts(id, updatedContacts)
                 }
             )
-
             dialog.show(childFragmentManager, "edit_contacts")
         }
 

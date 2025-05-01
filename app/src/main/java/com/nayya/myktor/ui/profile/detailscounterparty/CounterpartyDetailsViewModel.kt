@@ -9,6 +9,7 @@ import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyContact
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
+import com.nayya.myktor.domain.counterpartyentity.Country
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,6 +26,9 @@ class CounterpartyDetailsViewModel : ViewModel() {
     // Флаг не сохраненых данных.
     private val _hasUnsavedChanges = MutableLiveData<Boolean>(false)
     val hasUnsavedChanges: LiveData<Boolean> = _hasUnsavedChanges
+
+    private val _countries = MutableLiveData<List<Country>>()
+    val countries: LiveData<List<Country>> get() = _countries
 
     fun loadCounterpartyById(counterpartyId: Long) {
         viewModelScope.launch {
@@ -76,5 +80,17 @@ class CounterpartyDetailsViewModel : ViewModel() {
             }
         }
     }
-}
 
+    fun loadCountries() {
+        viewModelScope.launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    RetrofitInstance.api.getCountries()
+                }
+                _countries.value = result
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Ошибка загрузки стран: ${e.localizedMessage}", e)
+            }
+        }
+    }
+}

@@ -17,6 +17,7 @@ import com.nayya.myktor.R
 import com.nayya.myktor.databinding.BottomSheetEditContactsBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyContact
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
+import com.nayya.myktor.domain.counterpartyentity.Country
 
 // BottomSheetDialogFragment для редактирования контактов контрагента
 class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {
@@ -26,15 +27,20 @@ class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {
     private val contacts = mutableListOf<CounterpartyContactRequest>()
     private lateinit var adapter: ContactsAdapter
     private var onSave: ((Long, List<CounterpartyContactRequest>) -> Unit)? = null
+    private val countries = mutableListOf<Country>()
 
     fun setInitialData(
         initialContacts: List<CounterpartyContact>,
         counterpartyId: Long,
+        countries: List<Country>,
         onSaveCallback: (Long, List<CounterpartyContactRequest>) -> Unit,
     ) {
         Log.d("BottomSheetInit", "Пришло ${initialContacts.size} контактов") // ← ВОТ СЮДА!
 
         this.counterpartyId = counterpartyId
+        this.countries.clear()
+        this.countries.addAll(countries)
+
         contacts.clear()
         contacts.addAll(
             initialContacts.map {
@@ -56,7 +62,7 @@ class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {
         val binding = BottomSheetEditContactsBinding.inflate(inflater, container, false)
 
         // Адаптер создаётся уже после заполнения contacts
-        adapter = ContactsAdapter(contacts, ::onAddContact, ::onDeleteContact)
+        adapter = ContactsAdapter(contacts, countries, ::onAddContact, ::onDeleteContact)
         binding.rvContacts.layoutManager = LinearLayoutManager(requireContext())
         binding.rvContacts.adapter = adapter
 

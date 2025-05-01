@@ -45,7 +45,7 @@ data class RepresentativeRequest(
 data class CounterpartyContactRequest(
     var contactType: String?,
     var contactValue: String?,
-    val countryCodeId: Long? = null,
+    var countryCodeId: Long? = null,
     val representativeId: Long? = null,
 )
 

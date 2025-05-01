@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/itemRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -20,12 +21,18 @@
         android:spinnerMode="dropdown" />
 
     <!-- Код страны (если тип = phone) -->
-    <Spinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/spinnerCountryCode"
-        android:layout_width="70dp"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_spinner"
+        android:popupBackground="@drawable/edit_text_background"
+        android:spinnerMode="dropdown"
+        android:dropDownHeight="100dp" />
 
     <!-- Значение -->
     <EditText
