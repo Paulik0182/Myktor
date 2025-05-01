@@ -19,9 +19,9 @@
 
 
     <string-array name="contact_type_entries">
-        <item>Телефон</item>
+        <item>Tel</item>
         <item>Email</item>
-        <item>Факс</item>
+        <item>Fax</item>
         <item>Другое</item>
     </string-array>
 

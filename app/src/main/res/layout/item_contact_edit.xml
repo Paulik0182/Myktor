@@ -11,10 +11,12 @@
     <!-- Тип контакта -->
     <Spinner
         android:id="@+id/spinnerContactType"
-        android:layout_width="100dp"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:entries="@array/contact_type_entries"
         android:layout_marginEnd="8dp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_spinner"
+        android:popupBackground="@drawable/edit_text_background"
         android:spinnerMode="dropdown" />
 
     <!-- Код страны (если тип = phone) -->
@@ -32,6 +34,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:inputType="text"
+        android:textColor="@color/white"
+        android:textSize="14dp"
         android:hint="Контакт" />
 
     <!-- Кнопка удаления -->

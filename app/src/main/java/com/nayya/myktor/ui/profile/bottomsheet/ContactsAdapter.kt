@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ItemContactEditBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
 
@@ -59,6 +61,16 @@ class ContactsAdapter(
 
             etContactValue.addTextChangedListener(watcher)
             holder.currentWatcher = watcher
+
+            // ✅ УСТАНАВЛИВАЕМ АДАПТЕР С БЕЛЫМ ТЕКСТОМ
+            val context = holder.itemView.context
+            val adapter = ArrayAdapter.createFromResource(
+                context,
+                R.array.contact_type_entries,
+                R.layout.spinner_selected_item_white // ← только выбранное значение будет белым
+            )
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) // выпадашка остаётся чёрной
+            spinnerContactType.adapter = adapter
 
             // Устанавливаем тип контакта (email / phone)
             spinnerContactType.setSelection(

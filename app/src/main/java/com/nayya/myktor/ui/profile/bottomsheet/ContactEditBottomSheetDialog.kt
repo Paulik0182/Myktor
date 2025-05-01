@@ -1,12 +1,17 @@
 package com.nayya.myktor.ui.profile.bottomsheet
 
+import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.BottomSheetEditContactsBinding
@@ -80,7 +85,47 @@ class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {
             dismiss()
         }
 
+//        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+
+        binding.btnClose.setOnClickListener {
+            dismiss()
+        }
+
         return binding.root
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return super.onCreateDialog(savedInstanceState).apply {
+            setOnShowListener { dialog ->
+                val bottomSheetDialog = dialog as? BottomSheetDialog
+                val bottomSheet = bottomSheetDialog
+                    ?.findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet)
+
+                bottomSheet?.let {
+                    // Отключаем промежуточные состояния
+                    val behavior = BottomSheetBehavior.from(it).apply {
+                        state = BottomSheetBehavior.STATE_EXPANDED
+                        skipCollapsed = true
+                        isHideable = true
+                        isFitToContents = false
+                        halfExpandedRatio = 0.7f // просто дефолт, не используем
+                        expandedOffset = dpToPx(140) // ← нужный отступ
+                    }
+
+                    // Ограничиваем высоту вручную (если требуется)
+                    it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    it.requestLayout()
+                }
+            }
+        }
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp.toFloat(),
+            resources.displayMetrics
+        ).toInt()
     }
 
     private fun onAddContact() {

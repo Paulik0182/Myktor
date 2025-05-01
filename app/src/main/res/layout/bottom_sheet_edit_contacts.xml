@@ -4,7 +4,7 @@
     android:id="@+id/layoutRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/black"
+    android:background="@drawable/bg_bottom_sheet_rounded"
     android:orientation="vertical"
     android:paddingTop="8dp"
     android:paddingBottom="16dp"
@@ -12,8 +12,8 @@
 
     <!-- Handle (черточка сверху) -->
     <View
-        android:layout_width="36dp"
-        android:layout_height="4dp"
+        android:layout_width="70dp"
+        android:layout_height="2dp"
         android:layout_gravity="center"
         android:background="@drawable/bg_bottom_sheet_handle"
         android:layout_marginBottom="12dp"
@@ -36,7 +36,7 @@
             android:text="Контакты"
             android:textColor="@android:color/white"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="normal" />
 
         <ImageButton
             android:id="@+id/btnClose"
