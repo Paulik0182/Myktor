@@ -27,13 +27,18 @@
 
 
     <!-- Validation messages -->
-    <string name="error_invalid_characters">Не может содержать ”+”, “!”, но допустимы латинские буквы, цифры, “.”, “– ” и “_”</string>
     <string name="error_max_length">Не более %1$d символов</string>
-    <string name="error_min_length">Не менее %1$d символов</string>
-    <string name="error_empty_field">Обязательное поле</string>
     <string name="error_reserved_name">Занято, попробуй другое</string>
     <string name="error_prohibited_words">Имя не может содержать мат</string>
     <string name="error_invalid_characters_for_unique_name">Может содержать только латинские буквы, цифры, “_“ и “.“</string>
-    <string name="error_starting_or_ending_dot">Не может начинаться или заканчиваться точкой</string>
+
+    <!-- Validation -->
+    <string name="error_empty_field">Поле не может быть пустым</string>
+    <string name="error_invalid_email_format">Неверный формат email</string>
+    <string name="error_invalid_characters">Недопустимые символы</string>
+    <string name="error_line_breaks">Email не может содержать переносы строк</string>
+    <string name="error_starting_or_ending_dot">Email не может начинаться или заканчиваться точкой</string>
+    <string name="error_starting_or_ending_space">Email не может начинаться или заканчиваться пробелом</string>
+    <string name="error_min_length">Минимум %1$d символов</string>
 
 </resources>

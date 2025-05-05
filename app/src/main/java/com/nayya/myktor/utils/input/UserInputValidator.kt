@@ -1,4 +1,4 @@
-package com.nayya.myktor.utils
+package com.nayya.myktor.utils.input
 
 import android.content.Context
 import androidx.emoji2.text.EmojiCompat

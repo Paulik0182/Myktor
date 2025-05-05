@@ -66,6 +66,9 @@ class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {
         binding.rvContacts.layoutManager = LinearLayoutManager(requireContext())
         binding.rvContacts.adapter = adapter
 
+        // 🔸 Передаем recyclerView в адаптер. Немного нарушаем, но это архитектурный компромисс!
+        adapter.attachRecyclerView(binding.rvContacts)
+
         binding.tvTitle.text = "Контакты"
         binding.tvCounter.text = "${contacts.size}/5"
 
@@ -84,6 +87,12 @@ class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         binding.btnSave.setOnClickListener {
+            val isValid = adapter.triggerValidationAndReturnValid(requireContext())
+
+            if (!isValid) {
+                return@setOnClickListener // ❌ ошибки есть, не сохраняем
+            }
+
             onSave?.invoke(counterpartyId, contacts.toList())
 
             // Сообщаем родительскому фрагменту, что контакты обновлены

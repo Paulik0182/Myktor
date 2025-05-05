@@ -1,4 +1,4 @@
-package com.nayya.myktor.utils.input
+package com.nayya.myktor.utils.validators
 
 import android.text.Editable
 import android.text.InputFilter

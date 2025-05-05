@@ -11,13 +11,15 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.recyclerview.widget.RecyclerView
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ItemContactEditBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
 import com.nayya.myktor.domain.counterpartyentity.Country
-import com.nayya.myktor.utils.input.PhoneInputMask
+import com.nayya.myktor.utils.validators.EmailValidator
+import com.nayya.myktor.utils.validators.PhoneInputMask
 
 class ContactsAdapter(
     private val contacts: List<CounterpartyContactRequest>,
@@ -25,6 +27,15 @@ class ContactsAdapter(
     private val onAdd: () -> Unit,
     private val onDelete: (Int) -> Unit,
 ) : RecyclerView.Adapter<ContactsAdapter.ContactViewHolder>() {
+
+    private var wasValidationTriggered = false
+
+    // 🔸 recyclerView, передаётся из фрагмента
+    private var recyclerView: RecyclerView? = null
+
+    fun attachRecyclerView(rv: RecyclerView) {
+        recyclerView = rv
+    }
 
     inner class ContactViewHolder(val binding: ItemContactEditBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -53,6 +64,20 @@ class ContactsAdapter(
             // Устанавливаем значение
             etContactValue.setText(contact.contactValue ?: "")
 
+            // Обработка вставки
+            etContactValue.setOnCreateContextMenuListener { _, _, _ ->
+                etContactValue.post {
+                    val pasted = etContactValue.text.toString()
+                    if (contact.contactType == "email") {
+                        val error = EmailValidator.validateEmail(context, pasted)
+                        if (error != null) {
+                            etContactValue.setText("") // Очистить поле
+//                            Toast.makeText(context, "Вставленный email невалиден", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+
             // Устанавливаем inputType
             etContactValue.inputType = when (contact.contactType) {
                 "email" -> InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
@@ -62,7 +87,23 @@ class ContactsAdapter(
             // Новый TextWatcher
             val watcher = object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
-                    contact.contactValue = s?.toString()
+                    val value = s?.toString().orEmpty()
+                    contact.contactValue = value
+
+                    // ✳️ Email: валидация только если включена
+                    if (contact.contactType == "email") {
+                        val error = EmailValidator.validateEmail(context, value)
+
+                        if (wasValidationTriggered) {
+                            etContactValue.error = error
+                        }
+
+                        if (error == null) {
+                            contact.contactValue = value
+                        }
+                    } else {
+                        contact.contactValue = value
+                    }
                 }
 
                 override fun beforeTextChanged(
@@ -211,5 +252,30 @@ class ContactsAdapter(
             dp.toFloat(),
             context.resources.displayMetrics
         ).toInt()
+    }
+
+    // 🔸 Метод валидации всех email после нажатия "Сохранить"
+    fun triggerValidationAndReturnValid(context: Context): Boolean {
+        wasValidationTriggered = true
+        var allValid = true
+
+        contacts.forEachIndexed { index, contact ->
+            if (contact.contactType == "email") {
+                val error = EmailValidator.validateEmail(context, contact.contactValue.orEmpty())
+                if (error != null) {
+                    allValid = false
+                    // 🔹 Встряска поля — пробел + удаление
+                    val holder = recyclerView?.findViewHolderForAdapterPosition(index) as? ContactViewHolder
+                    holder?.binding?.etContactValue?.let {
+                        val original = it.text.toString()
+                        it.setText("$original ")
+                        it.setText(original)
+                        it.setSelection(original.length)
+                    }
+                }
+            }
+        }
+
+        return allValid
     }
 }
