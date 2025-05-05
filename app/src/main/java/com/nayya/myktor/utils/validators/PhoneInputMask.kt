@@ -91,4 +91,9 @@ object PhoneInputMask {
 
         return result.toString()
     }
+
+    fun getExpectedDigitsCount(countryCode: String?): Int? {
+        val mask = masks[countryCode] ?: return null
+        return mask.count { it == '#' }
+    }
 }

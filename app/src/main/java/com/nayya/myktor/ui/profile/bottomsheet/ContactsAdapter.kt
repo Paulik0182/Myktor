@@ -260,13 +260,31 @@ class ContactsAdapter(
         var allValid = true
 
         contacts.forEachIndexed { index, contact ->
+            val holder = recyclerView?.findViewHolderForAdapterPosition(index) as? ContactViewHolder
+            val editText = holder?.binding?.etContactValue
+
             if (contact.contactType == "email") {
                 val error = EmailValidator.validateEmail(context, contact.contactValue.orEmpty())
                 if (error != null) {
                     allValid = false
-                    // 🔹 Встряска поля — пробел + удаление
-                    val holder = recyclerView?.findViewHolderForAdapterPosition(index) as? ContactViewHolder
-                    holder?.binding?.etContactValue?.let {
+                    editText?.let {
+                        it.error = error
+                        val original = it.text.toString()
+                        it.setText("$original ")
+                        it.setText(original)
+                        it.setSelection(original.length)
+                    }
+                }
+
+            } else if (contact.contactType == "phone" || contact.contactType == "fax") {
+                val phoneDigits = contact.contactValue?.replace(Regex("[^\\d]"), "") ?: ""
+                val code = countries.find { it.id == contact.countryCodeId }?.phoneCode
+                val expectedLength = PhoneInputMask.getExpectedDigitsCount(code)
+
+                if (expectedLength != null && phoneDigits.length != expectedLength) {
+                    allValid = false
+                    editText?.let {
+                        it.error = "Неполный номер"
                         val original = it.text.toString()
                         it.setText("$original ")
                         it.setText(original)
