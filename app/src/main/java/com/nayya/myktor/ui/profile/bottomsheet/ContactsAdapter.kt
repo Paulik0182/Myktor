@@ -11,13 +11,14 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.recyclerview.widget.RecyclerView
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ItemContactEditBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
 import com.nayya.myktor.domain.counterpartyentity.Country
+import com.nayya.myktor.utils.LocaleUtils.showValidationError
+import com.nayya.myktor.utils.input.InputValidator
 import com.nayya.myktor.utils.validators.EmailValidator
 import com.nayya.myktor.utils.validators.PhoneInputMask
 
@@ -80,8 +81,10 @@ class ContactsAdapter(
 
             // Устанавливаем inputType
             etContactValue.inputType = when (contact.contactType) {
-                "email" -> InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-                else -> InputType.TYPE_CLASS_PHONE
+                "email" -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                "phone", "fax" -> InputType.TYPE_CLASS_PHONE
+                "other" -> InputType.TYPE_CLASS_TEXT
+                else -> InputType.TYPE_CLASS_TEXT
             }
 
             // Новый TextWatcher
@@ -131,7 +134,13 @@ class ContactsAdapter(
             spinnerContactType.adapter = adapter
 
             // Установка типа
-            val contactTypePosition = if (contact.contactType == "email") 1 else 0
+            val contactTypeToPosition = mapOf(
+                "phone" to 0,
+                "email" to 1,
+                "fax" to 2,
+                "other" to 3
+            )
+            val contactTypePosition = contactTypeToPosition[contact.contactType] ?: 0
             if (spinnerContactType.selectedItemPosition != contactTypePosition) {
                 spinnerContactType.setSelection(contactTypePosition, false)
             }
@@ -263,32 +272,42 @@ class ContactsAdapter(
             val holder = recyclerView?.findViewHolderForAdapterPosition(index) as? ContactViewHolder
             val editText = holder?.binding?.etContactValue
 
-            if (contact.contactType == "email") {
-                val error = EmailValidator.validateEmail(context, contact.contactValue.orEmpty())
-                if (error != null) {
-                    allValid = false
-                    editText?.let {
-                        it.error = error
-                        val original = it.text.toString()
-                        it.setText("$original ")
-                        it.setText(original)
-                        it.setSelection(original.length)
+            // 🧹 Очищаем пробелы ДО валидации
+            val value = contact.contactValue.orEmpty().trim()
+            contact.contactValue = value
+
+            when (contact.contactType) {
+                "email" -> {
+                    val error = EmailValidator.validateEmail(context, value)
+                    if (error != null) {
+                        allValid = false
+                        editText?.showValidationError(error)
                     }
                 }
 
-            } else if (contact.contactType == "phone" || contact.contactType == "fax") {
-                val phoneDigits = contact.contactValue?.replace(Regex("[^\\d]"), "") ?: ""
-                val code = countries.find { it.id == contact.countryCodeId }?.phoneCode
-                val expectedLength = PhoneInputMask.getExpectedDigitsCount(code)
+                "phone", "fax" -> {
+                    val phoneDigits = contact.contactValue?.replace(Regex("[^\\d]"), "") ?: ""
+                    val code = countries.find { it.id == contact.countryCodeId }?.phoneCode
+                    val expectedLength = PhoneInputMask.getExpectedDigitsCount(code)
 
-                if (expectedLength != null && phoneDigits.length != expectedLength) {
-                    allValid = false
-                    editText?.let {
-                        it.error = "Неполный номер"
-                        val original = it.text.toString()
-                        it.setText("$original ")
-                        it.setText(original)
-                        it.setSelection(original.length)
+                    if (expectedLength != null && phoneDigits.length != expectedLength) {
+                        allValid = false
+                        editText?.showValidationError("Неполный номер")
+                    }
+                }
+
+                else -> { // other
+                    val errors = listOfNotNull(
+                        InputValidator.validateEmpty(context, value),
+                        InputValidator.validateLength(context, value, 50),
+                        InputValidator.validateMinAllowedInitialLength(context, value),
+                        InputValidator.validateCharacters(context, value),
+                        InputValidator.validateLineBreaksAndCharacters(context, value),
+                        InputValidator.validateStartingOrEndingDot(context, value)
+                    )
+                    if (errors.isNotEmpty()) {
+                        allValid = false
+                        editText?.showValidationError(errors.first())
                     }
                 }
             }

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.emoji2.text.EmojiCompat
 import com.nayya.myktor.R
 
-class UserInputValidator {
+class InputValidator {
 
     companion object {
         const val MAX_LENGTH = 30
@@ -33,7 +33,7 @@ class UserInputValidator {
          * [\u0080-\uFFFF] - Запрещает все символы Unicode, которые не являются частью ASCII-диапазона (\u0000-\u007F).
          */
         private val ADVANCED_INVALID_CHARACTERS =
-            Regex("[^a-zA-Z0-9._\\-]|[\uD800-\uDFFF]|[\u0080-\uFFFF]")
+            Regex("[^a-zA-Z0-9@#/_\\-.]|[\uD800-\uDFFF]|[\u0080-\uFFFF]")
 
         /**
          * [\n\r] - Запрещает перенос строк

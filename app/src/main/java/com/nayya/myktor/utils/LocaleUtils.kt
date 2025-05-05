@@ -2,6 +2,7 @@ package com.nayya.myktor.utils
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.fragment.app.Fragment
 import java.util.Locale
 import androidx.lifecycle.LiveData
@@ -27,5 +28,13 @@ object LocaleUtils {
                 removeObserver(this)
             }
         })
+    }
+
+    fun EditText.showValidationError(message: String) {
+        this.error = message
+        val original = this.text.toString()
+        this.setText("$original ")
+        this.setText(original)
+        this.setSelection(original.length)
     }
 }

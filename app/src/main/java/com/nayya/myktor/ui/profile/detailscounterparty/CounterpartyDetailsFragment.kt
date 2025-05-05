@@ -84,6 +84,12 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         setFragmentResultListener("contacts_updated") { _, _ ->
             counterpartyId?.let { viewModel.loadCounterpartyById(it) } // ← повторно загружаем с сервера
         }
+
+        viewModel.toastMessage.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun setupToolbar() {

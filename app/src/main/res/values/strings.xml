@@ -30,7 +30,7 @@
     <string name="error_max_length">Не более %1$d символов</string>
     <string name="error_reserved_name">Занято, попробуй другое</string>
     <string name="error_prohibited_words">Имя не может содержать мат</string>
-    <string name="error_invalid_characters_for_unique_name">Может содержать только латинские буквы, цифры, “_“ и “.“</string>
+    <string name="error_invalid_characters_for_unique_name">Может содержать только латинские буквы, цифры, -, _ @, #, /</string>
 
     <!-- Validation -->
     <string name="error_empty_field">Поле не может быть пустым</string>
