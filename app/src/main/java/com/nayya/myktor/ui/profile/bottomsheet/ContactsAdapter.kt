@@ -17,6 +17,7 @@ import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ItemContactEditBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
 import com.nayya.myktor.domain.counterpartyentity.Country
+import com.nayya.myktor.utils.input.PhoneInputMask
 
 class ContactsAdapter(
     private val contacts: List<CounterpartyContactRequest>,
@@ -129,6 +130,14 @@ class ContactsAdapter(
                         spinnerCountryCode.visibility =
                             if (contact.contactType == "phone" || contact.contactType == "fax")
                                 View.VISIBLE else View.GONE
+
+                        // Применяем маску
+                        if (contact.contactType == "phone" || contact.contactType == "fax") {
+                            val code = countries.getOrNull(spinnerCountryCode.selectedItemPosition)?.phoneCode
+                            PhoneInputMask.applyMask(etContactValue, code)
+                        } else {
+                            PhoneInputMask.clearMask(etContactValue)
+                        }
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -176,6 +185,11 @@ class ContactsAdapter(
                         id: Long,
                     ) {
                         contact.countryCodeId = countries[pos].id
+
+                        if (contact.contactType == "phone" || contact.contactType == "fax") {
+                            val code = countries[pos].phoneCode
+                            PhoneInputMask.applyMask(etContactValue, code)
+                        }
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>) {}

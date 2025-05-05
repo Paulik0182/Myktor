@@ -104,4 +104,9 @@ dependencies {
     //Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
+
+    implementation("androidx.emoji2:emoji2:1.5.0")
+
+    // библиотека uCrop - инструмент для обрезки изображений
+//    implementation("com.github.AntonBelousov:uCrop:develop-SNAPSHOT")
 }
