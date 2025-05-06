@@ -238,7 +238,10 @@ class ContactsAdapter(
 
                         if (contact.contactType == "phone" || contact.contactType == "fax") {
                             val code = countries[pos].phoneCode
+
+                            // Применяем маску и форсируем переформатирование номера
                             PhoneInputMask.applyMask(etContactValue, code)
+                            etContactValue.text = etContactValue.text
                         }
                     }
 
