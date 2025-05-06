@@ -19,6 +19,7 @@ class ProfileViewModel(private val repository: CounterpartyRepository) : ViewMod
     private val _menuItems = MutableLiveData<List<ProfileMenuType>>()
     val menuItems: LiveData<List<ProfileMenuType>> = _menuItems
 
+    // TODO Перенести в репозиторий или в Интерактор
     fun loadCounterparty(counterpartyId: Long) {
         viewModelScope.launch {
             try {

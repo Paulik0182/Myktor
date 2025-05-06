@@ -1,6 +1,6 @@
 package com.nayya.myktor.domain.productentity
 
-import com.nayya.myktor.domain.BigDecimalSerializer
+import com.nayya.myktor.utils.BigDecimalSerializer
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 

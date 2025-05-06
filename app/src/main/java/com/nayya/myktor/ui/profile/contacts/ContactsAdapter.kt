@@ -1,4 +1,4 @@
-package com.nayya.myktor.ui.profile.bottomsheet
+package com.nayya.myktor.ui.profile.contacts
 
 import android.content.Context
 import android.text.Editable
@@ -15,7 +15,7 @@ import androidx.appcompat.widget.AppCompatSpinner
 import androidx.recyclerview.widget.RecyclerView
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.ItemContactEditBinding
-import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
+import com.nayya.myktor.data.network.CounterpartyContactRequest
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.utils.LocaleUtils.showValidationError
 import com.nayya.myktor.utils.input.InputValidator

@@ -1,8 +1,5 @@
-package com.nayya.myktor.domain.counterpartyentity
+package com.nayya.myktor.data.network
 
-import com.nayya.myktor.domain.productentity.ProductCounterpartyRequest
-import com.nayya.myktor.domain.productentity.ProductLinkRequest
-import com.nayya.myktor.domain.productentity.ProductSupplierRequest
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nayya.myktor.data.RetrofitInstance
-import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
+import com.nayya.myktor.data.network.CounterpartyContactRequest
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.utils.Event
@@ -33,6 +33,7 @@ class CounterpartyDetailsViewModel : ViewModel() {
     private val _toastMessage = MutableLiveData<Event<String>>()
     val toastMessage: LiveData<Event<String>> get() = _toastMessage
 
+    // TODO Перенести в репозиторий или в Интерактор
     fun loadCounterpartyById(counterpartyId: Long) {
         viewModelScope.launch {
             try {
@@ -70,6 +71,7 @@ class CounterpartyDetailsViewModel : ViewModel() {
         toggleEditMode() // Выходим из режима редактирования без сохранения
     }
 
+    // TODO Перенести в репозиторий или в Интерактор
     fun updateContacts(counterpartyId: Long, contacts: List<CounterpartyContactRequest>) {
         viewModelScope.launch {
             try {
@@ -90,6 +92,7 @@ class CounterpartyDetailsViewModel : ViewModel() {
         }
     }
 
+    // TODO Перенести в репозиторий или в Интерактор
     fun loadCountries() {
         viewModelScope.launch {
             try {

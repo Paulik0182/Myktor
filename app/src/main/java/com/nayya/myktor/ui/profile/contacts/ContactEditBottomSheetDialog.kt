@@ -1,4 +1,4 @@
-package com.nayya.myktor.ui.profile.bottomsheet
+package com.nayya.myktor.ui.profile.contacts
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -18,10 +18,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.BottomSheetEditContactsBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyContact
-import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
+import com.nayya.myktor.data.network.CounterpartyContactRequest
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.ui.dialogs.UnsavedChangesDialogHelper
-import com.nayya.myktor.ui.dialogs.showSnackbar
+import com.nayya.myktor.utils.showSnackbar
 
 // BottomSheetDialogFragment для редактирования контактов контрагента
 class ContactEditBottomSheetDialog : BottomSheetDialogFragment() {

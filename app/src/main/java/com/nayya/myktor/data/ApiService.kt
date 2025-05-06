@@ -1,12 +1,12 @@
 package com.nayya.myktor.data
 
-import com.nayya.myktor.domain.counterpartyentity.CounterpartyContactRequest
+import com.nayya.myktor.data.network.CounterpartyContactRequest
+import com.nayya.myktor.data.network.ProductCreateRequest
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
-import com.nayya.myktor.domain.productentity.ProductCreateRequest
 import com.nayya.myktor.domain.productentity.ProductImage
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody

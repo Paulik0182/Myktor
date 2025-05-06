@@ -1,4 +1,4 @@
-package com.nayya.myktor.domain
+package com.nayya.myktor.utils
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

@@ -12,7 +12,7 @@ import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentCounterpartyDetailsBinding
 import com.nayya.myktor.databinding.LayoutLegalEntityBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
-import com.nayya.myktor.ui.profile.bottomsheet.ContactEditBottomSheetDialog
+import com.nayya.myktor.ui.profile.contacts.ContactEditBottomSheetDialog
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.viewBinding
@@ -46,11 +46,13 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         setupToolbar()
         observeViewModel()
 
+        // TODO Это должно быть во ViewModel
         if (viewModel.countries.value.isNullOrEmpty()) {
             viewModel.loadCountries()
         }
 
         binding.contactsInfo.setEditClickListener {
+            // TODO Это должно быть во ViewModel
             val countries = viewModel.countries.value
             if (countries.isNullOrEmpty()) {
                 Toast.makeText(context, "Список стран ещё загружается", Toast.LENGTH_SHORT).show()
@@ -83,12 +85,6 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
         setFragmentResultListener("contacts_updated") { _, _ ->
             counterpartyId?.let { viewModel.loadCounterpartyById(it) } // ← повторно загружаем с сервера
-        }
-
-        viewModel.toastMessage.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { message ->
-                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-            }
         }
     }
 
@@ -133,6 +129,12 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     private fun observeViewModel() {
         observeCounterparty()
         observeEditMode()
+
+        viewModel.toastMessage.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun observeCounterparty() {
@@ -268,6 +270,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 }
 
                 viewModel.setHasUnsavedChanges(true) // <-- СТАВИМ, ЧТО ЕСТЬ ИЗМЕНЕНИЯ
+
+
+                // Вот обработка нажатия на бигунок и изменение видимости некоторых элементов
+                updateLegalEntityVisibility(isChecked)
             }
         } else {
             binding.contactsInfo.apply {
@@ -315,6 +321,12 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             // Когда НЕ редактируем — убираем слушатель, чтобы не сработал зря
             binding.scEntityStatus.setOnCheckedChangeListener(null)
         }
+    }
+
+    private fun updateLegalEntityVisibility(isLegalEntity: Boolean) {
+        binding.tvFirstName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
+        binding.tvLastName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
+        binding.includeLegalEntity.layoutLegalEntity.visibility = if (isLegalEntity) View.VISIBLE else View.GONE
     }
 
     private fun updateEditableStateEditText(isEditable: Boolean) {

@@ -1,4 +1,4 @@
-package com.nayya.myktor.ui.profile.bottomsheet
+package com.nayya.myktor.ui.profile.contacts
 
 import android.content.Context
 import android.view.LayoutInflater

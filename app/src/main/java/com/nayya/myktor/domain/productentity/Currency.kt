@@ -3,7 +3,7 @@ package com.nayya.myktor.domain.productentity
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CurrencyResponse(
+data class Currency(
     val id: Long,
     val code: String,
     val symbol: String,

@@ -1,6 +1,6 @@
 package com.nayya.myktor.domain.counterpartyentity
 
-import com.nayya.myktor.domain.productentity.CurrencyResponse
+import com.nayya.myktor.domain.productentity.Currency
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,6 +12,6 @@ data class CounterpartyBankAccount(
     val code: String,
     val symbol: String?,
     val currencyName: String,
-    val currency: CurrencyResponse,
+    val currency: Currency,
     val currencyId: Long,
 ) : java.io.Serializable

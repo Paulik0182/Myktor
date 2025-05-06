@@ -1,4 +1,4 @@
-package com.nayya.myktor.domain.productentity
+package com.nayya.myktor.data.network
 
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal

@@ -1,4 +1,4 @@
-package com.nayya.myktor.ui.dialogs
+package com.nayya.myktor.utils
 
 import android.widget.Toast
 import androidx.fragment.app.Fragment

@@ -7,11 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.nayya.myktor.data.ApiService
 import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.domain.productentity.CategoryEntity
-import com.nayya.myktor.domain.productentity.CurrencyResponse
+import com.nayya.myktor.domain.productentity.Currency
 import com.nayya.myktor.domain.productentity.MeasurementUnitList
 import com.nayya.myktor.domain.productentity.Product
-import com.nayya.myktor.domain.productentity.ProductCreateRequest
-import com.nayya.myktor.domain.productentity.ProductLinkRequest
+import com.nayya.myktor.data.network.ProductCreateRequest
+import com.nayya.myktor.data.network.ProductLinkRequest
 import com.nayya.myktor.ui.product.products.ProductViewModel
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -38,7 +38,7 @@ class EditProductViewModel(
     private val _categories = MutableLiveData<List<CategoryEntity>>()
     val categories: LiveData<List<CategoryEntity>> get() = _categories
 
-    val currencies = MutableLiveData<List<CurrencyResponse>>() // Для выпадающего списка
+    val currencies = MutableLiveData<List<Currency>>() // Для выпадающего списка
     val selectedCurrencyId = MutableLiveData<Long>() // Выбранная валюта
 
     fun loadProduct(productId: Long) {
@@ -108,7 +108,7 @@ class EditProductViewModel(
         }
     }
 
-    fun setCurrencies(currencyList: List<CurrencyResponse>) {
+    fun setCurrencies(currencyList: List<Currency>) {
         currencies.value = currencyList
     }
 
