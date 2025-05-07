@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ProfileViewModel(private val repository: CounterpartyRepository) : ViewModel() {
+class ProfileViewModel(private val repository: CounterpartyRepository2) : ViewModel() {
 
     private val _counterparty = MutableLiveData<CounterpartyEntity>()
     val counterparty: LiveData<CounterpartyEntity> = _counterparty
@@ -35,11 +35,11 @@ class ProfileViewModel(private val repository: CounterpartyRepository) : ViewMod
     }
 }
 
-interface CounterpartyRepository {
+interface CounterpartyRepository2 {
     suspend fun getCounterpartyById(id: Long): CounterpartyEntity
 }
 
-class DefaultCounterpartyRepository : CounterpartyRepository {
+class DefaultCounterpartyRepository : CounterpartyRepository2 {
     override suspend fun getCounterpartyById(id: Long): CounterpartyEntity {
         return RetrofitInstance.api.getCounterpartyById(id)
     }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.data.network.CounterpartyContactRequest
+import com.nayya.myktor.data.network.CounterpartyPatchRequest
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.utils.Event
@@ -60,12 +61,6 @@ class CounterpartyDetailsViewModel : ViewModel() {
         _hasUnsavedChanges.value = hasChanges
     }
 
-    fun saveChanges() {
-        // TODO: Реализация сохранения данных на сервер
-        setHasUnsavedChanges(false)
-        toggleEditMode() // Выходим из режима редактирования
-    }
-
     fun discardChanges() {
         setHasUnsavedChanges(false)
         toggleEditMode() // Выходим из режима редактирования без сохранения
@@ -102,6 +97,57 @@ class CounterpartyDetailsViewModel : ViewModel() {
                 _countries.value = result
             } catch (e: Exception) {
                 Log.e("ViewModel", "Ошибка загрузки стран: ${e.localizedMessage}", e)
+            }
+        }
+    }
+
+    fun saveChanges(
+        shortName: String,
+        firstName: String?,
+        lastName: String?,
+        companyName: String?,
+        type: String,
+        nip: String?,
+        krs: String?,
+        isSupplier: Boolean,
+        isWarehouse: Boolean,
+        isCustomer: Boolean,
+        isLegalEntity: Boolean,
+    ) {
+        val old = _counterparty.value ?: return
+
+        val patchRequest = CounterpartyPatchRequest(
+            shortName = shortName,
+            companyName = companyName,
+            type = type,
+            isSupplier = isSupplier,
+            isWarehouse = isWarehouse,
+            isCustomer = isCustomer,
+            isLegalEntity = isLegalEntity,
+            nip = nip,
+            krs = krs,
+            firstName = firstName,
+            lastName = lastName
+        )
+
+        viewModelScope.launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    RetrofitInstance.api.patchBasicFields(
+                        old.id ?: return@withContext null,
+                        patchRequest
+                    )
+                }
+
+                if (result != null && result.isSuccessful) {
+                    _toastMessage.postValue(Event("Изменения сохранены"))
+                    setHasUnsavedChanges(false)
+                    loadCounterpartyById(old.id!!)
+                } else {
+                    _toastMessage.postValue(Event("Ошибка при сохранении основных полей"))
+                }
+            } catch (e: Exception) {
+                _toastMessage.postValue(Event("Ошибка сети: ${e.localizedMessage}"))
             }
         }
     }

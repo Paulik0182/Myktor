@@ -1,7 +1,13 @@
 package com.nayya.myktor.data
 
+import com.nayya.myktor.data.network.BankAccountRequest
+import com.nayya.myktor.data.network.CounterpartyAddressRequest
 import com.nayya.myktor.data.network.CounterpartyContactRequest
+import com.nayya.myktor.data.network.CounterpartyImageRequest
+import com.nayya.myktor.data.network.CounterpartyPatchRequest
+import com.nayya.myktor.data.network.CounterpartyRequest
 import com.nayya.myktor.data.network.ProductCreateRequest
+import com.nayya.myktor.data.network.RepresentativeRequest
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.domain.counterpartyentity.OrderEntity
@@ -106,11 +112,14 @@ interface ApiService {
 
     // Добавление нового поставщика
     @POST("/counterparties")
-    suspend fun addCounterparty(@Body counterpartyEntity: CounterpartyEntity)
+    suspend fun addCounterparty(@Body counterpartyRequest: CounterpartyRequest)
 
     // Обновление данных поставщика
     @PUT("/counterparties/{id}")
-    suspend fun updateCounterparty(@Path("id") id: Long, @Body counterpartyEntity: CounterpartyEntity)
+    suspend fun updateCounterparty(
+        @Path("id") id: Long,
+        @Body counterpartyRequest: CounterpartyRequest
+    ): Response<Unit>
 
     // Получение списка заказов
     @GET("/orders")
@@ -136,4 +145,35 @@ interface ApiService {
 
     @GET("/countries")
     suspend fun getCountries(): List<Country>
+
+    @PATCH("counterparties/{id}/basic")
+    suspend fun patchBasicFields(
+        @Path("id") id: Long,
+        @Body body: CounterpartyPatchRequest
+    ): Response<Unit>
+
+    @PATCH("counterparties/{id}/addresses")
+    suspend fun patchAddresses(
+        @Path("id") id: Long,
+        @Body addresses: List<CounterpartyAddressRequest>
+    ): Response<Unit>
+
+    @PATCH("counterparties/{id}/representatives")
+    suspend fun patchRepresentatives(
+        @Path("id") id: Long,
+        @Body rep: RepresentativeRequest
+    ): Response<Unit>
+
+    @PATCH("counterparties/{id}/bankAccounts")
+    suspend fun patchBankAccounts(
+        @Path("id") id: Long,
+        @Body acc: BankAccountRequest
+    ): Response<Unit>
+
+    @PATCH("counterparties/{id}/image")
+    suspend fun patchImagePath(
+        @Path("id") id: Long,
+        @Body image: CounterpartyImageRequest
+    ): Response<Unit>
+
 }

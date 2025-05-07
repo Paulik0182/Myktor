@@ -17,7 +17,6 @@ import com.nayya.myktor.ui.product.category.CategoriesFragment
 import com.nayya.myktor.ui.product.category.subcategory.SubcategoryFragment
 import com.nayya.myktor.ui.product.editorder.EditOrderFragment
 import com.nayya.myktor.ui.product.editproduct.EditProductFragment
-import com.nayya.myktor.ui.product.editsupplier.EditSupplierFragment
 import com.nayya.myktor.ui.product.orders.OrdersFragment
 import com.nayya.myktor.ui.product.products.ProductsFragment
 import com.nayya.myktor.ui.product.productview.ViewProductFragment
@@ -37,7 +36,6 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     OrdersFragment.Controller,
     ProductsFragment.Controller,
     CounterpartiesFragment.Controller,
-    EditSupplierFragment.Controller,
     EditProductFragment.Controller,
     CategoriesFragment.Controller,
     SubcategoryFragment.Controller,
@@ -155,10 +153,6 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         openChildFragment(CounterpartiesFragment.newInstance())
     }
 
-    override fun openEditSupplierFragment(supplier: CounterpartyEntity?) {
-        openChildFragment(EditSupplierFragment.newInstance(supplier))
-    }
-
     override fun openEditOrderFragment(orderEntity: OrderEntity?) {
         openChildFragment(EditOrderFragment.newInstance(orderEntity?.id))
     }
@@ -185,5 +179,9 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
     override fun onProfileMenuItemClicked(item: ProfileMenuType) {
         Toast.makeText(this, "Нажато: ${item.title}", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun openEditSupplierFragment(supplier: CounterpartyEntity?) {
+        TODO("Not yet implemented")
     }
 }

@@ -2,8 +2,12 @@ package com.nayya.myktor.ui.profile.detailscounterparty
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
+import android.widget.CompoundButton
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
@@ -29,6 +33,8 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     // Для того чтобы скрыть нижнюю навигацию и персчитать размеры container
     override val hideBottomNavigation = true
 
+    private var ignoreChanges = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         counterpartyId = arguments?.getLong(ARG_COUNTERPARTY_ID)
@@ -52,55 +58,134 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         binding.contactsInfo.setEditClickListener {
-            // TODO Это должно быть во ViewModel
-            val countries = viewModel.countries.value
-            if (countries.isNullOrEmpty()) {
-                Toast.makeText(context, "Список стран ещё загружается", Toast.LENGTH_SHORT).show()
-                return@setEditClickListener
+            tryNavigateWithSaveCheck {
+                openContactsEditor()
             }
-
-            val dialog = ContactEditBottomSheetDialog()
-            dialog.setInitialData(
-                initialContacts = viewModel.counterparty.value?.counterpartyContacts ?: emptyList(),
-                counterpartyId = viewModel.counterparty.value?.id ?: return@setEditClickListener,
-                countries = countries,
-                onSaveCallback = { id, updatedContacts ->
-                    viewModel.updateContacts(id, updatedContacts)
-                }
-            )
-            dialog.show(childFragmentManager, "edit_contacts")
         }
 
         binding.bankInfo.apply {
             setEditClickListener {
-                Toast.makeText(context, "Клик на Банк", Toast.LENGTH_SHORT).show()
+                tryNavigateWithSaveCheck {
+                    Toast.makeText(context, "Клик на Банк", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
         binding.addressesInfo.apply {
             setEditClickListener {
-                Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
+                tryNavigateWithSaveCheck {
+                    Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
         setFragmentResultListener("contacts_updated") { _, _ ->
             counterpartyId?.let { viewModel.loadCounterpartyById(it) } // ← повторно загружаем с сервера
         }
+
+        saveDate()
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    tryNavigateWithSaveCheck {
+                        goBack()
+                    }
+                }
+            }
+        )
+    }
+
+    private fun setupTextWatchers() {
+        val watcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
+                Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!ignoreChanges) {
+                    viewModel.setHasUnsavedChanges(true)
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) = Unit
+        }
+
+        val nameEditTexts = listOf(
+            binding.tvShortName,
+            binding.tvFirstName,
+            binding.tvLastName
+        )
+
+        val firmEditTexts = listOf(
+            legalEntityBinding.etCompanyName,
+            legalEntityBinding.etType,
+            legalEntityBinding.etNIP,
+            legalEntityBinding.etKRS
+        )
+
+        (nameEditTexts + firmEditTexts).forEach { it.addTextChangedListener(watcher) }
+    }
+
+    private fun openContactsEditor() {
+        // TODO Это должно быть во ViewModel
+        val countries = viewModel.countries.value
+        if (countries.isNullOrEmpty()) {
+            Toast.makeText(context, "Список стран ещё загружается", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val dialog = ContactEditBottomSheetDialog()
+        dialog.setInitialData(
+            initialContacts = viewModel.counterparty.value?.counterpartyContacts ?: emptyList(),
+            counterpartyId = viewModel.counterparty.value?.id ?: return,
+            countries = countries,
+            onSaveCallback = { id, updatedContacts ->
+                viewModel.updateContacts(id, updatedContacts)
+            }
+        )
+        dialog.show(childFragmentManager, "edit_contacts")
     }
 
     private fun setupToolbar() {
         binding.toolbar.btnBack.setOnClickListener {
-            goBack()
+            tryNavigateWithSaveCheck {
+                goBack()
+            }
         }
 
         binding.toolbar.btnEdit.setOnClickListener {
             if (viewModel.hasUnsavedChanges.value == true) {
                 // Показать диалог: Сохранить изменения или отменить
-                showUnsavedChangesDialog()
+                showUnsavedChangesDialog(
+                    onSave = { saveChangesFragment() },
+                    onDiscard = { viewModel.discardChanges() }
+                )
             } else {
                 viewModel.toggleEditMode()
             }
         }
+    }
+
+    private fun saveDate() {
+        binding.btnSaveData.setOnClickListener {
+            saveChangesFragment()
+        }
+    }
+
+    private fun saveChangesFragment() {
+        viewModel.saveChanges(
+            shortName = binding.tvShortName.text.toString(),
+            firstName = binding.tvFirstName.text.toString(),
+            lastName = binding.tvLastName.text.toString(),
+            companyName = legalEntityBinding.etCompanyName.text.toString(),
+            type = legalEntityBinding.etType.text.toString(),
+            nip = legalEntityBinding.etNIP.text.toString(),
+            krs = legalEntityBinding.etKRS.text.toString(),
+            isSupplier = legalEntityBinding.cbSupplier.isChecked,
+            isWarehouse = legalEntityBinding.cbWarehouse.isChecked,
+            isCustomer = legalEntityBinding.cbCustomer.isChecked,
+            isLegalEntity = binding.scEntityStatus.isChecked
+        )
     }
 
     private fun updateToolbarState(isEditMode: Boolean) {
@@ -139,8 +224,33 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
     private fun observeCounterparty() {
         viewModel.counterparty.observe(viewLifecycleOwner) { counterparty ->
+            ignoreChanges = true // 🔒 Отключаем реакцию на установку текста
+
             updateEditableState(viewModel.isEditMode.value ?: false)
             updateCounterpartyInfo(counterparty)
+
+            setupTextWatchers()
+            setupChangeListeners()
+
+            ignoreChanges = false // 🔓 Включаем обратно
+        }
+    }
+
+    private fun setupChangeListeners() {
+        val listeners = CompoundButton.OnCheckedChangeListener { _, _ ->
+            if (!ignoreChanges) {
+                viewModel.setHasUnsavedChanges(true)
+            }
+        }
+
+        legalEntityBinding.cbSupplier.setOnCheckedChangeListener(listeners)
+        legalEntityBinding.cbWarehouse.setOnCheckedChangeListener(listeners)
+        legalEntityBinding.cbCustomer.setOnCheckedChangeListener(listeners)
+
+        binding.scEntityStatus.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.setHasUnsavedChanges(true)
+            binding.scEntityStatus.text = if (isChecked) "Юридическое лицо" else "Физическое лицо"
+            updateLegalEntityVisibility(isChecked)
         }
     }
 
@@ -326,7 +436,8 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     private fun updateLegalEntityVisibility(isLegalEntity: Boolean) {
         binding.tvFirstName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
         binding.tvLastName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
-        binding.includeLegalEntity.layoutLegalEntity.visibility = if (isLegalEntity) View.VISIBLE else View.GONE
+        binding.includeLegalEntity.layoutLegalEntity.visibility =
+            if (isLegalEntity) View.VISIBLE else View.GONE
     }
 
     private fun updateEditableStateEditText(isEditable: Boolean) {
@@ -394,17 +505,55 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
     }
 
-    private fun showUnsavedChangesDialog() {
+    private fun showUnsavedChangesDialog(
+        onSave: (() -> Unit)? = null,
+        onDiscard: (() -> Unit)? = null,
+        onCancel: (() -> Unit)? = null,
+    ) {
         AlertDialog.Builder(requireContext())
             .setTitle("Несохранённые изменения")
             .setMessage("Вы хотите сохранить изменения?")
-            .setPositiveButton("Сохранить") { _, _ ->
-                viewModel.saveChanges()
-            }
-            .setNegativeButton("Отменить") { _, _ ->
-                viewModel.discardChanges()
-            }
+            .setPositiveButton("Сохранить") { _, _ -> onSave?.invoke() }
+            .setNegativeButton("Отменить") { _, _ -> onDiscard?.invoke() }
+            .setNeutralButton("Остаться") { _, _ -> onCancel?.invoke() }
             .show()
+    }
+
+    private fun hasUnsavedChanges(): Boolean {
+        val counterparty = viewModel.counterparty.value ?: return false
+        return binding.tvShortName.text.toString() != counterparty.shortName ||
+                binding.tvFirstName.text.toString() != (counterparty.firstName ?: "") ||
+                binding.tvLastName.text.toString() != (counterparty.lastName ?: "") ||
+                binding.scEntityStatus.isChecked != counterparty.isLegalEntity ||
+                legalEntityBinding.cbSupplier.isChecked != counterparty.isSupplier ||
+                legalEntityBinding.cbWarehouse.isChecked != counterparty.isWarehouse ||
+                legalEntityBinding.cbCustomer.isChecked != counterparty.isCustomer ||
+                legalEntityBinding.etCompanyName.text.toString() != (counterparty.companyName
+            ?: "") ||
+                legalEntityBinding.etType.text.toString() != counterparty.type ||
+                legalEntityBinding.etNIP.text.toString() != (counterparty.nip ?: "") ||
+                legalEntityBinding.etKRS.text.toString() != (counterparty.krs ?: "")
+    }
+
+    private fun tryNavigateWithSaveCheck(navigateAction: () -> Unit) {
+        if (!hasUnsavedChanges()) {
+            navigateAction()
+            return
+        }
+
+        showUnsavedChangesDialog(
+            onSave = {
+                saveChangesFragment()
+                navigateAction()
+            },
+            onDiscard = {
+                viewModel.discardChanges()
+                navigateAction()
+            },
+            onCancel = {
+                // остаться — ничего не делаем
+            }
+        )
     }
 
     companion object {
