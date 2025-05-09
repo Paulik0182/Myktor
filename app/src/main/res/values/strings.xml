@@ -40,5 +40,13 @@
     <string name="error_starting_or_ending_dot">Email не может начинаться или заканчиваться точкой</string>
     <string name="error_starting_or_ending_space">Email не может начинаться или заканчиваться пробелом</string>
     <string name="error_min_length">Минимум %1$d символов</string>
+    <string name="error_digits_only">Разрешены только цифры от 0 до 9</string>
+
+    <plurals name="remaining_characters">
+        <item quantity="one">Остался символ - %d</item>
+        <item quantity="few">Осталось символа - %d</item>
+        <item quantity="many">Осталось символов - %d</item>
+        <item quantity="other">Осталось символов - %d</item>
+    </plurals>
 
 </resources>

@@ -34,6 +34,15 @@ class CounterpartyDetailsViewModel : ViewModel() {
     private val _toastMessage = MutableLiveData<Event<String>>()
     val toastMessage: LiveData<Event<String>> get() = _toastMessage
 
+    private val _isCompanyNameValid = MutableLiveData<Boolean>(true)
+    val isCompanyNameValid: LiveData<Boolean> = _isCompanyNameValid
+
+    private val _isNipValid = MutableLiveData<Boolean>(true)
+    val isNipValid: LiveData<Boolean> = _isNipValid
+
+    private val _isKrsValid = MutableLiveData<Boolean>(true)
+    val isKrsValid: LiveData<Boolean> = _isKrsValid
+
     // TODO Перенести в репозиторий или в Интерактор
     fun loadCounterpartyById(counterpartyId: Long) {
         viewModelScope.launch {
@@ -150,5 +159,17 @@ class CounterpartyDetailsViewModel : ViewModel() {
                 _toastMessage.postValue(Event("Ошибка сети: ${e.localizedMessage}"))
             }
         }
+    }
+
+    fun setCompanyNameValid(isValid: Boolean) {
+        _isCompanyNameValid.value = isValid
+    }
+
+    fun setNipValid(isValid: Boolean) {
+        _isNipValid.value = isValid
+    }
+
+    fun setKrsValid(isValid: Boolean) {
+        _isKrsValid.value = isValid
     }
 }

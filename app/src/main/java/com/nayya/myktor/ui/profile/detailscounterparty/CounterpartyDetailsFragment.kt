@@ -20,7 +20,10 @@ import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.ui.profile.contacts.ContactEditBottomSheetDialog
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
+import com.nayya.myktor.utils.input.InputValidator
+import com.nayya.myktor.utils.showSnackbar
 import com.nayya.myktor.utils.viewBinding
+import com.nayya.uicomponents.BottomTextState
 import com.nayya.uicomponents.CustomCardActionView
 
 class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_details) {
@@ -181,6 +184,17 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     }
 
     private fun saveChangesFragment() {
+        val isLegalEntity = binding.scEntityStatus.isChecked
+
+        if (isLegalEntity &&
+            (viewModel.isCompanyNameValid.value != true ||
+                    viewModel.isNipValid.value != true ||
+                    viewModel.isKrsValid.value != true)
+        ) {
+            showSnackbar("Проверьте поля: НИП, KRS, Название компании")
+            return
+        }
+
         viewModel.saveChanges(
             shortName = binding.tvShortName.text.toString(),
             firstName = binding.tvFirstName.text.toString(),
@@ -239,6 +253,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
             setupTextWatchers()
             setupChangeListeners()
+            setupCompanyNameValidation()
+            setupNIPValidation()
+            setupKRSValidation()
 
             ignoreChanges = false // 🔓 Включаем обратно
         }
@@ -563,6 +580,233 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 // остаться — ничего не делаем
             }
         )
+    }
+
+    // ВАЛИДАЦИЯ ПОЛЯ ccavCompanyName
+    private fun setupCompanyNameValidation() {
+        val context = requireContext()
+        val field = legalEntityBinding.ccavCompanyName
+        field.addTextChangedListener(object : TextWatcher {
+            private var isEditing = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
+                Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEditing) return
+                isEditing = true
+
+                var text = s?.toString() ?: ""
+
+                // Удаление переносов строк и пробелов по краям
+                text = text.replace("\n", "").trim()
+                if (text != field.text) {
+                    field.text = text
+                    field.setSelection(text.length)
+                }
+
+                val error = when {
+                    InputValidator.validateEmpty(context, text) != null ->
+                        InputValidator.validateEmpty(context, text)
+
+                    InputValidator.validateLength(context, text, 90) != null ->
+                        InputValidator.validateLength(context, text, 90)
+
+                    InputValidator.validateMinAllowedInitialLength(context, text) != null ->
+                        InputValidator.validateMinAllowedInitialLength(context, text)
+
+                    InputValidator.validateStartingOrEndingDot(context, text) != null ->
+                        InputValidator.validateStartingOrEndingDot(context, text)
+
+                    InputValidator.validateStartingOrEndingSpace(context, text) != null ->
+                        InputValidator.validateStartingOrEndingSpace(context, text)
+
+                    InputValidator.validateLineBreaksAndCharacters(context, text) != null ->
+                        InputValidator.validateLineBreaksAndCharacters(context, text)
+
+                    InputValidator.validateName(context, text) != null ->
+                        InputValidator.validateName(context, text)
+
+                    else -> null
+                }
+
+                // ✅ ВАЖНО: обновляем валидность во ViewModel
+                viewModel.setCompanyNameValid(error == null)
+
+                if (error != null) {
+                    field.setBottomTextState(
+                        BottomTextState.Error(
+                            showErrorText = true,
+                            showErrorIcon = true,
+                            errorText = error
+                        )
+                    )
+                } else {
+                    val remaining = 90 - text.length
+                    if (remaining in 0..90) {
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = resources.getQuantityString(
+                                    R.plurals.remaining_characters,
+                                    remaining,
+                                    remaining
+                                )
+                            )
+                        )
+                    } else {
+                        field.setBottomTextState(BottomTextState.Empty)
+                    }
+                }
+                isEditing = false
+            }
+        })
+    }
+
+    private fun setupNIPValidation() {
+        legalEntityBinding.ccavNIP.addTextChangedListener(object : TextWatcher {
+            private var isEditing = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEditing) return
+                isEditing = true
+
+                var text = s?.toString().orEmpty()
+
+                // Удаляем пробелы и переносы строк
+                text = text.replace("\\s".toRegex(), "")
+
+                // Применяем очищенный текст, если был изменён
+                if (text != legalEntityBinding.ccavNIP.text) {
+                    legalEntityBinding.ccavNIP.text = text
+                    legalEntityBinding.ccavNIP.setSelection(text.length)
+                }
+
+                val error = when {
+                    text.isBlank() ->
+                        getString(R.string.error_empty_field)
+
+                    text.length < 10 ->
+                        getString(R.string.error_min_length, 10)
+
+                    text.length > 10 ->
+                        getString(R.string.error_max_length, 10)
+
+                    !text.all { it.isDigit() } ->
+                        getString(R.string.error_digits_only)
+
+                    else -> null
+                }
+
+                // ✅ ВАЖНО: обновляем валидность во ViewModel
+                viewModel.setNipValid(error == null)
+
+                if (error != null) {
+                    legalEntityBinding.ccavNIP.setBottomTextState(
+                        BottomTextState.Error(
+                            showErrorText = true,
+                            showErrorIcon = true,
+                            errorText = error
+                        )
+                    )
+                } else {
+                    val remaining = 10 - text.length
+                    if (remaining in 1..9) {
+                        legalEntityBinding.ccavNIP.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = resources.getQuantityString(
+                                    R.plurals.remaining_characters,
+                                    remaining,
+                                    remaining
+                                )
+                            )
+                        )
+                    } else {
+                        legalEntityBinding.ccavNIP.setBottomTextState(BottomTextState.Empty)
+                    }
+                }
+
+                isEditing = false
+            }
+        })
+    }
+
+    private fun setupKRSValidation() {
+        legalEntityBinding.ccavKRS.addTextChangedListener(object : TextWatcher {
+            private var isEditing = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEditing) return
+                isEditing = true
+
+                var text = s?.toString().orEmpty()
+
+                // Удаляем пробелы и переносы строк
+                text = text.replace("\\s".toRegex(), "")
+
+                // Применяем очищенный текст, если был изменён
+                if (text != legalEntityBinding.ccavKRS.text) {
+                    legalEntityBinding.ccavKRS.text = text
+                    legalEntityBinding.ccavKRS.setSelection(text.length)
+                }
+
+                val error = when {
+                    text.isBlank() ->
+                        getString(R.string.error_empty_field)
+
+                    text.length < 10 ->
+                        getString(R.string.error_min_length, 10)
+
+                    text.length > 10 ->
+                        getString(R.string.error_max_length, 10)
+
+                    !text.all { it.isDigit() } ->
+                        getString(R.string.error_digits_only)
+
+                    else -> null
+                }
+
+                // ✅ ВАЖНО: обновляем валидность во ViewModel
+                viewModel.setKrsValid(error == null)
+
+                if (error != null) {
+                    legalEntityBinding.ccavKRS.setBottomTextState(
+                        BottomTextState.Error(
+                            showErrorText = true,
+                            showErrorIcon = true,
+                            errorText = error
+                        )
+                    )
+                } else {
+                    val remaining = 10 - text.length
+                    if (remaining in 1..9) {
+                        legalEntityBinding.ccavKRS.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = resources.getQuantityString(
+                                    R.plurals.remaining_characters,
+                                    remaining,
+                                    remaining
+                                )
+                            )
+                        )
+                    } else {
+                        legalEntityBinding.ccavKRS.setBottomTextState(BottomTextState.Empty)
+                    }
+                }
+
+                isEditing = false
+            }
+        })
     }
 
     companion object {
