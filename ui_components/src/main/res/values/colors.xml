@@ -14,4 +14,7 @@
     <color name="uiKitColorDisabledPrimary">#C8CBCF</color>
     <color name="your_line_color">#000000</color>
 
+    <color name="input_bottom_color">#808080</color>
+    <color name="input_bottom_error">#F44336</color>
+
 </resources>

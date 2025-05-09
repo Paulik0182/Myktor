@@ -431,4 +431,67 @@ class CustomCardActionView @JvmOverloads constructor(
             _isHorizontallyScrolling = value
             binding.etInputUser.setHorizontallyScrolling(value)
         }
+
+    fun setSelection(position: Int) {
+        binding.etInputUser.setSelection(position)
+    }
+
+    fun setBottomTextState(state: BottomTextState) {
+        when (state) {
+            is BottomTextState.Description -> {
+                showDescriptionText = state.showDescriptionText
+                showDescriptionIcon = state.showDescriptionIcon
+                description = state.descriptionText
+                setDescriptionColor(isError = false)
+            }
+
+            is BottomTextState.Error -> {
+                showDescriptionText = state.showErrorText
+                showDescriptionIcon = state.showErrorIcon
+                description = state.errorText
+                setDescriptionColor(isError = true)
+            }
+
+            is BottomTextState.Empty -> {
+                showDescriptionText = false
+                showDescriptionIcon = false
+                description = null
+            }
+        }
+    }
+
+    private fun setDescriptionColor(isError: Boolean) {
+        val color = if (isError) {
+            ContextCompat.getColor(context, R.color.input_bottom_error)
+        } else {
+            ContextCompat.getColor(context, R.color.input_bottom_color)
+        }
+        binding.tvDescription.setTextColor(color)
+        binding.ivDescriptionIcon.setColorFilter(color)
+    }
+
+//    fun setBottomTextState(isError: Boolean, text: String?) {
+//        binding.tvDescription.text = text
+//
+//        val color = if (isError) {
+//            ContextCompat.getColor(context, R.color.uiKitColorError)
+//        } else {
+//            // Это важно: ставим селектор через setTextColor(resourceId), а не конкретный цвет
+//            ContextCompat.getColorStateList(context, R.color.input_bottom_color)
+//        }
+//
+//        // Применяем цвет (и селектор, и фиксированный обрабатываются корректно)
+//        if (color is ColorStateList) {
+//            binding.tvDescription.setTextColor(color)
+//            binding.ivDescriptionIcon.imageTintList = color
+//        } else {
+//            binding.tvDescription.setTextColor(color)
+//            binding.ivDescriptionIcon.setColorFilter(color)
+//        }
+//
+//        // Управляем видимостью
+//        binding.tvDescription.isVisible = !text.isNullOrBlank()
+//        binding.ivDescriptionIcon.isVisible = !text.isNullOrBlank()
+//    }
+
 }
