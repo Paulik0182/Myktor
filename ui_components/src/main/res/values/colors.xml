@@ -12,5 +12,6 @@
 
     <!--Disabled-->
     <color name="uiKitColorDisabledPrimary">#C8CBCF</color>
+    <color name="your_line_color">#000000</color>
 
 </resources>

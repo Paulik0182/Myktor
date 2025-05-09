@@ -5,11 +5,13 @@ import android.graphics.Typeface
 import android.text.InputFilter
 import android.text.InputType
 import android.text.TextUtils
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.annotation.StyleRes
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.nayya.uicomponents.databinding.LayoutCardActionViewBinding
@@ -60,6 +62,8 @@ class CustomCardActionView @JvmOverloads constructor(
                     getBoolean(R.styleable.CustomCardActionView_showDescriptionText, true)
 
                 showEditIcon = getBoolean(R.styleable.CustomCardActionView_showEditIcon, true)
+                showLeftIcon = getBoolean(R.styleable.CustomCardActionView_showLeftIcon, true)
+                showUnderline = getBoolean(R.styleable.CustomCardActionView_showUnderline, false)
 
                 // Размер текста
                 if (hasValue(R.styleable.CustomCardActionView_inputTextSize)) {
@@ -177,6 +181,13 @@ class CustomCardActionView @JvmOverloads constructor(
             binding.etInputUser.setText(value)
         }
 
+    /**
+     * установка TextWatcher
+     */
+    fun addTextChangedListener(watcher: TextWatcher) {
+        binding.etInputUser.addTextChangedListener(watcher)
+    }
+
     var isInputEnabled: Boolean
         get() = binding.etInputUser.isEnabled
         set(value) {
@@ -224,6 +235,34 @@ class CustomCardActionView @JvmOverloads constructor(
             } else {
                 binding.ivActionIcon.isVisible = false
             }
+        }
+
+    /**
+     * ✩ Управление отображением иконки слева
+     */
+    var showLeftIcon: Boolean = true
+        set(value) {
+            field = value
+            binding.ivActionIcon.isVisible = value
+
+            val params = binding.etInputUser.layoutParams as ConstraintLayout.LayoutParams
+            params.marginStart = if (value) {
+                // если иконка показана — отступ между иконкой и полем
+                context.resources.getDimensionPixelSize(R.dimen.etInputUser_marginStart_with_icon)
+            } else {
+                // если иконка скрыта — отступ слева в 0
+                0
+            }
+            binding.etInputUser.layoutParams = params
+        }
+
+    /**
+     * ✩ Управление отображением нижней линии под вводом
+     */
+    var showUnderline: Boolean = true
+        set(value) {
+            field = value
+            binding.vUnderline.isVisible = value
         }
 
     var leftIconRes2: Int = 0

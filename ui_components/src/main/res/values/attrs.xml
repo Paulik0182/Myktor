@@ -59,6 +59,9 @@
 
         <!-- Иконка слева -->
         <attr name="leftIconRes" format="reference" />
+        <attr name="showLeftIcon" format="boolean" />
+
+        <attr name="showUnderline" format="boolean" />
 
         <!-- Иконка карандаша -->
         <attr name="editIconRes" format="reference" />

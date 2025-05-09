@@ -37,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:paddingVertical="2dp"
+                android:paddingVertical="1dp"
                 android:text="Information"
                 android:textColor="@color/uiKitColorForegroundSecondary"
                 app:layout_constraintStart_toEndOf="@id/ivInformationIcon"
@@ -77,14 +77,15 @@
                 android:id="@+id/etInputUser"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="6dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:layout_marginStart="@dimen/etInputUser_marginStart_with_icon"
                 android:layout_marginEnd="12dp"
                 android:background="@null"
                 android:gravity="center_vertical|start"
                 android:imeOptions="actionDone"
                 android:inputType="textNoSuggestions"
-                android:paddingVertical="6dp"
+                android:paddingVertical="4dp"
                 android:saveEnabled="false"
                 android:textColorHint="@color/input_right_color"
                 android:textCursorDrawable="@drawable/cursor_drawable"
@@ -93,6 +94,17 @@
                 app:layout_constraintStart_toEndOf="@id/barrierIconEnd"
                 app:layout_constraintTop_toTopOf="@id/vgInput"
                 tools:hint="Title" />
+
+            <View
+                android:id="@+id/vUnderline"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="@color/your_line_color"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:layout_constraintEnd_toEndOf="@id/etInputUser"
+                app:layout_constraintStart_toStartOf="@id/etInputUser"
+                app:layout_constraintTop_toBottomOf="@id/etInputUser" />
 
             <ImageView
                 android:id="@+id/ivDescriptionIcon"
@@ -113,13 +125,13 @@
                 android:layout_marginStart="4dp"
                 android:gravity="bottom"
                 android:maxLines="2"
-                android:paddingVertical="2dp"
+                android:paddingVertical="1dp"
                 android:text="Description"
                 android:textColor="@color/input_bottom_color"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/ivDescriptionIcon"
-                app:layout_constraintTop_toBottomOf="@id/etInputUser"
+                app:layout_constraintTop_toBottomOf="@id/vgInput"
                 tools:visibility="visible" />
 
             <androidx.constraintlayout.widget.Barrier
