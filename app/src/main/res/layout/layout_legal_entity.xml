@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layoutLegalEntity"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -40,51 +41,76 @@
     </LinearLayout>
 
     <!-- Юридические данные -->
-    <EditText
-        android:id="@+id/etCompanyName"
+    <com.nayya.uicomponents.CustomCardActionView
+        android:id="@+id/ccavCompanyName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:cursorVisible="false"
-        android:textSize="16sp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:hint="Название компании"/>
+        app:descriptionText="Особенность"
+        app:infoText="Название компании"
+        app:showEditIcon="false"
+        app:showDescriptionIcon="true"
+        app:showDescriptionText="true"
+        app:showInfoIcon="false"
+        app:showInfoText="false"
+        app:inputEnabled="false"
+        app:showUnderline="true"
+        app:inputMaxLines="2"
+        app:showLeftIcon="false"
+        app:inputBackground="@drawable/bg_field_gray_cell_white"
+        app:hintText="Название компании" />
 
-    <EditText
-        android:id="@+id/etType"
+    <com.nayya.uicomponents.CustomCardActionView
+        android:id="@+id/ccavType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:cursorVisible="false"
-        android:textSize="16sp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:hint="Тип компании"/>
+        app:descriptionText="Особенность"
+        app:infoText="Тип компании"
+        app:showEditIcon="false"
+        app:showDescriptionIcon="true"
+        app:showDescriptionText="true"
+        app:showInfoIcon="false"
+        app:showInfoText="false"
+        app:inputEnabled="false"
+        app:showUnderline="true"
+        app:inputMaxLines="2"
+        app:showLeftIcon="false"
+        app:inputBackground="@drawable/bg_field_gray_cell_white"
+        app:hintText="Тип компании" />
 
-    <EditText
-        android:id="@+id/etNIP"
+    <com.nayya.uicomponents.CustomCardActionView
+        android:id="@+id/ccavNIP"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:cursorVisible="false"
-        android:textSize="16sp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:hint="NIP"/>
+        app:descriptionText="Особенность"
+        app:infoText="NIP"
+        app:showEditIcon="false"
+        app:showDescriptionIcon="true"
+        app:showDescriptionText="true"
+        app:showInfoIcon="false"
+        app:showInfoText="false"
+        app:inputEnabled="false"
+        app:showUnderline="true"
+        app:inputMaxLines="2"
+        app:showLeftIcon="false"
+        app:inputBackground="@drawable/bg_field_gray_cell_white"
+        app:hintText="NIP" />
 
-    <EditText
-        android:id="@+id/etKRS"
+    <com.nayya.uicomponents.CustomCardActionView
+        android:id="@+id/ccavKRS"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:cursorVisible="false"
-        android:textSize="16sp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:hint="KRS"/>
+        app:descriptionText="Особенность"
+        app:infoText="KRS"
+        app:showEditIcon="false"
+        app:showDescriptionIcon="true"
+        app:showDescriptionText="true"
+        app:showInfoIcon="false"
+        app:showInfoText="false"
+        app:inputEnabled="false"
+        app:showUnderline="true"
+        app:inputMaxLines="2"
+        app:showLeftIcon="false"
+        app:inputBackground="@drawable/bg_field_gray_cell_white"
+        app:hintText="KRS" />
+
 </LinearLayout>

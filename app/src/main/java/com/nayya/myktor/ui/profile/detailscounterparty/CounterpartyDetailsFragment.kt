@@ -6,6 +6,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.CompoundButton
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
@@ -20,6 +21,7 @@ import com.nayya.myktor.ui.profile.contacts.ContactEditBottomSheetDialog
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.viewBinding
+import com.nayya.uicomponents.CustomCardActionView
 
 class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_details) {
 
@@ -96,6 +98,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         )
     }
 
+    // Часть механизма отслеживания изменений данных.
     private fun setupTextWatchers() {
         val watcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
@@ -116,14 +119,19 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             binding.tvLastName
         )
 
-        val firmEditTexts = listOf(
-            legalEntityBinding.etCompanyName,
-            legalEntityBinding.etType,
-            legalEntityBinding.etNIP,
-            legalEntityBinding.etKRS
+        val firmFields = listOf(
+            legalEntityBinding.ccavCompanyName,
+            legalEntityBinding.ccavType,
+            legalEntityBinding.ccavNIP,
+            legalEntityBinding.ccavKRS
         )
 
-        (nameEditTexts + firmEditTexts).forEach { it.addTextChangedListener(watcher) }
+        (nameEditTexts + firmFields).forEach { view ->
+            when (view) {
+                is EditText -> view.addTextChangedListener(watcher)
+                is CustomCardActionView -> view.addTextChangedListener(watcher)
+            }
+        }
     }
 
     private fun openContactsEditor() {
@@ -177,10 +185,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             shortName = binding.tvShortName.text.toString(),
             firstName = binding.tvFirstName.text.toString(),
             lastName = binding.tvLastName.text.toString(),
-            companyName = legalEntityBinding.etCompanyName.text.toString(),
-            type = legalEntityBinding.etType.text.toString(),
-            nip = legalEntityBinding.etNIP.text.toString(),
-            krs = legalEntityBinding.etKRS.text.toString(),
+            companyName = legalEntityBinding.ccavCompanyName.text.orEmpty(),
+            type = legalEntityBinding.ccavType.text.orEmpty(),
+            nip = legalEntityBinding.ccavNIP.text.orEmpty(),
+            krs = legalEntityBinding.ccavKRS.text.orEmpty(),
             isSupplier = legalEntityBinding.cbSupplier.isChecked,
             isWarehouse = legalEntityBinding.cbWarehouse.isChecked,
             isCustomer = legalEntityBinding.cbCustomer.isChecked,
@@ -317,10 +325,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             legalEntityBinding.cbSupplier.isChecked = counterparty.isSupplier
             legalEntityBinding.cbWarehouse.isChecked = counterparty.isWarehouse
             legalEntityBinding.cbCustomer.isChecked = counterparty.isCustomer
-            legalEntityBinding.etCompanyName.setText(counterparty.companyName)
-            legalEntityBinding.etType.setText(counterparty.type)
-            legalEntityBinding.etNIP.setText(counterparty.nip)
-            legalEntityBinding.etKRS.setText(counterparty.krs)
+            legalEntityBinding.ccavCompanyName.text = counterparty.companyName
+            legalEntityBinding.ccavType.text = counterparty.type
+            legalEntityBinding.ccavNIP.text = counterparty.nip
+            legalEntityBinding.ccavKRS.text = counterparty.krs
         } else {
             legalEntityBinding.layoutLegalEntity.visibility = View.GONE
             binding.bankInfo.visibility = View.GONE
@@ -447,11 +455,11 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             binding.tvLastName
         )
 
-        val firmEditTexts = listOf(
-            legalEntityBinding.etCompanyName,
-            legalEntityBinding.etType,
-            legalEntityBinding.etNIP,
-            legalEntityBinding.etKRS,
+        val firmFields = listOf(
+            legalEntityBinding.ccavCompanyName,
+            legalEntityBinding.ccavType,
+            legalEntityBinding.ccavNIP,
+            legalEntityBinding.ccavKRS,
         )
 
         val textColor = if (isEditable) {
@@ -470,17 +478,18 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             }
         }
 
-        firmEditTexts.forEach { editText ->
-            editText.apply {
-                isEnabled = isEditable
-                isFocusable = isEditable
-                isFocusableInTouchMode = isEditable
-                isCursorVisible = isEditable
-                setTextColor(textColor)
+        firmFields.forEach { legalEntity ->
+            legalEntity.apply {
+                showUnderline = isEditable
+                showDescriptionIcon = isEditable
+                showDescriptionText = isEditable
+                isInputEnabled = isEditable
+                setInputTextColor(textColor)
             }
         }
 
-        legalEntityBinding.etCompanyName.minLines = if (isEditable) 2 else 1
+        val maxLines = if (isEditable) 2 else 1
+        legalEntityBinding.ccavCompanyName.setInputMaxLines(maxLines)
     }
 
     private fun updateEditableStateCheckBoxes(isEditable: Boolean) {
@@ -528,11 +537,11 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 legalEntityBinding.cbSupplier.isChecked != counterparty.isSupplier ||
                 legalEntityBinding.cbWarehouse.isChecked != counterparty.isWarehouse ||
                 legalEntityBinding.cbCustomer.isChecked != counterparty.isCustomer ||
-                legalEntityBinding.etCompanyName.text.toString() != (counterparty.companyName
+                legalEntityBinding.ccavCompanyName.text.orEmpty() != (counterparty.companyName
             ?: "") ||
-                legalEntityBinding.etType.text.toString() != counterparty.type ||
-                legalEntityBinding.etNIP.text.toString() != (counterparty.nip ?: "") ||
-                legalEntityBinding.etKRS.text.toString() != (counterparty.krs ?: "")
+                legalEntityBinding.ccavType.text.orEmpty() != counterparty.type ||
+                legalEntityBinding.ccavNIP.text.orEmpty() != (counterparty.nip ?: "") ||
+                legalEntityBinding.ccavKRS.text.orEmpty() != (counterparty.krs ?: "")
     }
 
     private fun tryNavigateWithSaveCheck(navigateAction: () -> Unit) {
