@@ -204,6 +204,15 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             }
         }
 
+        val isSupplier = legalEntityBinding.cbSupplier.isChecked
+        val isWarehouse = legalEntityBinding.cbWarehouse.isChecked
+        val isCustomer = legalEntityBinding.cbCustomer.isChecked
+
+        if (!isSupplier && !isWarehouse && !isCustomer) {
+            showSnackbar("Выберите хотя бы один тип компании. По умолчанию выбран 'customer'")
+            legalEntityBinding.cbCustomer.isChecked = true
+        }
+
         viewModel.saveChanges(
             shortName = binding.tvShortName.text.toString(),
             firstName = binding.tvFirstName.text.toString(),
@@ -280,9 +289,19 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     }
 
     private fun setupChangeListeners() {
+
+        val updateTypePreview = {
+            val types = mutableListOf<String>()
+            if (legalEntityBinding.cbSupplier.isChecked) types.add("supplier")
+            if (legalEntityBinding.cbWarehouse.isChecked) types.add("warehouse")
+            if (legalEntityBinding.cbCustomer.isChecked) types.add("customer")
+            legalEntityBinding.ccavType.text = types.joinToString(", ")
+        }
+
         val listeners = CompoundButton.OnCheckedChangeListener { _, _ ->
             if (!ignoreChanges) {
                 viewModel.setHasUnsavedChanges(true)
+                updateTypePreview()
             }
         }
 
@@ -496,7 +515,6 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
         val firmFields = listOf(
             legalEntityBinding.ccavCompanyName,
-            legalEntityBinding.ccavType,
             legalEntityBinding.ccavNIP,
             legalEntityBinding.ccavKRS,
         )
@@ -526,6 +544,23 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 setInputTextColor(textColor)
             }
         }
+
+        legalEntityBinding.ccavType.apply {
+            showUnderline = isEditable
+            showDescriptionIcon = isEditable
+            showDescriptionText = isEditable
+            setInputTextColor(textColor)
+        }
+
+        if (isEditable) {
+            legalEntityBinding.ccavTypeOverlay.visibility = View.VISIBLE
+            legalEntityBinding.ccavTypeOverlay.setOnClickListener {
+                showSnackbar("Поле заполняется автоматически")
+            }
+        } else {
+            legalEntityBinding.ccavTypeOverlay.visibility = View.GONE
+        }
+
 
         val maxLines = if (isEditable) 2 else 1
         legalEntityBinding.ccavCompanyName.setInputMaxLines(maxLines)

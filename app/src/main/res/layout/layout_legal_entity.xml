@@ -60,12 +60,17 @@
         app:inputBackground="@drawable/bg_field_gray_cell_white"
         app:hintText="Название компании" />
 
+    <FrameLayout
+        android:id="@+id/flCcavType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <com.nayya.uicomponents.CustomCardActionView
         android:id="@+id/ccavType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:descriptionText="Тип компании"
-        app:infoText="Тип компании"
+        app:infoText="Тип компании. Поле меняется автоматически"
         app:showEditIcon="false"
         app:showDescriptionIcon="true"
         app:showDescriptionText="true"
@@ -78,6 +83,17 @@
         app:showLeftIcon="false"
         app:inputBackground="@drawable/bg_field_gray_cell_white"
         app:hintText="Тип компании" />
+
+        <View
+            android:id="@+id/ccavTypeOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:clickable="true"
+            android:focusable="true" />
+    </FrameLayout>
 
     <com.nayya.uicomponents.CustomCardActionView
         android:id="@+id/ccavNIP"
