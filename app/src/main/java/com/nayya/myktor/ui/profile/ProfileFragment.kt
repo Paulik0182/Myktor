@@ -1,6 +1,5 @@
 package com.nayya.myktor.ui.profile
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,6 +11,7 @@ import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentProfileBinding
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.viewBinding
+
 class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
     private val binding by viewBinding<FragmentProfileBinding>()
@@ -21,6 +21,8 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
     }
 
     private lateinit var adapter: ProfileMenuAdapter
+
+    private val counterpartyId = 19L
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -34,7 +36,14 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
         observeViewModel()
         // Пока ID жёстко задан
-        viewModel.loadCounterparty(counterpartyId = 19L)
+        viewModel.loadCounterparty(counterpartyId = counterpartyId)
+
+        parentFragmentManager.setFragmentResultListener(
+            "counterparty_updated",
+            viewLifecycleOwner
+        ) { _, _ ->
+            viewModel.loadCounterparty(counterpartyId = counterpartyId) // ⬅️ Повторно загружаем актуальные данные
+        }
 
         binding.ivTelegram.setOnClickListener {
             openUrl("https://t.me/your_channel") // TODO заменить на свой канал
@@ -78,7 +87,9 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
             binding.llTextContainer.setOnClickListener {
                 counterparty.id?.let { counterpartyId ->
-                    requireController<ProfileFragment.Controller>().openCounterpartyDetails(counterpartyId)
+                    requireController<ProfileFragment.Controller>().openCounterpartyDetails(
+                        counterpartyId
+                    )
                 }
             }
         }
@@ -89,7 +100,7 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
         }
     }
 
-    interface Controller: BaseFragment.Controller {
+    interface Controller : BaseFragment.Controller {
         fun openCounterpartyDetails(counterpartyId: Long)
         fun onProfileMenuItemClicked(item: ProfileMenuType)
     }

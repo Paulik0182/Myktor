@@ -221,6 +221,11 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         if (viewModel.isEditMode.value == true) {
             viewModel.setEditMode(false)
         }
+
+        // ✅ Отложенный вызов гарантирует доставку результата
+        view?.post {
+            parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+        }
     }
 
     private fun updateToolbarState(isEditMode: Boolean) {
