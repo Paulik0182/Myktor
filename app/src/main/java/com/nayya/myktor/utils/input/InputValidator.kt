@@ -59,37 +59,19 @@ class InputValidator {
             "᙭уёвина"
         )
 
-        // TODO Старая проверка!!! Она была сделана согласно документации по экрану Редактирование
-        //  профиля. Проверка на недопустимые символы
-//        fun validateName(context: Context, name: String): String? {
-//
-//            val invalidChars = name.filter { INVALID_CHARACTERS.containsMatchIn(it.toString()) }
-//
-//            return if (invalidChars.isNotEmpty()) {
-//                context.getString(R.string.error_invalid_characters)
-//            } else null
-//        }
-
-        // Проверка на недопустимые символы
         fun validateName(context: Context, name: String): String? {
-            // Запрещённые символы
+            // Проверка на запрещённые символы (например, + и !)
             if (INVALID_CHARACTERS.containsMatchIn(name)) {
                 return context.getString(R.string.error_invalid_characters)
             }
 
-            // Проверка эмоджи с EmojiCompat
-            val containsOnlyValidEmoji = if (EmojiCompat.isConfigured()) {
-                name.all { char ->
-                    char.isLetterOrDigit() ||
-                            char.isWhitespace() ||
-                            EmojiCompat.get().process(char.toString())?.isNotEmpty() == true
-                }
-            } else {
-                true // Если EmojiCompat не настроен
+            // Надёжная проверка на Emoji через суррогатные пары
+            val containsEmoji = name.any { char ->
+                Character.getType(char) == Character.SURROGATE.toInt()
             }
 
-            return if (!containsOnlyValidEmoji) {
-                context.getString(R.string.error_invalid_characters)
+            return if (containsEmoji) {
+                context.getString(R.string.error_emoji_not_allowed)
             } else {
                 null
             }

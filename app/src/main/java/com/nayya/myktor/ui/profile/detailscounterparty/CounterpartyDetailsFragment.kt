@@ -169,7 +169,14 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 // Показать диалог: Сохранить изменения или отменить
                 showUnsavedChangesDialog(
                     onSave = { saveChangesFragment() },
-                    onDiscard = { viewModel.discardChanges() }
+                    onDiscard = {
+                        val id = counterpartyId
+                        if (id != null) {
+                            viewModel.loadCounterpartyById(id) // ⬅️ загружаем заново с сервера
+                        }
+
+                        viewModel.discardChanges()
+                    }
                 )
             } else {
                 viewModel.toggleEditMode()
@@ -186,13 +193,15 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     private fun saveChangesFragment() {
         val isLegalEntity = binding.scEntityStatus.isChecked
 
-        if (isLegalEntity &&
-            (viewModel.isCompanyNameValid.value != true ||
-                    viewModel.isNipValid.value != true ||
-                    viewModel.isKrsValid.value != true)
-        ) {
-            showSnackbar("Проверьте поля: НИП, KRS, Название компании")
-            return
+        if (isLegalEntity) {
+            val companyNameValid = viewModel.isCompanyNameValid.value == true
+            val nipValid = validateNIPOnSave()
+            val krsValid = validateKRSOnSave()
+
+            if (!companyNameValid || !nipValid || !krsValid) {
+                showSnackbar("Проверьте поля: НИП, KRS, Название компании")
+                return
+            }
         }
 
         viewModel.saveChanges(
@@ -208,6 +217,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             isCustomer = legalEntityBinding.cbCustomer.isChecked,
             isLegalEntity = binding.scEntityStatus.isChecked
         )
+
+        if (viewModel.isEditMode.value == true) {
+            viewModel.setEditMode(false)
+        }
     }
 
     private fun updateToolbarState(isEditMode: Boolean) {
@@ -285,6 +298,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             updateEditableState(isEditMode)
             updateEditableStateEditText(isEditMode)
             updateEditableStateCheckBoxes(isEditMode)
+
+            if (isEditMode) {
+                runInitialValidations()
+            }
         }
     }
 
@@ -626,6 +643,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                     InputValidator.validateLineBreaksAndCharacters(context, text) != null ->
                         InputValidator.validateLineBreaksAndCharacters(context, text)
 
+                    InputValidator.validateCharacters(context, text) != null ->
+                        InputValidator.validateCharacters(context, text)
+
                     InputValidator.validateName(context, text) != null ->
                         InputValidator.validateName(context, text)
 
@@ -635,29 +655,31 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 // ✅ ВАЖНО: обновляем валидность во ViewModel
                 viewModel.setCompanyNameValid(error == null)
 
-                if (error != null) {
-                    field.setBottomTextState(
-                        BottomTextState.Error(
-                            showErrorText = true,
-                            showErrorIcon = true,
-                            errorText = error
-                        )
-                    )
-                } else {
-                    val remaining = 90 - text.length
-                    if (remaining in 0..90) {
+                if (viewModel.isEditMode.value == true) {
+                    if (error != null) {
                         field.setBottomTextState(
-                            BottomTextState.Description(
-                                showDescriptionText = true,
-                                descriptionText = resources.getQuantityString(
-                                    R.plurals.remaining_characters,
-                                    remaining,
-                                    remaining
-                                )
+                            BottomTextState.Error(
+                                showErrorText = true,
+                                showErrorIcon = true,
+                                errorText = error
                             )
                         )
                     } else {
-                        field.setBottomTextState(BottomTextState.Empty)
+                        val remaining = 90 - text.length
+                        if (remaining in 0..90) {
+                            field.setBottomTextState(
+                                BottomTextState.Description(
+                                    showDescriptionText = true,
+                                    descriptionText = resources.getQuantityString(
+                                        R.plurals.remaining_characters,
+                                        remaining,
+                                        remaining
+                                    )
+                                )
+                            )
+                        } else {
+                            field.setBottomTextState(BottomTextState.Empty)
+                        }
                     }
                 }
                 isEditing = false
@@ -688,12 +710,6 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 }
 
                 val error = when {
-                    text.isBlank() ->
-                        getString(R.string.error_empty_field)
-
-                    text.length < 10 ->
-                        getString(R.string.error_min_length, 10)
-
                     text.length > 10 ->
                         getString(R.string.error_max_length, 10)
 
@@ -704,19 +720,27 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 }
 
                 // ✅ ВАЖНО: обновляем валидность во ViewModel
-                viewModel.setNipValid(error == null)
+                // валидности — true, только если длина = 10 и все цифры
+                viewModel.setNipValid(text.length == 10 && text.all { it.isDigit() })
 
-                if (error != null) {
-                    legalEntityBinding.ccavNIP.setBottomTextState(
-                        BottomTextState.Error(
-                            showErrorText = true,
-                            showErrorIcon = true,
-                            errorText = error
+                if (viewModel.isEditMode.value == true) {
+                    if (text.isBlank()) {
+                        legalEntityBinding.ccavNIP.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = getString(R.string.exact_length, 10)
+                            )
                         )
-                    )
-                } else {
-                    val remaining = 10 - text.length
-                    if (remaining in 1..9) {
+                    } else if (error != null) {
+                        legalEntityBinding.ccavNIP.setBottomTextState(
+                            BottomTextState.Error(
+                                showErrorText = true,
+                                showErrorIcon = true,
+                                errorText = error
+                            )
+                        )
+                    } else {
+                        val remaining = 10 - text.length
                         legalEntityBinding.ccavNIP.setBottomTextState(
                             BottomTextState.Description(
                                 showDescriptionText = true,
@@ -727,11 +751,8 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                                 )
                             )
                         )
-                    } else {
-                        legalEntityBinding.ccavNIP.setBottomTextState(BottomTextState.Empty)
                     }
                 }
-
                 isEditing = false
             }
         })
@@ -760,12 +781,6 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 }
 
                 val error = when {
-                    text.isBlank() ->
-                        getString(R.string.error_empty_field)
-
-                    text.length < 10 ->
-                        getString(R.string.error_min_length, 10)
-
                     text.length > 10 ->
                         getString(R.string.error_max_length, 10)
 
@@ -776,19 +791,27 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 }
 
                 // ✅ ВАЖНО: обновляем валидность во ViewModel
-                viewModel.setKrsValid(error == null)
+                // валидности — true, только если длина = 10 и все цифры
+                viewModel.setKrsValid(text.length == 10 && text.all { it.isDigit() })
 
-                if (error != null) {
-                    legalEntityBinding.ccavKRS.setBottomTextState(
-                        BottomTextState.Error(
-                            showErrorText = true,
-                            showErrorIcon = true,
-                            errorText = error
+                if (viewModel.isEditMode.value == true) {
+                    if (text.isBlank()) {
+                        legalEntityBinding.ccavKRS.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = getString(R.string.exact_length, 10)
+                            )
                         )
-                    )
-                } else {
-                    val remaining = 10 - text.length
-                    if (remaining in 1..9) {
+                    } else if (error != null) {
+                        legalEntityBinding.ccavKRS.setBottomTextState(
+                            BottomTextState.Error(
+                                showErrorText = true,
+                                showErrorIcon = true,
+                                errorText = error
+                            )
+                        )
+                    } else {
+                        val remaining = 10 - text.length
                         legalEntityBinding.ccavKRS.setBottomTextState(
                             BottomTextState.Description(
                                 showDescriptionText = true,
@@ -799,14 +822,75 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                                 )
                             )
                         )
-                    } else {
-                        legalEntityBinding.ccavKRS.setBottomTextState(BottomTextState.Empty)
                     }
                 }
-
                 isEditing = false
             }
         })
+    }
+
+    private fun validateNIPAndKRS(text: String): String? {
+        if (text.isBlank()) return null  // ⬅️ поле не обязательно, пропускаем
+
+        return when {
+            text.length > 10 -> getString(R.string.error_max_length, 10)
+            !text.all { it.isDigit() } -> getString(R.string.error_digits_only)
+            text.length < 10 -> getString(R.string.error_length, 10)
+            else -> null
+        }
+    }
+
+    private fun validateNIPOnSave(): Boolean {
+        val text = legalEntityBinding.ccavNIP.text.orEmpty()
+        val error = validateNIPAndKRS(text)
+        val isValid = error == null
+
+        viewModel.setNipValid(isValid)
+
+        if (!isValid) {
+            legalEntityBinding.ccavNIP.setBottomTextState(
+                BottomTextState.Error(
+                    showErrorText = true,
+                    showErrorIcon = true,
+                    errorText = requireNotNull(error)
+                )
+            )
+        }
+
+        return isValid
+    }
+
+    private fun validateKRSOnSave(): Boolean {
+        val text = legalEntityBinding.ccavKRS.text.orEmpty()
+        val error = validateNIPAndKRS(text)
+        val isValid = error == null
+
+        viewModel.setKrsValid(isValid)
+
+        if (!isValid) {
+            legalEntityBinding.ccavKRS.setBottomTextState(
+                BottomTextState.Error(
+                    showErrorText = true,
+                    showErrorIcon = true,
+                    errorText = requireNotNull(error)
+                )
+            )
+        }
+
+        return isValid
+    }
+
+    private fun runInitialValidations() {
+        val context = requireContext()
+
+        // Company Name
+        legalEntityBinding.ccavCompanyName.text = legalEntityBinding.ccavCompanyName.text
+        // NIP
+        legalEntityBinding.ccavNIP.text = legalEntityBinding.ccavNIP.text
+        // KRS
+        legalEntityBinding.ccavKRS.text = legalEntityBinding.ccavKRS.text
+
+        viewModel.setHasUnsavedChanges(false)
     }
 
     companion object {

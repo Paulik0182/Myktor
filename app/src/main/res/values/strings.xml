@@ -36,11 +36,16 @@
     <string name="error_empty_field">Поле не может быть пустым</string>
     <string name="error_invalid_email_format">Неверный формат email</string>
     <string name="error_invalid_characters">Недопустимые символы</string>
+    <string name="error_invalid_characters2">Разрешены только латинские буквы, цифры, точка и тире</string>
+    <string name="error_emoji_not_allowed">Поле не может содержать Emoji</string>
     <string name="error_line_breaks">Email не может содержать переносы строк</string>
     <string name="error_starting_or_ending_dot">Email не может начинаться или заканчиваться точкой</string>
     <string name="error_starting_or_ending_space">Email не может начинаться или заканчиваться пробелом</string>
     <string name="error_min_length">Минимум %1$d символов</string>
+    <string name="error_length">Значение должно равнятся %1$d символов</string>
     <string name="error_digits_only">Разрешены только цифры от 0 до 9</string>
+    <string name="error_exact_length">Должно быть %1$d символов</string>
+    <string name="exact_length">Введите %1$d символов</string>
 
     <plurals name="remaining_characters">
         <item quantity="one">Остался символ - %d</item>
