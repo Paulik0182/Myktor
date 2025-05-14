@@ -51,6 +51,7 @@
         app:showEditIcon="false"
         app:showDescriptionIcon="true"
         app:showDescriptionText="true"
+        app:inputMaxLength="91"
         app:showInfoIcon="false"
         app:showInfoText="false"
         app:inputEnabled="false"

@@ -462,6 +462,10 @@ class CustomCardActionView @JvmOverloads constructor(
         binding.etInputUser.setSelection(position)
     }
 
+    fun getSelection(): Int {
+        return binding.etInputUser.selectionStart
+    }
+
     fun setBottomTextState(state: BottomTextState) {
         when (state) {
             is BottomTextState.Description -> {

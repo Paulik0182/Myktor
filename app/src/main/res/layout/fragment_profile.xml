@@ -82,10 +82,10 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/ivNotifications"
+                android:id="@+id/ivRightIcon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_notification"
+                android:src="@drawable/ic_outline_edit"
                 android:contentDescription="notifications" />
         </LinearLayout>
 

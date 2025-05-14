@@ -33,7 +33,7 @@ class InputValidator {
          * [\u0080-\uFFFF] - Запрещает все символы Unicode, которые не являются частью ASCII-диапазона (\u0000-\u007F).
          */
         private val ADVANCED_INVALID_CHARACTERS =
-            Regex("[^a-zA-Z0-9@#/_\\-.]|[\uD800-\uDFFF]|[\u0080-\uFFFF]")
+            Regex("[^a-zA-Z0-9@#/_\\-.\\s]|[\uD800-\uDFFF]|[\u0080-\uFFFF]")
 
         /**
          * [\n\r] - Запрещает перенос строк
@@ -140,6 +140,13 @@ class InputValidator {
                 context.getString(R.string.error_starting_or_ending_dot)
             } else null
         }
+
+        fun validateStartingDot(context: Context, name: String): String? {
+            return if (name.startsWith(".")) {
+                context.getString(R.string.error_starting_dot)
+            } else null
+        }
+
 
         // Проверка первого или последнего пробела
         fun validateStartingOrEndingSpace(context: Context, name: String): String? {

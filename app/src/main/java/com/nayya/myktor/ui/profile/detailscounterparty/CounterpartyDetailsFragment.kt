@@ -3,6 +3,7 @@ package com.nayya.myktor.ui.profile.detailscounterparty
 import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.View
 import android.widget.CompoundButton
@@ -217,7 +218,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             shortName = binding.tvShortName.text.toString(),
             firstName = binding.tvFirstName.text.toString(),
             lastName = binding.tvLastName.text.toString(),
-            companyName = legalEntityBinding.ccavCompanyName.text.orEmpty(),
+            companyName = legalEntityBinding.ccavCompanyName.text.orEmpty().trimEnd(),
             type = legalEntityBinding.ccavType.text.orEmpty(),
             nip = legalEntityBinding.ccavNIP.text.orEmpty(),
             krs = legalEntityBinding.ccavKRS.text.orEmpty(),
@@ -383,7 +384,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             legalEntityBinding.cbSupplier.isChecked = counterparty.isSupplier
             legalEntityBinding.cbWarehouse.isChecked = counterparty.isWarehouse
             legalEntityBinding.cbCustomer.isChecked = counterparty.isCustomer
-            legalEntityBinding.ccavCompanyName.text = counterparty.companyName
+            legalEntityBinding.ccavCompanyName.setTextAndMode(
+                counterparty.companyName ?: "",
+                readOnly = true
+            )
             legalEntityBinding.ccavType.text = counterparty.type
             legalEntityBinding.ccavNIP.text = counterparty.nip
             legalEntityBinding.ccavKRS.text = counterparty.krs
@@ -562,8 +566,19 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
 
-        val maxLines = if (isEditable) 2 else 1
-        legalEntityBinding.ccavCompanyName.setInputMaxLines(maxLines)
+        if (isEditable) {
+            legalEntityBinding.ccavCompanyName.apply {
+                setReadOnlyMode(false)
+                setInputEllipsize(null)
+                setInputMaxLines(2)
+            }
+        } else {
+            legalEntityBinding.ccavCompanyName.apply {
+                setReadOnlyMode(true)
+                setInputEllipsize(TextUtils.TruncateAt.END)
+                setInputMaxLines(1)
+            }
+        }
     }
 
     private fun updateEditableStateCheckBoxes(isEditable: Boolean) {
@@ -655,39 +670,47 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 if (isEditing) return
                 isEditing = true
 
-                var text = s?.toString() ?: ""
+                val original = s?.toString() ?: ""
+                val cursorPosition = field.getSelection()
 
-                // Удаление переносов строк и пробелов по краям
-                text = text.replace("\n", "").trim()
-                if (text != field.text) {
-                    field.text = text
-                    field.setSelection(text.length)
+                // Удаляем переносы строк, заменяем множественные пробелы на один, но не трогаем крайние пробелы
+                var cleaned = original
+                    .replace("\n", "") // убираем переносы строк
+                    .replace(Regex(" {2,}"), " ") // заменяем 2+ пробелов на 1
+
+                // Если изменили текст — обновляем поле
+                if (cleaned != original) {
+                    field.text = cleaned
+                    field.setSelection(minOf(cursorPosition, cleaned.length))
                 }
 
+                // Для валидации обрезаем пробелы по краям (НЕ В field.text!)
+                val trimmedText = cleaned.trim()
+
                 val error = when {
-                    InputValidator.validateEmpty(context, text) != null ->
-                        InputValidator.validateEmpty(context, text)
+                    InputValidator.validateEmpty(context, trimmedText) != null ->
+                        InputValidator.validateEmpty(context, trimmedText)
 
-                    InputValidator.validateLength(context, text, 90) != null ->
-                        InputValidator.validateLength(context, text, 90)
+                    InputValidator.validateLength(context, trimmedText, 90) != null ->
+                        InputValidator.validateLength(context, trimmedText, 90)
 
-                    InputValidator.validateMinAllowedInitialLength(context, text) != null ->
-                        InputValidator.validateMinAllowedInitialLength(context, text)
+                    InputValidator.validateMinAllowedInitialLength(context, trimmedText) != null ->
+                        InputValidator.validateMinAllowedInitialLength(context, trimmedText)
 
-                    InputValidator.validateStartingOrEndingDot(context, text) != null ->
-                        InputValidator.validateStartingOrEndingDot(context, text)
+                    InputValidator.validateStartingDot(context, trimmedText) != null ->
+                        InputValidator.validateStartingDot(context, trimmedText)
 
-                    InputValidator.validateStartingOrEndingSpace(context, text) != null ->
-                        InputValidator.validateStartingOrEndingSpace(context, text)
+                    InputValidator.validateStartingOrEndingSpace(context, trimmedText) != null ->
+                        InputValidator.validateStartingOrEndingSpace(context, trimmedText)
 
-                    InputValidator.validateLineBreaksAndCharacters(context, text) != null ->
-                        InputValidator.validateLineBreaksAndCharacters(context, text)
+                    InputValidator.validateLineBreaksAndCharacters(context, trimmedText) != null ->
+                        InputValidator.validateLineBreaksAndCharacters(context, trimmedText)
 
-                    InputValidator.validateCharacters(context, text) != null ->
-                        InputValidator.validateCharacters(context, text)
+                    InputValidator.validateCharacters(context, trimmedText) != null ->
+                        InputValidator.validateCharacters(context, trimmedText)
 
-                    InputValidator.validateName(context, text) != null ->
-                        InputValidator.validateName(context, text)
+                    InputValidator.validateName(context, trimmedText) != null ->
+                        InputValidator.validateName(context, trimmedText)
 
                     else -> null
                 }
@@ -705,7 +728,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                             )
                         )
                     } else {
-                        val remaining = 90 - text.length
+                        val remaining = 90 - trimmedText.length
                         if (remaining in 0..90) {
                             field.setBottomTextState(
                                 BottomTextState.Description(

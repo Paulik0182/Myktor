@@ -85,7 +85,7 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
             binding.tvNickname.text = counterparty.shortName
 
-            binding.llTextContainer.setOnClickListener {
+            binding.ivRightIcon.setOnClickListener {
                 counterparty.id?.let { counterpartyId ->
                     requireController<ProfileFragment.Controller>().openCounterpartyDetails(
                         counterpartyId

@@ -41,6 +41,7 @@
     <string name="error_line_breaks">Email не может содержать переносы строк</string>
     <string name="error_starting_or_ending_dot">Email не может начинаться или заканчиваться точкой</string>
     <string name="error_starting_or_ending_space">Email не может начинаться или заканчиваться пробелом</string>
+    <string name="error_starting_dot">Текст не может начинаться с точки</string>
     <string name="error_min_length">Минимум %1$d символов</string>
     <string name="error_length">Значение должно равнятся %1$d символов</string>
     <string name="error_digits_only">Разрешены только цифры от 0 до 9</string>
