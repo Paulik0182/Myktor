@@ -8,6 +8,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.annotation.StyleRes
@@ -23,6 +24,8 @@ class CustomCardActionView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val binding = LayoutCardActionViewBinding.inflate(LayoutInflater.from(context), this)
+
+    private var inputEllipsize: TextUtils.TruncateAt? = null
 
     init {
         context.theme.obtainStyledAttributes(
@@ -110,6 +113,7 @@ class CustomCardActionView @JvmOverloads constructor(
                 if (hasValue(R.styleable.CustomCardActionView_inputFontFamily)) {
                     val font = getString(R.styleable.CustomCardActionView_inputFontFamily)
                     binding.etInputUser.typeface = Typeface.create(font, Typeface.NORMAL)
+                    binding.tvInputUserReadOnly.typeface = Typeface.create(font, Typeface.NORMAL)
                 }
 
                 val ime = getInt(
@@ -136,12 +140,14 @@ class CustomCardActionView @JvmOverloads constructor(
                 }
 
                 when (getInt(R.styleable.CustomCardActionView_inputEllipsize, 0)) {
-                    1 -> binding.etInputUser.ellipsize = TextUtils.TruncateAt.START
-                    2 -> binding.etInputUser.ellipsize = TextUtils.TruncateAt.MIDDLE
-                    3 -> binding.etInputUser.ellipsize = TextUtils.TruncateAt.END
-                    4 -> binding.etInputUser.ellipsize = TextUtils.TruncateAt.MARQUEE
-                    else -> binding.etInputUser.ellipsize = null
+                    1 -> inputEllipsize = TextUtils.TruncateAt.START
+                    2 -> inputEllipsize = TextUtils.TruncateAt.MIDDLE
+                    3 -> inputEllipsize = TextUtils.TruncateAt.END
+                    4 -> inputEllipsize = TextUtils.TruncateAt.MARQUEE
+                    else -> inputEllipsize = null
                 }
+                binding.etInputUser.ellipsize = inputEllipsize
+                binding.tvInputUserReadOnly.ellipsize = inputEllipsize
 
                 // Цвет текста
                 if (hasValue(R.styleable.CustomCardActionView_inputTextColor)) {
@@ -166,9 +172,11 @@ class CustomCardActionView @JvmOverloads constructor(
 
                 // ✩ Важно: отключаем singleLine, чтобы \n работал как перенос строки
                 // Некоторые inputType (например, textNoSuggestions) включают singleLine по умолчанию
-                binding.etInputUser.apply{
+                binding.etInputUser.apply {
                     isSingleLine = false
                 }
+
+                syncReadOnlyTextStyle()
             } finally {
                 recycle()
             }
@@ -245,15 +253,23 @@ class CustomCardActionView @JvmOverloads constructor(
             field = value
             binding.ivActionIcon.isVisible = value
 
-            val params = binding.etInputUser.layoutParams as ConstraintLayout.LayoutParams
-            params.marginStart = if (value) {
-                // если иконка показана — отступ между иконкой и полем
+            val marginStart = if (value) {
                 context.resources.getDimensionPixelSize(R.dimen.etInputUser_marginStart_with_icon)
             } else {
-                // если иконка скрыта — отступ слева в 0
                 0
             }
-            binding.etInputUser.layoutParams = params
+
+            // Установка marginStart для EditText
+            (binding.etInputUser.layoutParams as ConstraintLayout.LayoutParams).apply {
+                this.marginStart = marginStart
+                binding.etInputUser.layoutParams = this
+            }
+
+            // Установка marginStart для TextView
+            (binding.tvInputUserReadOnly.layoutParams as ConstraintLayout.LayoutParams).apply {
+                this.marginStart = marginStart
+                binding.tvInputUserReadOnly.layoutParams = this
+            }
         }
 
     /**
@@ -383,14 +399,20 @@ class CustomCardActionView @JvmOverloads constructor(
 
     fun setInputTextSize(sizePx: Float) {
         binding.etInputUser.textSize = sizePx / resources.displayMetrics.scaledDensity
+        binding.tvInputUserReadOnly.textSize = sizePx / resources.displayMetrics.scaledDensity
+        syncReadOnlyTextStyle()
     }
 
     fun setInputTextStyle(style: Int) {
         binding.etInputUser.setTypeface(null, style)
+        binding.tvInputUserReadOnly.setTypeface(null, style)
+        syncReadOnlyTextStyle()
     }
 
     fun setInputTextAppearance(@StyleRes appearanceRes: Int) {
         binding.etInputUser.setTextAppearance(appearanceRes)
+        binding.tvInputUserReadOnly.setTextAppearance(appearanceRes)
+        syncReadOnlyTextStyle()
     }
 
     /**
@@ -398,6 +420,8 @@ class CustomCardActionView @JvmOverloads constructor(
      */
     fun setInputTextColor(color: Int) {
         binding.etInputUser.setTextColor(color)
+        binding.tvInputUserReadOnly.setTextColor(color)
+        syncReadOnlyTextStyle()
     }
 
     /**
@@ -405,6 +429,8 @@ class CustomCardActionView @JvmOverloads constructor(
      */
     fun setInputHintTextColor(color: Int) {
         binding.etInputUser.setHintTextColor(color)
+        binding.tvInputUserReadOnly.setHintTextColor(color)
+        syncReadOnlyTextStyle()
     }
 
     fun setInputLines(lines: Int) {
@@ -470,28 +496,48 @@ class CustomCardActionView @JvmOverloads constructor(
         binding.ivDescriptionIcon.setColorFilter(color)
     }
 
-//    fun setBottomTextState(isError: Boolean, text: String?) {
-//        binding.tvDescription.text = text
-//
-//        val color = if (isError) {
-//            ContextCompat.getColor(context, R.color.uiKitColorError)
-//        } else {
-//            // Это важно: ставим селектор через setTextColor(resourceId), а не конкретный цвет
-//            ContextCompat.getColorStateList(context, R.color.input_bottom_color)
-//        }
-//
-//        // Применяем цвет (и селектор, и фиксированный обрабатываются корректно)
-//        if (color is ColorStateList) {
-//            binding.tvDescription.setTextColor(color)
-//            binding.ivDescriptionIcon.imageTintList = color
-//        } else {
-//            binding.tvDescription.setTextColor(color)
-//            binding.ivDescriptionIcon.setColorFilter(color)
-//        }
-//
-//        // Управляем видимостью
-//        binding.tvDescription.isVisible = !text.isNullOrBlank()
-//        binding.ivDescriptionIcon.isVisible = !text.isNullOrBlank()
-//    }
+    fun setReadOnlyMode(enabled: Boolean) {
+        if (enabled) {
+            val currentText = binding.etInputUser.text?.toString().orEmpty()
+            binding.tvInputUserReadOnly.text = currentText
+            binding.etInputUser.visibility = View.GONE
+            binding.tvInputUserReadOnly.visibility = View.VISIBLE
+        } else {
+            binding.etInputUser.visibility = View.VISIBLE
+            binding.tvInputUserReadOnly.visibility = View.GONE
+        }
+    }
 
+    fun setTextAndMode(text: String, readOnly: Boolean) {
+        this.text = text // Установит в EditText
+        if (readOnly) {
+            binding.tvInputUserReadOnly.text = text
+        }
+        setReadOnlyMode(readOnly)
+    }
+
+    private fun syncReadOnlyTextStyle() {
+        binding.tvInputUserReadOnly.apply {
+            textSize = binding.etInputUser.textSize / resources.displayMetrics.scaledDensity
+            setTypeface(
+                binding.etInputUser.typeface,
+                binding.etInputUser.typeface?.style ?: Typeface.NORMAL
+            )
+            setTextColor(binding.etInputUser.currentTextColor)
+            gravity = binding.etInputUser.gravity
+            ellipsize = inputEllipsize
+            setPadding(
+                binding.etInputUser.paddingLeft,
+                binding.etInputUser.paddingTop,
+                binding.etInputUser.paddingRight,
+                binding.etInputUser.paddingBottom
+            )
+        }
+    }
+
+    fun setInputEllipsize(mode: TextUtils.TruncateAt?) {
+        inputEllipsize = mode
+        binding.etInputUser.ellipsize = mode
+        binding.tvInputUserReadOnly.ellipsize = mode
+    }
 }

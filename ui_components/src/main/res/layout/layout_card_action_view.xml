@@ -95,6 +95,28 @@
                 app:layout_constraintTop_toTopOf="@id/vgInput"
                 tools:hint="Title" />
 
+            <TextView
+                android:id="@+id/tvInputUserReadOnly"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:layout_marginStart="@dimen/etInputUser_marginStart_with_icon"
+                android:layout_marginEnd="12dp"
+                android:gravity="center_vertical|start"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/input_right_color"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:paddingVertical="4dp"
+                app:layout_constraintBottom_toBottomOf="@id/vgInput"
+                app:layout_constraintEnd_toStartOf="@+id/btnEdit"
+                app:layout_constraintStart_toEndOf="@id/barrierIconEnd"
+                app:layout_constraintTop_toTopOf="@id/vgInput"
+                tools:hint="Title"/>
+
             <View
                 android:id="@+id/vUnderline"
                 android:layout_width="0dp"

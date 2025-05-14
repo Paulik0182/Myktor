@@ -12,6 +12,7 @@
         <!-- Количество строк -->
         <attr name="inputLines" format="integer" />
         <attr name="inputMaxLines" format="integer" />
+        <attr name="inputSingleLine" format="boolean" />
 
         <attr name="inputMaxLength" format="integer" />
 
