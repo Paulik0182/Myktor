@@ -24,14 +24,11 @@ import com.nayya.myktor.ui.product.counterparties.CounterpartiesFragment
 import com.nayya.myktor.ui.profile.ProfileFragment
 import com.nayya.myktor.ui.profile.ProfileMenuType
 import com.nayya.myktor.ui.profile.detailscounterparty.CounterpartyDetailsFragment
-import com.nayya.myktor.ui.test.RequestFragment
 import com.nayya.myktor.utils.ViewBindingActivity
 
 private const val TAG_ROOT_CONTAINER_FRAGMENT = "NAG_ROOT_CONTAINER_FRAGMENT"
 
 class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBinding::inflate),
-    RootFragment.Controller,
-    RequestFragment.Controller,
     AccountingProductsFragment.Controller,
     OrdersFragment.Controller,
     ProductsFragment.Controller,
@@ -124,15 +121,6 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 //            .replace(binding.container.id, fragment)
             .addToBackStack(null)
             .commit()
-    }
-
-    override fun openTestCollServer() {
-        openChildFragment(RequestFragment.newInstance())
-    }
-
-    // TODO переделать. удалить
-    override fun openProductAccounting() {
-        openChildFragment(AccountingProductsFragment.newInstance())
     }
 
     override fun openOrders() {

@@ -14,6 +14,7 @@ import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.utils.viewBinding
 import kotlinx.coroutines.launch
 
+// TODO На удаление!
 class OrdersFragment : Fragment(R.layout.fragment_orders) {
 
     private val binding by viewBinding<FragmentOrdersBinding>()

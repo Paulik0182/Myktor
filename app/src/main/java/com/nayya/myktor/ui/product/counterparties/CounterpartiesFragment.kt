@@ -15,6 +15,7 @@ import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.utils.viewBinding
 import kotlinx.coroutines.launch
 
+// TODO На удаление!
 class CounterpartiesFragment : Fragment(R.layout.fragment_suppliers) {
 
     private lateinit var viewModel: CounterpartyViewModel

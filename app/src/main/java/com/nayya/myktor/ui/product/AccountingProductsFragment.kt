@@ -8,6 +8,7 @@ import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentAccountingProductBinding
 import com.nayya.myktor.utils.viewBinding
 
+// TODO На удаление!
 class AccountingProductsFragment : Fragment(R.layout.fragment_accounting_product) {
 
     private val binding by viewBinding<FragmentAccountingProductBinding>()
