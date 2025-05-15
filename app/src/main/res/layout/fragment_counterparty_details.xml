@@ -56,54 +56,63 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <EditText
-                        android:id="@+id/tvShortName"
+                    <com.nayya.uicomponents.CustomCardActionView
+                        android:id="@+id/ccavShortName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
-                        android:cursorVisible="false"
-                        android:ellipsize="end"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:hint="Short Name"
-                        android:maxLines="1"
-                        android:textColor="@color/light_gray"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        app:descriptionText="Short Name"
+                        app:showEditIcon="false"
+                        app:showDescriptionIcon="true"
+                        app:showDescriptionText="true"
+                        app:inputMaxLength="21"
+                        app:showInfoIcon="false"
+                        app:showInfoText="false"
+                        app:inputEnabled="false"
+                        app:showUnderline="true"
+                        app:inputMaxLines="1"
+                        app:showLeftIcon="false"
+                        app:inputBackground="@drawable/bg_field_gray_cell_white"
+                        app:hintText="Short Name" />
 
-                    <EditText
-                        android:id="@+id/tvFirstName"
+                    <com.nayya.uicomponents.CustomCardActionView
+                        android:id="@+id/ccavFirstName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
-                        android:cursorVisible="false"
-                        android:ellipsize="end"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:hint="First Name"
-                        android:maxLines="1"
-                        android:paddingTop="5dp"
-                        android:textColor="@color/light_gray"
-                        android:textSize="14sp"
+                        app:descriptionText="First Name"
+                        app:showEditIcon="false"
+                        app:showDescriptionIcon="true"
+                        app:showDescriptionText="true"
+                        app:inputMaxLength="36"
+                        app:showInfoIcon="false"
+                        app:showInfoText="false"
+                        app:inputEnabled="false"
+                        app:showUnderline="true"
+                        app:inputMaxLines="1"
+                        app:showLeftIcon="false"
                         android:visibility="gone"
-                        tools:visibility="visible" />
+                        tools:visibility="visible"
+                        app:inputBackground="@drawable/bg_field_gray_cell_white"
+                        app:hintText="First Name" />
 
-                    <EditText
-                        android:id="@+id/tvLastName"
+                    <com.nayya.uicomponents.CustomCardActionView
+                        android:id="@+id/ccavLastName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
-                        android:cursorVisible="false"
-                        android:ellipsize="end"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:hint="Last Name"
-                        android:maxLines="1"
-                        android:paddingTop="5dp"
-                        android:textColor="@color/light_gray"
-                        android:textSize="14sp"
+                        app:descriptionText="Last Name"
+                        app:showEditIcon="false"
+                        app:showDescriptionIcon="true"
+                        app:showDescriptionText="true"
+                        app:inputMaxLength="36"
+                        app:showInfoIcon="false"
+                        app:showInfoText="false"
+                        app:inputEnabled="false"
+                        app:showUnderline="true"
+                        app:inputMaxLines="1"
+                        app:showLeftIcon="false"
                         android:visibility="gone"
-                        tools:visibility="visible" />
+                        tools:visibility="visible"
+                        app:inputBackground="@drawable/bg_field_gray_cell_white"
+                        app:hintText="Last Name" />
                 </LinearLayout>
             </LinearLayout>
 

@@ -117,24 +117,18 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             override fun afterTextChanged(s: Editable?) = Unit
         }
 
-        val nameEditTexts = listOf(
-            binding.tvShortName,
-            binding.tvFirstName,
-            binding.tvLastName
-        )
-
         val firmFields = listOf(
+            binding.ccavShortName,
+            binding.ccavFirstName,
+            binding.ccavLastName,
             legalEntityBinding.ccavCompanyName,
             legalEntityBinding.ccavType,
             legalEntityBinding.ccavNIP,
             legalEntityBinding.ccavKRS
         )
 
-        (nameEditTexts + firmFields).forEach { view ->
-            when (view) {
-                is EditText -> view.addTextChangedListener(watcher)
-                is CustomCardActionView -> view.addTextChangedListener(watcher)
-            }
+        firmFields.forEach { view ->
+            view.addTextChangedListener(watcher)
         }
     }
 
@@ -215,9 +209,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         viewModel.saveChanges(
-            shortName = binding.tvShortName.text.toString(),
-            firstName = binding.tvFirstName.text.toString(),
-            lastName = binding.tvLastName.text.toString(),
+            shortName = binding.ccavShortName.text.orEmpty().trimEnd(),
+            firstName = binding.ccavFirstName.text.orEmpty().trimEnd(),
+            lastName = binding.ccavLastName.text.orEmpty().trimEnd(),
             companyName = legalEntityBinding.ccavCompanyName.text.orEmpty().trimEnd(),
             type = legalEntityBinding.ccavType.text.orEmpty(),
             nip = legalEntityBinding.ccavNIP.text.orEmpty(),
@@ -281,6 +275,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
             setupTextWatchers()
             setupChangeListeners()
+            setupShortNameValidation()
+            setupFirstNameValidation()
+            setupLastNameValidation()
             setupCompanyNameValidation()
             setupNIPValidation()
             setupKRSValidation()
@@ -343,18 +340,26 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             .circleCrop()
             .into(binding.ivAvatar)
 
-        binding.tvFirstName.apply {
+        binding.ccavFirstName.apply {
             visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-            setText(counterparty.firstName)
+            setTextAndMode(
+                counterparty.firstName ?: "",
+                readOnly = true
+            )
         }
 
-        binding.tvLastName.apply {
+        binding.ccavLastName.apply {
             visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-            setText(counterparty.lastName)
+            setTextAndMode(
+                counterparty.lastName ?: "",
+                readOnly = true
+            )
         }
 
-        binding.tvShortName.setText(counterparty.shortName)
-
+        binding.ccavShortName.setTextAndMode(
+            counterparty.shortName ?: "",
+            readOnly = true
+        )
         bindCounterparty(counterparty)
     }
 
@@ -504,20 +509,18 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     }
 
     private fun updateLegalEntityVisibility(isLegalEntity: Boolean) {
-        binding.tvFirstName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
-        binding.tvLastName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
+        binding.ccavFirstName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
+        binding.ccavLastName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
         binding.includeLegalEntity.layoutLegalEntity.visibility =
             if (isLegalEntity) View.VISIBLE else View.GONE
     }
 
     private fun updateEditableStateEditText(isEditable: Boolean) {
-        val nameEditTexts = listOf(
-            binding.tvShortName,
-            binding.tvFirstName,
-            binding.tvLastName
-        )
 
         val firmFields = listOf(
+            binding.ccavShortName,
+            binding.ccavFirstName,
+            binding.ccavLastName,
             legalEntityBinding.ccavCompanyName,
             legalEntityBinding.ccavNIP,
             legalEntityBinding.ccavKRS,
@@ -529,16 +532,6 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             ContextCompat.getColor(requireContext(), R.color.light_gray)
         }
 
-        nameEditTexts.forEach { editText ->
-            editText.apply {
-                isEnabled = isEditable
-                isFocusable = isEditable
-                isFocusableInTouchMode = isEditable
-                isCursorVisible = isEditable
-                setTextColor(textColor)
-            }
-        }
-
         firmFields.forEach { legalEntity ->
             legalEntity.apply {
                 showUnderline = isEditable
@@ -547,6 +540,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 isInputEnabled = isEditable
                 setInputTextColor(textColor)
             }
+        }
+
+        binding.ccavShortName.apply {
+            setInputTextColor(ContextCompat.getColor(requireContext(), R.color.black))
         }
 
         legalEntityBinding.ccavType.apply {
@@ -567,12 +564,31 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
 
         if (isEditable) {
+            binding.ccavShortName.apply {
+                setReadOnlyMode(false)
+            }
+            binding.ccavFirstName.apply {
+                setReadOnlyMode(false)
+            }
+            binding.ccavLastName.apply {
+                setReadOnlyMode(false)
+            }
             legalEntityBinding.ccavCompanyName.apply {
                 setReadOnlyMode(false)
                 setInputEllipsize(null)
                 setInputMaxLines(2)
             }
+
         } else {
+            binding.ccavShortName.apply {
+                setReadOnlyMode(true)
+            }
+            binding.ccavFirstName.apply {
+                setReadOnlyMode(true)
+            }
+            binding.ccavLastName.apply {
+                setReadOnlyMode(true)
+            }
             legalEntityBinding.ccavCompanyName.apply {
                 setReadOnlyMode(true)
                 setInputEllipsize(TextUtils.TruncateAt.END)
@@ -619,9 +635,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
     private fun hasUnsavedChanges(): Boolean {
         val counterparty = viewModel.counterparty.value ?: return false
-        return binding.tvShortName.text.toString() != counterparty.shortName ||
-                binding.tvFirstName.text.toString() != (counterparty.firstName ?: "") ||
-                binding.tvLastName.text.toString() != (counterparty.lastName ?: "") ||
+        return binding.ccavShortName.text.orEmpty() != counterparty.shortName ||
+                binding.ccavFirstName.text.orEmpty() != (counterparty.firstName ?: "") ||
+                binding.ccavLastName.text.orEmpty() != (counterparty.lastName ?: "") ||
                 binding.scEntityStatus.isChecked != counterparty.isLegalEntity ||
                 legalEntityBinding.cbSupplier.isChecked != counterparty.isSupplier ||
                 legalEntityBinding.cbWarehouse.isChecked != counterparty.isWarehouse ||
@@ -654,7 +670,290 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         )
     }
 
-    // ВАЛИДАЦИЯ ПОЛЯ ccavCompanyName
+    private fun setupShortNameValidation() {
+        val context = requireContext()
+        val field = binding.ccavShortName
+        field.addTextChangedListener(object : TextWatcher {
+            private var isEditing = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
+                Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEditing) return
+                isEditing = true
+
+                val original = s?.toString() ?: ""
+                val cursorPosition = field.getSelection()
+
+                // Удаляем переносы строк, заменяем множественные пробелы на один, но не трогаем крайние пробелы
+                var cleaned = original
+                    .replace("\n", "") // убираем переносы строк
+                    .replace(Regex(" {2,}"), " ") // заменяем 2+ пробелов на 1
+
+                // Если изменили текст — обновляем поле
+                if (cleaned != original) {
+                    field.text = cleaned
+                    field.setSelection(minOf(cursorPosition, cleaned.length))
+                }
+
+                // Для валидации обрезаем пробелы по краям (НЕ В field.text!)
+                val trimmedText = cleaned.trim()
+
+                val error = when {
+                    InputValidator.validateEmpty(context, trimmedText) != null ->
+                        InputValidator.validateEmpty(context, trimmedText)
+
+                    InputValidator.validateLength(context, trimmedText, 20) != null ->
+                        InputValidator.validateLength(context, trimmedText, 20)
+
+                    InputValidator.validateMinAllowedInitialLength(
+                        context,
+                        trimmedText,
+                        5
+                    ) != null ->
+                        InputValidator.validateMinAllowedInitialLength(context, trimmedText, 5)
+
+                    InputValidator.validateStartingDot(context, trimmedText) != null ->
+                        InputValidator.validateStartingDot(context, trimmedText)
+
+                    InputValidator.validateStartingOrEndingSpace(context, trimmedText) != null ->
+                        InputValidator.validateStartingOrEndingSpace(context, trimmedText)
+
+                    InputValidator.validateLineBreaksAndCharacters(context, trimmedText) != null ->
+                        InputValidator.validateLineBreaksAndCharacters(context, trimmedText)
+
+                    InputValidator.validateCharacters(context, trimmedText) != null ->
+                        InputValidator.validateCharacters(context, trimmedText)
+
+                    InputValidator.validateName(context, trimmedText) != null ->
+                        InputValidator.validateName(context, trimmedText)
+
+                    else -> null
+                }
+
+                // ✅ ВАЖНО: обновляем валидность во ViewModel
+                viewModel.setCompanyNameValid(error == null)
+
+                if (viewModel.isEditMode.value == true) {
+                    if (error != null) {
+                        field.setBottomTextState(
+                            BottomTextState.Error(
+                                showErrorText = true,
+                                showErrorIcon = true,
+                                errorText = error
+                            )
+                        )
+                    } else {
+                        val remaining = 20 - trimmedText.length
+                        if (remaining in 0..20) {
+                            field.setBottomTextState(
+                                BottomTextState.Description(
+                                    showDescriptionText = true,
+                                    descriptionText = resources.getQuantityString(
+                                        R.plurals.remaining_characters,
+                                        remaining,
+                                        remaining
+                                    )
+                                )
+                            )
+                        } else {
+                            field.setBottomTextState(BottomTextState.Empty)
+                        }
+                    }
+                }
+                isEditing = false
+            }
+        })
+    }
+
+    private fun setupFirstNameValidation() {
+        val context = requireContext()
+        val field = binding.ccavFirstName
+        field.addTextChangedListener(object : TextWatcher {
+            private var isEditing = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
+                Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEditing) return
+                isEditing = true
+
+                val original = s?.toString() ?: ""
+                val cursorPosition = field.getSelection()
+
+                // Удаляем переносы строк, заменяем множественные пробелы на один, но не трогаем крайние пробелы
+                var cleaned = original
+                    .replace("\n", "") // убираем переносы строк
+                    .replace(Regex(" {2,}"), " ") // заменяем 2+ пробелов на 1
+
+                // Если изменили текст — обновляем поле
+                if (cleaned != original) {
+                    field.text = cleaned
+                    field.setSelection(minOf(cursorPosition, cleaned.length))
+                }
+
+                // Для валидации обрезаем пробелы по краям (НЕ В field.text!)
+                val trimmedText = cleaned.trim()
+
+                val error = when {
+                    InputValidator.validateLength(context, trimmedText, 35) != null ->
+                        InputValidator.validateLength(context, trimmedText, 35)
+
+                    InputValidator.validateStartingDot(context, trimmedText) != null ->
+                        InputValidator.validateStartingDot(context, trimmedText)
+
+                    InputValidator.validateEndDot(context, trimmedText) != null ->
+                        InputValidator.validateEndDot(context, trimmedText)
+
+                    InputValidator.validateStartingOrEndingSpace(context, trimmedText) != null ->
+                        InputValidator.validateStartingOrEndingSpace(context, trimmedText)
+
+                    InputValidator.validateLineBreaksAndCharacters(context, trimmedText) != null ->
+                        InputValidator.validateLineBreaksAndCharacters(context, trimmedText)
+
+                    InputValidator.validateOnlyLettersDashAndSpace(context, trimmedText) != null ->
+                        InputValidator.validateOnlyLettersDashAndSpace(context, trimmedText)
+
+                    InputValidator.validateName(context, trimmedText) != null ->
+                        InputValidator.validateName(context, trimmedText)
+
+                    else -> null
+                }
+
+                // ✅ ВАЖНО: обновляем валидность во ViewModel
+                viewModel.setCompanyNameValid(error == null)
+
+                if (viewModel.isEditMode.value == true) {
+                    if (error != null) {
+                        field.setBottomTextState(
+                            BottomTextState.Error(
+                                showErrorText = true,
+                                showErrorIcon = true,
+                                errorText = error
+                            )
+                        )
+                    } else {
+                        val remaining = 35 - trimmedText.length
+                        if (remaining in 2..35) {
+                            field.setBottomTextState(
+                                BottomTextState.Description(
+                                    showDescriptionText = true,
+                                    descriptionText = resources.getQuantityString(
+                                        R.plurals.remaining_characters,
+                                        remaining,
+                                        remaining
+                                    )
+                                )
+                            )
+                        } else {
+                            field.setBottomTextState(BottomTextState.Empty)
+                        }
+                    }
+                }
+                isEditing = false
+            }
+        })
+    }
+
+    private fun setupLastNameValidation() {
+        val context = requireContext()
+        val field = binding.ccavLastName
+        field.addTextChangedListener(object : TextWatcher {
+            private var isEditing = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
+                Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEditing) return
+                isEditing = true
+
+                val original = s?.toString() ?: ""
+                val cursorPosition = field.getSelection()
+
+                // Удаляем переносы строк, заменяем множественные пробелы на один, но не трогаем крайние пробелы
+                var cleaned = original
+                    .replace("\n", "") // убираем переносы строк
+                    .replace(Regex(" {2,}"), " ") // заменяем 2+ пробелов на 1
+
+                // Если изменили текст — обновляем поле
+                if (cleaned != original) {
+                    field.text = cleaned
+                    field.setSelection(minOf(cursorPosition, cleaned.length))
+                }
+
+                // Для валидации обрезаем пробелы по краям (НЕ В field.text!)
+                val trimmedText = cleaned.trim()
+
+                val error = when {
+
+                    InputValidator.validateLength(context, trimmedText, 35) != null ->
+                        InputValidator.validateLength(context, trimmedText, 35)
+
+                    InputValidator.validateStartingDot(context, trimmedText) != null ->
+                        InputValidator.validateStartingDot(context, trimmedText)
+
+                    InputValidator.validateEndDot(context, trimmedText) != null ->
+                        InputValidator.validateEndDot(context, trimmedText)
+
+                    InputValidator.validateStartingOrEndingSpace(context, trimmedText) != null ->
+                        InputValidator.validateStartingOrEndingSpace(context, trimmedText)
+
+                    InputValidator.validateLineBreaksAndCharacters(context, trimmedText) != null ->
+                        InputValidator.validateLineBreaksAndCharacters(context, trimmedText)
+
+                    InputValidator.validateOnlyLettersDashAndSpace(context, trimmedText) != null ->
+                        InputValidator.validateOnlyLettersDashAndSpace(context, trimmedText)
+
+                    InputValidator.validateName(context, trimmedText) != null ->
+                        InputValidator.validateName(context, trimmedText)
+
+                    else -> null
+                }
+
+                // ✅ ВАЖНО: обновляем валидность во ViewModel
+                viewModel.setCompanyNameValid(error == null)
+
+                if (viewModel.isEditMode.value == true) {
+                    if (error != null) {
+                        field.setBottomTextState(
+                            BottomTextState.Error(
+                                showErrorText = true,
+                                showErrorIcon = true,
+                                errorText = error
+                            )
+                        )
+                    } else {
+                        val remaining = 35 - trimmedText.length
+                        if (remaining in 2..35) {
+                            field.setBottomTextState(
+                                BottomTextState.Description(
+                                    showDescriptionText = true,
+                                    descriptionText = resources.getQuantityString(
+                                        R.plurals.remaining_characters,
+                                        remaining,
+                                        remaining
+                                    )
+                                )
+                            )
+                        } else {
+                            field.setBottomTextState(BottomTextState.Empty)
+                        }
+                    }
+                }
+                isEditing = false
+            }
+        })
+    }
+
     private fun setupCompanyNameValidation() {
         val context = requireContext()
         val field = legalEntityBinding.ccavCompanyName
@@ -946,11 +1245,11 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     private fun runInitialValidations() {
         val context = requireContext()
 
-        // Company Name
+        binding.ccavShortName.text = binding.ccavShortName.text
+        binding.ccavFirstName.text = binding.ccavFirstName.text
+        binding.ccavLastName.text = binding.ccavLastName.text
         legalEntityBinding.ccavCompanyName.text = legalEntityBinding.ccavCompanyName.text
-        // NIP
         legalEntityBinding.ccavNIP.text = legalEntityBinding.ccavNIP.text
-        // KRS
         legalEntityBinding.ccavKRS.text = legalEntityBinding.ccavKRS.text
 
         viewModel.setHasUnsavedChanges(false)

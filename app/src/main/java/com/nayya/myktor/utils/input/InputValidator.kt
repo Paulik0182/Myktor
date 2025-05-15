@@ -27,6 +27,7 @@ class InputValidator {
          * ”+”, “!”
          */
         private val INVALID_CHARACTERS = Regex("[+!]")
+
         /**
          * [^a-zA-Z0-9._\\-] - Запрещает все символы, кроме латинских букв, цифр, точки, подчеркивания и дефиса.
          * [\uD800-\uDFFF] - Запрещает все суррогатные пары UTF-16, которые используются для представления эмодзи.
@@ -34,6 +35,8 @@ class InputValidator {
          */
         private val ADVANCED_INVALID_CHARACTERS =
             Regex("[^a-zA-Z0-9@#/_\\-.\\s]|[\uD800-\uDFFF]|[\u0080-\uFFFF]")
+
+        private val ONLY_LETTERS_DASH_SPACE_REGEX = Regex("[^a-zA-Zа-яА-ЯёЁ\\-\\s]")
 
         /**
          * [\n\r] - Запрещает перенос строк
@@ -99,9 +102,13 @@ class InputValidator {
         }
 
         // Проверка на минимальное количество символов
-        fun validateMinAllowedInitialLength(context: Context, name: String): String? {
-            return if (name.length < MIN_ALLOWED_INITIAL_LENGTH) {
-                context.getString(R.string.error_min_length, MIN_ALLOWED_INITIAL_LENGTH)
+        fun validateMinAllowedInitialLength(
+            context: Context,
+            name: String,
+            lengthText: Int = MIN_ALLOWED_INITIAL_LENGTH,
+        ): String? {
+            return if (name.length < lengthText) {
+                context.getString(R.string.error_min_length, lengthText)
             } else null
         }
 
@@ -127,6 +134,12 @@ class InputValidator {
             } else null
         }
 
+        fun validateOnlyLettersDashAndSpace(context: Context, name: String): String? {
+            return if (ONLY_LETTERS_DASH_SPACE_REGEX.containsMatchIn(name)) {
+                context.getString(R.string.error_only_letters_allowed)
+            } else null
+        }
+
         // Проверка на перенос строки
         fun validateLineBreaksAndCharacters(context: Context, name: String): String? {
             return if (INVALID_LINE_BREAKS_REGEX.containsMatchIn(name)) {
@@ -144,6 +157,12 @@ class InputValidator {
         fun validateStartingDot(context: Context, name: String): String? {
             return if (name.startsWith(".")) {
                 context.getString(R.string.error_starting_dot)
+            } else null
+        }
+
+        fun validateEndDot(context: Context, name: String): String? {
+            return if (name.endsWith(".")) {
+                context.getString(R.string.error_end_dot)
             } else null
         }
 

@@ -115,7 +115,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/btnEdit"
                 app:layout_constraintStart_toEndOf="@id/barrierIconEnd"
                 app:layout_constraintTop_toTopOf="@id/vgInput"
-                tools:hint="Title"/>
+                tools:hint=""/>
 
             <View
                 android:id="@+id/vUnderline"
