@@ -7,11 +7,16 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.nayya.myktor.R
+import com.nayya.myktor.data.prefs.TokenStorage
 import com.nayya.myktor.databinding.ActivityMainBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
+import com.nayya.myktor.ui.login.LoginFragment
+import com.nayya.myktor.ui.login.register.RegisterFragment
+import com.nayya.myktor.ui.login.resetpassword.ResetPasswordFragment
+import com.nayya.myktor.ui.login.setnewpassword.SetNewPasswordFragment
 import com.nayya.myktor.ui.product.AccountingProductsFragment
 import com.nayya.myktor.ui.product.category.CategoriesFragment
 import com.nayya.myktor.ui.product.category.subcategory.SubcategoryFragment
@@ -37,11 +42,17 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     CategoriesFragment.Controller,
     SubcategoryFragment.Controller,
     ViewProductFragment.Controller,
-    ProfileFragment.Controller {
+    ProfileFragment.Controller,
+    LoginFragment.LoginController,
+    ResetPasswordFragment.Controller {
+
+    private lateinit var tokenStorage: TokenStorage
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onRootBottomNavBar()
+
+        tokenStorage = TokenStorage(this)
 
         val bottomNav = binding.bottomNavigation
 
@@ -86,6 +97,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
                 R.id.nav_cart -> {
                     // открыть корзину
+                    openRootFragment(LoginFragment.newInstance())
                     true
                 }
 
@@ -171,5 +183,32 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
     override fun openEditSupplierFragment(supplier: CounterpartyEntity?) {
         TODO("Not yet implemented")
+    }
+
+    override fun onLoginSuccess(token: String) {
+        tokenStorage.saveToken(token)
+
+        openRootFragment(ProfileFragment.newInstance())
+    }
+
+    override fun onRegisterClicked() {
+        openChildFragment(RegisterFragment.newInstance())
+    }
+
+    override fun onForgotPasswordClicked() {
+        openChildFragment(ResetPasswordFragment.newInstance())
+    }
+
+    override fun onPrivacyPolicyClicked() {
+        Toast.makeText(this, "Политика конфеденциальности", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onClientInfoClicked() {
+        Toast.makeText(this, "Информация для клиентов", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onSetNewPassword() {
+        val token = tokenStorage.getToken() ?: ""
+        openChildFragment(SetNewPasswordFragment.newInstance(token))
     }
 }

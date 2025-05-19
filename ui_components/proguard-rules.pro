@@ -22,3 +22,14 @@
 
 # Оставляем все классы в ui_components
 -keep class com.nayya.uicomponents.** { *; }
+-keep class com.yourpackage.** { *; }
+# Для kotlinx.serialization
+-keepclassmembers class * {
+    @kotlinx.serialization.SerialName *;
+    @kotlinx.serialization.Serializable *;
+}
+
+-keep class kotlinx.serialization.** { *; }
+-keepclassmembers class ** {
+    *** Companion;
+}

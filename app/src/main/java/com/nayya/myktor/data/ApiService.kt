@@ -11,6 +11,10 @@ import com.nayya.myktor.data.network.RepresentativeRequest
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.domain.counterpartyentity.OrderEntity
+import com.nayya.myktor.domain.loginentity.LoginRequest
+import com.nayya.myktor.domain.loginentity.RegisterRequest
+import com.nayya.myktor.domain.loginentity.ResetPasswordRequest
+import com.nayya.myktor.domain.loginentity.ResetRequest
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.domain.productentity.ProductImage
@@ -176,4 +180,15 @@ interface ApiService {
         @Body image: CounterpartyImageRequest
     ): Response<Unit>
 
+    @POST("/auth/login")
+    suspend fun login(@Body request: LoginRequest): Map<String, String>
+
+    @POST("/auth/request_password_reset")
+    suspend fun requestResetPassword(@Body request: ResetRequest)
+
+    @POST("/auth/reset_password")
+    suspend fun resetPassword(@Body request: ResetPasswordRequest)
+
+    @POST("/auth/register")
+    suspend fun register(@Body request: RegisterRequest)
 }
