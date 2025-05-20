@@ -1,12 +1,15 @@
 package com.nayya.myktor.ui.login
 
+import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.viewModels
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentLoginBinding
 import com.nayya.myktor.ui.root.BaseFragment
+import com.nayya.myktor.utils.showSnackbar
 import com.nayya.myktor.utils.viewBinding
 
 class LoginFragment : BaseFragment(R.layout.fragment_login) {
@@ -24,8 +27,9 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
             val password = binding.etPassword.text.toString().trim()
 
             if (email.isBlank() || password.isBlank()) {
-                Toast.makeText(requireContext(), "Введите email и пароль", Toast.LENGTH_SHORT)
-                    .show()
+                binding.etEmail.error = "Введите email и пароль"
+                binding.etPassword.error = "Введите email и пароль"
+                showSnackbar("Введите email и пароль")
                 return@setOnClickListener
             }
 
@@ -55,15 +59,48 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
         viewModel.loginState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is LoginState.Success -> {
-                    Toast.makeText(requireContext(), "Добро пожаловать!", Toast.LENGTH_SHORT).show()
+                    showSnackbar("Добро пожаловать!")
                     requireController<LoginFragment.LoginController>().onLoginSuccess(state.token)
                 }
 
                 is LoginState.Error -> {
-                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                    if (state.code != "wrong_credentials") {
+                        hideKeyboard()
+                    }
+
+                    when (state.code) {
+                        "wrong_credentials" -> {
+                            binding.etEmail.error = "Проверьте email или пароль"
+                            binding.etPassword.error = "Проверьте email или пароль"
+                        }
+
+                        "user_blocked_admin" -> showSupportDialog(state.message)
+                        "user_deleted_self" -> showSupportDialog(state.message)
+                        "user_soft_deleted" -> showSnackbar(state.message)
+                        else -> showSnackbar(state.message)
+                    }
                 }
             }
         }
+    }
+
+    private fun showSupportDialog(message: String) {
+        hideKeyboard()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Вход невозможен")
+            .setMessage(message)
+            .setPositiveButton("Отмена", null)
+            .setNegativeButton("Написать в поддержку") { _, _ ->
+                showSnackbar("Письмо ушло. Доделать реализацию!")
+            }
+            .show()
+    }
+
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        val view = requireActivity().currentFocus ?: View(requireContext())
+        imm?.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     interface LoginController : BaseFragment.Controller {
