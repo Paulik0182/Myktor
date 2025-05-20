@@ -8,6 +8,8 @@ import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.viewModels
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentLoginBinding
+import com.nayya.myktor.ui.login.workingpassword.AuthBottomSheetFragment
+import com.nayya.myktor.ui.login.workingpassword.AuthMode
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.showSnackbar
 import com.nayya.myktor.utils.viewBinding
@@ -37,11 +39,11 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
         }
 
         binding.tvRegister.setOnClickListener {
-            requireController<LoginFragment.LoginController>().onRegisterClicked()
+            AuthBottomSheetFragment.newInstance(AuthMode.REGISTER).show(childFragmentManager, "auth")
         }
 
         binding.tvResetPassword.setOnClickListener {
-            requireController<LoginFragment.LoginController>().onForgotPasswordClicked()
+            AuthBottomSheetFragment.newInstance(AuthMode.RESET_PASSWORD).show(childFragmentManager, "auth")
         }
 
         binding.tvPrivacyPolicy.setOnClickListener {
@@ -105,8 +107,6 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
 
     interface LoginController : BaseFragment.Controller {
         fun onLoginSuccess(token: String)
-        fun onRegisterClicked()
-        fun onForgotPasswordClicked()
         fun onPrivacyPolicyClicked()
         fun onClientInfoClicked()
     }

@@ -14,9 +14,6 @@ import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
 import com.nayya.myktor.domain.productentity.Product
 import com.nayya.myktor.ui.login.LoginFragment
-import com.nayya.myktor.ui.login.register.RegisterFragment
-import com.nayya.myktor.ui.login.resetpassword.ResetPasswordFragment
-import com.nayya.myktor.ui.login.setnewpassword.SetNewPasswordFragment
 import com.nayya.myktor.ui.product.AccountingProductsFragment
 import com.nayya.myktor.ui.product.category.CategoriesFragment
 import com.nayya.myktor.ui.product.category.subcategory.SubcategoryFragment
@@ -43,8 +40,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     SubcategoryFragment.Controller,
     ViewProductFragment.Controller,
     ProfileFragment.Controller,
-    LoginFragment.LoginController,
-    ResetPasswordFragment.Controller {
+    LoginFragment.LoginController {
 
     private lateinit var tokenStorage: TokenStorage
 
@@ -191,24 +187,11 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         openRootFragment(ProfileFragment.newInstance())
     }
 
-    override fun onRegisterClicked() {
-        openChildFragment(RegisterFragment.newInstance())
-    }
-
-    override fun onForgotPasswordClicked() {
-        openChildFragment(ResetPasswordFragment.newInstance())
-    }
-
     override fun onPrivacyPolicyClicked() {
         Toast.makeText(this, "Политика конфеденциальности", Toast.LENGTH_SHORT).show()
     }
 
     override fun onClientInfoClicked() {
         Toast.makeText(this, "Информация для клиентов", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onSetNewPassword() {
-        val token = tokenStorage.getToken() ?: ""
-        openChildFragment(SetNewPasswordFragment.newInstance(token))
     }
 }
