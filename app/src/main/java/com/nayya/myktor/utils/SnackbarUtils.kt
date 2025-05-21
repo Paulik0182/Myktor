@@ -6,10 +6,17 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 fun Fragment.showSnackbar(message: String) {
     val rootView = requireActivity().findViewById<View>(android.R.id.content)
     Snackbar.make(rootView, message, Snackbar.LENGTH_SHORT).show()
+}
+
+fun BottomSheetDialogFragment.showSnackbarBottomSheetDialog(message: String) {
+    view?.let {
+        Snackbar.make(it, message, Snackbar.LENGTH_SHORT).show()
+    }
 }
 
 fun AppCompatActivity.showMessage(message: String) {
