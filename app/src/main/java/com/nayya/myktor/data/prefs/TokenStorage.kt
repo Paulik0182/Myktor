@@ -3,22 +3,25 @@ package com.nayya.myktor.data.prefs
 import android.content.Context
 import android.content.SharedPreferences
 
-class TokenStorage(context: Context) {
+object TokenStorage {
+    private const val PREFS_NAME = "auth_prefs"
+    private const val TOKEN_KEY = "auth_token"
 
-    private val prefs: SharedPreferences =
-        context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+    private lateinit var prefs: SharedPreferences
+
+    fun init(context: Context) {
+        prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
 
     fun saveToken(token: String) {
-        prefs.edit().putString(KEY_TOKEN, token).apply()
+        prefs.edit().putString(TOKEN_KEY, token).apply()
     }
 
-    fun getToken(): String? = prefs.getString(KEY_TOKEN, null)
-
-    fun clearToken() {
-        prefs.edit().remove(KEY_TOKEN).apply()
+    fun getToken(): String? {
+        return prefs.getString(TOKEN_KEY, null)
     }
 
-    companion object {
-        private const val KEY_TOKEN = "auth_token"
+    fun clear() {
+        prefs.edit().remove(TOKEN_KEY).apply()
     }
 }

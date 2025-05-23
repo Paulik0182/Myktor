@@ -12,6 +12,7 @@ import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.domain.loginentity.LoginRequest
+import com.nayya.myktor.domain.loginentity.MeResponse
 import com.nayya.myktor.domain.loginentity.RegisterRequest
 import com.nayya.myktor.domain.loginentity.ResetPasswordRequest
 import com.nayya.myktor.domain.loginentity.ResetRequest
@@ -191,4 +192,7 @@ interface ApiService {
 
     @POST("/auth/register")
     suspend fun register(@Body request: RegisterRequest)
+
+    @GET("/auth/me")
+    suspend fun getMe(): MeResponse
 }

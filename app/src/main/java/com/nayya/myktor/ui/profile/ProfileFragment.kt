@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.nayya.myktor.R
@@ -16,13 +17,11 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
     private val binding by viewBinding<FragmentProfileBinding>()
 
-    private val viewModel by lazy {
-        ProfileViewModel(DefaultCounterpartyRepository())
+    private val viewModel: ProfileViewModel by viewModels {
+        ProfileViewModelFactory()
     }
 
     private lateinit var adapter: ProfileMenuAdapter
-
-    private val counterpartyId = 19L
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -36,13 +35,13 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
         observeViewModel()
         // Пока ID жёстко задан
-        viewModel.loadCounterparty(counterpartyId = counterpartyId)
+        viewModel.loadUserProfile()
 
         parentFragmentManager.setFragmentResultListener(
             "counterparty_updated",
             viewLifecycleOwner
         ) { _, _ ->
-            viewModel.loadCounterparty(counterpartyId = counterpartyId) // ⬅️ Повторно загружаем актуальные данные
+            viewModel.loadUserProfile() // ⬅️ Повторно загружаем актуальные данные
         }
 
         binding.ivTelegram.setOnClickListener {
@@ -61,11 +60,39 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
     private fun observeViewModel() {
         viewModel.counterparty.observe(viewLifecycleOwner) { counterparty ->
-            val placeholderRes = if (counterparty.isLegalEntity) {
-                R.drawable.ic_profile_placeholder_firm_orig
-            } else {
-                R.drawable.ic_profile_placeholder_user_orig
+            if (counterparty == null) {
+                // Не авторизован или контрагент не создан
+                val placeholderRes = R.drawable.ic_profile_placeholder_user_orig
+
+                Glide.with(requireContext())
+                    .load(placeholderRes)
+                    .placeholder(placeholderRes)
+                    .circleCrop()
+                    .into(binding.ivAvatar)
+
+                binding.tvLoginPrompt.visibility = View.VISIBLE
+                binding.tvNickname.visibility = View.GONE
+                binding.tvFirstName.visibility = View.GONE
+                binding.tvCompanyName.visibility = View.GONE
+                binding.ivRightIcon.visibility = View.GONE
+
+                // Очистим текст — это важно, иначе могут остаться данные предыдущего пользователя
+                binding.tvNickname.text = ""
+                binding.tvFirstName.text = ""
+                binding.tvCompanyName.text = ""
+
+                binding.tvLoginPrompt.setOnClickListener {
+                    requireController<ProfileFragment.Controller>().openLoginScreen()
+                }
+
+                return@observe
             }
+
+            // Контрагент доступен (авторизован)
+            val placeholderRes = if (counterparty.isLegalEntity)
+                R.drawable.ic_profile_placeholder_firm_orig
+            else
+                R.drawable.ic_profile_placeholder_user_orig
 
             Glide.with(requireContext())
                 .load(counterparty.imagePath.takeIf { !it.isNullOrBlank() } ?: placeholderRes)
@@ -73,23 +100,21 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
                 .circleCrop()
                 .into(binding.ivAvatar)
 
-            binding.tvCompanyName.apply {
-                visibility = if (counterparty.isLegalEntity) View.VISIBLE else View.GONE
-                text = counterparty.companyName
-            }
+            binding.tvLoginPrompt.visibility = View.GONE
+            binding.tvNickname.visibility = View.VISIBLE
+            binding.ivRightIcon.visibility = View.VISIBLE
 
-            binding.tvFirstName.apply {
-                visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-                text = counterparty.firstName
-            }
+            val isLegal = counterparty.isLegalEntity
+            binding.tvCompanyName.visibility = if (isLegal) View.VISIBLE else View.GONE
+            binding.tvFirstName.visibility = if (isLegal) View.GONE else View.VISIBLE
 
             binding.tvNickname.text = counterparty.shortName
+            binding.tvFirstName.text = counterparty.firstName
+            binding.tvCompanyName.text = counterparty.companyName
 
             binding.ivRightIcon.setOnClickListener {
                 counterparty.id?.let { counterpartyId ->
-                    requireController<ProfileFragment.Controller>().openCounterpartyDetails(
-                        counterpartyId
-                    )
+                    requireController<ProfileFragment.Controller>().openCounterpartyDetails(counterpartyId)
                 }
             }
         }
@@ -103,6 +128,7 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
     interface Controller : BaseFragment.Controller {
         fun openCounterpartyDetails(counterpartyId: Long)
         fun onProfileMenuItemClicked(item: ProfileMenuType)
+        fun openLoginScreen()
     }
 
     companion object {

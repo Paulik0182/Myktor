@@ -4,8 +4,8 @@ import com.nayya.myktor.ui.login.UserRole
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RegisterRequest(
-    val email: String,
-    val password: String,
-    val role: UserRole = UserRole.CUSTOMER
+data class MeResponse(
+    val userId: Long,
+    val role: UserRole,
+    val counterpartyId: Long? = null
 )

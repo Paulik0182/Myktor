@@ -7,6 +7,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.viewModels
 import com.nayya.myktor.R
+import com.nayya.myktor.data.prefs.TokenStorage
 import com.nayya.myktor.databinding.FragmentLoginBinding
 import com.nayya.myktor.ui.login.workingpassword.AuthBottomSheetFragment
 import com.nayya.myktor.ui.login.workingpassword.AuthMode
@@ -20,6 +21,9 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
     private val viewModel: LoginViewModel by viewModels {
         LoginViewModelFactory(DefaultAuthRepository())
     }
+
+    // Для того чтобы скрыть нижнюю навигацию и персчитать размеры container
+    override val hideBottomNavigation = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -62,7 +66,18 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
             when (state) {
                 is LoginState.Success -> {
                     showSnackbar("Добро пожаловать!")
-                    requireController<LoginFragment.LoginController>().onLoginSuccess(state.token)
+                    TokenStorage.saveToken(state.token)
+                    // А как мне тут быть??? Видь я могу с разных мест вызвать данный экран, а
+                // после удачной авторизации, я должен ыернутся на экран с которого я вызвал этот
+                // фрагмет. А вернутся я должен и дернуть экран с которого пошел на авторизацию
+                // чтобы обновить контент на экране. Как мне это правильно сделать????
+
+                    // Это пока временное решение, только для одног экрана ProfileFragment
+                    view?.post {
+                        parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+                    }
+                    // Уведомим MainActivity, что авторизация успешна, и можно закрывать LoginFragment
+                    requireController<LoginController>().onLoginSuccess(state.token)
                 }
 
                 is LoginState.Error -> {

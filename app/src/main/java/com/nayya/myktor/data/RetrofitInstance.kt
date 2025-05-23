@@ -8,19 +8,30 @@ import retrofit2.converter.gson.GsonConverterFactory
 //TODO В продакшене обязательно перейти на https!!!!!
 
 const val BASE_URL = "http://10.0.2.2:8080"
-
 object RetrofitInstance {
-    val api: ApiService by lazy {
+    private lateinit var apiService: ApiService
+
+    fun init() {
+        buildApi()
+    }
+
+    private fun buildApi() {
         val logging = HttpLoggingInterceptor()
-        logging.setLevel(HttpLoggingInterceptor.Level.BASIC)
-        val client: OkHttpClient = OkHttpClient.Builder()
+        logging.level = HttpLoggingInterceptor.Level.BODY
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor())
             .addInterceptor(logging)
             .build()
-        Retrofit.Builder()
-            .baseUrl(BASE_URL) // Используем localhost для эмулятора
-            .addConverterFactory(GsonConverterFactory.create()) // JSON-конвертер
+
+        apiService = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
             .create(ApiService::class.java)
     }
+
+    val api: ApiService
+        get() = apiService
 }

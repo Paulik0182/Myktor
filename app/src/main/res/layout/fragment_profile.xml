@@ -79,6 +79,16 @@
                     android:ellipsize="end"
                     android:singleLine="true"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvLoginPrompt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Войти"
+                    android:textColor="@color/blue"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:paddingTop="16dp"/>
             </LinearLayout>
 
             <ImageView

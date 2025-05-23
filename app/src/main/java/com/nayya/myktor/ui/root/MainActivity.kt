@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.nayya.myktor.R
+import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.data.prefs.TokenStorage
 import com.nayya.myktor.databinding.ActivityMainBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
@@ -46,9 +47,10 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        onRootBottomNavBar()
+        TokenStorage.init(applicationContext) // ✅ один раз при старте
+        RetrofitInstance.init()
 
-        tokenStorage = TokenStorage(this)
+        onRootBottomNavBar()
 
         val bottomNav = binding.bottomNavigation
 
@@ -177,14 +179,17 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
         Toast.makeText(this, "Нажато: ${item.title}", Toast.LENGTH_SHORT).show()
     }
 
+    override fun openLoginScreen() {
+        openChildFragment(LoginFragment.newInstance())
+    }
+
     override fun openEditSupplierFragment(supplier: CounterpartyEntity?) {
         TODO("Not yet implemented")
     }
 
     override fun onLoginSuccess(token: String) {
-        tokenStorage.saveToken(token)
-
-        openRootFragment(ProfileFragment.newInstance())
+        // Закрываем LoginFragment
+        supportFragmentManager.popBackStack() // если был addToBackStack
     }
 
     override fun onPrivacyPolicyClicked() {
