@@ -34,7 +34,6 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
         binding.rvProfileMenu.adapter = adapter
 
         observeViewModel()
-        // Пока ID жёстко задан
         viewModel.loadUserProfile()
 
         parentFragmentManager.setFragmentResultListener(
@@ -114,7 +113,9 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
 
             binding.ivRightIcon.setOnClickListener {
                 counterparty.id?.let { counterpartyId ->
-                    requireController<ProfileFragment.Controller>().openCounterpartyDetails(counterpartyId)
+                    requireController<ProfileFragment.Controller>().openCounterpartyDetails(
+                        counterpartyId
+                    )
                 }
             }
         }

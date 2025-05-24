@@ -17,6 +17,8 @@ import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentCounterpartyDetailsBinding
 import com.nayya.myktor.databinding.LayoutLegalEntityBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
+import com.nayya.myktor.ui.login.logoutaccount.ConfirmActionBottomSheet
+import com.nayya.myktor.ui.login.logoutaccount.ConfirmActionType
 import com.nayya.myktor.ui.profile.contacts.ContactEditBottomSheetDialog
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
@@ -105,6 +107,16 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 }
             }
         )
+
+        binding.btnLogout.setOnClickListener {
+            ConfirmActionBottomSheet.newInstance(ConfirmActionType.LOGOUT)
+                .show(childFragmentManager, "logout")
+        }
+
+        binding.btnDeleteAccount.setOnClickListener {
+            ConfirmActionBottomSheet.newInstance(ConfirmActionType.DELETE_ACCOUNT)
+                .show(childFragmentManager, "delete")
+        }
     }
 
     // Часть механизма отслеживания изменений данных.

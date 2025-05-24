@@ -3,39 +3,50 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet_rounded_white"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@android:color/white">
+    android:paddingHorizontal="24dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="24dp">
 
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Заголовок"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:layout_gravity="center"
-            android:layout_marginBottom="16dp" />
+    <!-- Handle (черточка сверху) -->
+    <View
+        android:layout_width="70dp"
+        android:layout_height="2dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_bottom_sheet_handle"
+        android:contentDescription="@null" />
 
-        <EditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:layout_marginBottom="12dp" />
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"
+        android:text="Заголовок"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Пароль"
-            android:inputType="textPassword"
-            android:layout_marginBottom="12dp" />
+    <EditText
+        android:id="@+id/etEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:hint="Email"
+        android:inputType="textEmailAddress" />
 
-        <Button
-            android:id="@+id/btnAction"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Действие" />
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:hint="Пароль"
+        android:inputType="textPassword" />
+
+    <Button
+        android:id="@+id/btnAction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Действие" />
 </LinearLayout>

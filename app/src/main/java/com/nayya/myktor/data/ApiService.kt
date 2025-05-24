@@ -195,4 +195,13 @@ interface ApiService {
 
     @GET("/auth/me")
     suspend fun getMe(): MeResponse
+
+    @POST("/auth/logout")
+    suspend fun logout(): Response<Unit>
+
+    @POST("/auth/logout_all")
+    suspend fun logoutAll(): Response<Unit>
+
+    @POST("/auth/delete_account")
+    suspend fun deleteAccount(): Response<Unit>
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.nayya.myktor.data.RetrofitInstance
+import com.nayya.myktor.data.prefs.TokenStorage
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.loginentity.MeResponse
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,13 @@ class ProfileViewModel(private val repository: CounterpartyRepository2) : ViewMo
     val menuItems: LiveData<List<ProfileMenuType>> = _menuItems
 
     fun loadUserProfile() {
+        val token = TokenStorage.getToken()
+        if (token.isNullOrBlank()) {
+            _counterparty.value = null
+            _menuItems.value = ProfileMenuType.getVisibleItemsForGuest()
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val me = withContext(Dispatchers.IO) {
