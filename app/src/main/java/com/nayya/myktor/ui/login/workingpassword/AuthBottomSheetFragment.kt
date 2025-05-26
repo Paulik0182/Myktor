@@ -12,19 +12,35 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.nayya.myktor.R
 import com.nayya.myktor.databinding.BottomSheetAuthBinding
+import com.nayya.myktor.databinding.LayoutLegalEntityBinding
+import com.nayya.myktor.databinding.PersonNameFieldsBinding
 import com.nayya.myktor.ui.login.DefaultAuthRepository
+import com.nayya.myktor.ui.profile.detailscounterparty.CounterpartyDetailsViewModel
+import com.nayya.myktor.ui.profile.detailscounterparty.CounterpartyValidationDelegate
 import com.nayya.myktor.utils.showSnackbarBottomSheetDialog
 
+// TODO Проблема скролинга на шторке. Не получается заставить контекст скролится при раскрытой клавиатурой!
 class AuthBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var binding: BottomSheetAuthBinding
-    private val viewModel by viewModels<AuthViewModel> { AuthViewModelFactory(DefaultAuthRepository()) }
+    private val viewModel by viewModels<AuthViewModel> {
+        AuthViewModelFactory(DefaultAuthRepository())
+    }
+    private lateinit var counterpartyDetailsViewModel: CounterpartyDetailsViewModel
+
+    private lateinit var legalEntityBinding: LayoutLegalEntityBinding
+    private lateinit var personNameRegisterBinding: PersonNameFieldsBinding
+
+    private lateinit var validator: CounterpartyValidationDelegate
 
     private val mode: AuthMode by lazy {
         arguments?.getSerializable(ARG_MODE) as AuthMode
@@ -46,8 +62,30 @@ class AuthBottomSheetFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        counterpartyDetailsViewModel =
+            ViewModelProvider(this).get(CounterpartyDetailsViewModel::class.java)
+
+        legalEntityBinding = LayoutLegalEntityBinding.bind(binding.includeLegalEntityRegister.root)
+        personNameRegisterBinding =
+            PersonNameFieldsBinding.bind(binding.includePersonNameRegister.root)
+
+        counterpartyDetailsViewModel.setEditMode(true)
+
+        validator = CounterpartyValidationDelegate(
+            context = requireContext(),
+            viewModel = counterpartyDetailsViewModel,
+            binding = personNameRegisterBinding,
+            legalEntityBinding = legalEntityBinding
+        )
+
         setupUiByMode()
         setupObservers()
+
+        if (mode == AuthMode.REGISTER) {
+            forceEditMode()
+            setupChangeListeners()
+            validator.setupAll()
+        }
 
         binding.btnAction.setOnClickListener {
             when (mode) {
@@ -91,8 +129,7 @@ class AuthBottomSheetFragment : BottomSheetDialogFragment() {
                     skipCollapsed = true
                     isHideable = true
                     isFitToContents = false
-                    isFitToContents = false
-                    expandedOffset = dpToPx(100) // если нужно отступ — можно dpToPx(100)
+                    expandedOffset = dpToPx(70) // если нужно отступ — можно dpToPx(100)
                 }
 
                 it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
@@ -117,6 +154,8 @@ class AuthBottomSheetFragment : BottomSheetDialogFragment() {
                 binding.btnAction.text = "Отправить письмо"
                 binding.etEmail.isVisible = true
                 binding.etPassword.isVisible = false
+                personNameRegisterBinding.layoutPersonNameFields.isVisible = false
+                legalEntityBinding.layoutLegalEntity.isVisible = false
             }
 
             AuthMode.SET_NEW_PASSWORD -> {
@@ -124,6 +163,94 @@ class AuthBottomSheetFragment : BottomSheetDialogFragment() {
                 binding.btnAction.text = "Установить"
                 binding.etEmail.isVisible = false
                 binding.etPassword.isVisible = true
+                personNameRegisterBinding.layoutPersonNameFields.isVisible = false
+                legalEntityBinding.layoutLegalEntity.isVisible = false
+            }
+        }
+    }
+
+    private fun setupChangeListeners() {
+        with(binding.scEntityStatus) {
+            // Настройка видимости и состояния
+            isVisible = true
+            isEnabled = true
+            isChecked = false
+
+            updateRegistrationInformationVisibility(false)
+            setSwitchState(false)
+
+            // Обработчик изменений
+            setOnCheckedChangeListener { _, isChecked ->
+                Log.d("@@@", "Switch toggled: $isChecked")
+                setSwitchState(isChecked)
+                updateRegistrationInformationVisibility(isChecked)
+            }
+        }
+    }
+
+    private fun setSwitchState(isLegalEntity: Boolean) {
+        with(binding.scEntityStatus) {
+            text = if (isLegalEntity) "Юридическое лицо" else "Физическое лицо"
+
+            // Установка цветов (можно вынести в отдельный метод, если используется в нескольких местах)
+            thumbTintList = ContextCompat.getColorStateList(
+                requireContext(),
+                if (isLegalEntity) R.color.switch_thumb_color else R.color.switch_thumb_color
+            )
+            trackTintList = ContextCompat.getColorStateList(
+                requireContext(),
+                if (isLegalEntity) R.color.switch_track_color else R.color.switch_track_color
+            )
+        }
+    }
+
+    private fun updateRegistrationInformationVisibility(isLegalEntity: Boolean) {
+        // Всегда видим
+        personNameRegisterBinding.ccavShortName.visibility = View.VISIBLE
+
+        // Только для Физлица
+        personNameRegisterBinding.ccavFirstName.visibility =
+            if (isLegalEntity) View.GONE else View.VISIBLE
+        personNameRegisterBinding.ccavLastName.visibility =
+            if (isLegalEntity) View.GONE else View.VISIBLE
+
+        // Только для Юрлица
+        legalEntityBinding.layoutLegalEntity.visibility =
+            if (isLegalEntity) View.VISIBLE else View.GONE
+        legalEntityBinding.ccavCompanyName.visibility =
+            if (isLegalEntity) View.VISIBLE else View.GONE
+        legalEntityBinding.ccavNIP.visibility = if (isLegalEntity) View.VISIBLE else View.GONE
+
+        // Остальные элементы скрываем всегда
+        legalEntityBinding.llTypes.isVisible = false
+        legalEntityBinding.flCcavType.isVisible = false
+        legalEntityBinding.ccavKRS.isVisible = false
+    }
+
+    private fun forceEditMode() {
+        with(personNameRegisterBinding) {
+            ccavShortName.apply {
+                setReadOnlyMode(false)
+                isInputEnabled = true
+            }
+            ccavFirstName.apply {
+                setReadOnlyMode(false)
+                isInputEnabled = true
+            }
+            ccavLastName.apply {
+                setReadOnlyMode(false)
+                isInputEnabled = true
+            }
+        }
+
+        with(legalEntityBinding) {
+            ccavCompanyName.apply {
+                setReadOnlyMode(false)
+                isInputEnabled = true
+            }
+            ccavNIP.apply {
+                setReadOnlyMode(false)
+                isInputEnabled = true
             }
         }
     }

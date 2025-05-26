@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutPersonNameFields"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp" >
+
+    <com.nayya.uicomponents.CustomCardActionView
+        android:id="@+id/ccavShortName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:descriptionText="Short Name"
+        app:showEditIcon="false"
+        app:showDescriptionIcon="true"
+        app:showDescriptionText="true"
+        app:inputMaxLength="21"
+        app:showInfoIcon="false"
+        app:showInfoText="false"
+        app:inputEnabled="false"
+        app:showUnderline="true"
+        app:inputMaxLines="1"
+        app:showLeftIcon="false"
+        app:inputBackground="@drawable/bg_field_gray_cell_white"
+        app:hintText="Short Name" />
+
+    <com.nayya.uicomponents.CustomCardActionView
+        android:id="@+id/ccavFirstName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:descriptionText="First Name"
+        app:showEditIcon="false"
+        app:showDescriptionIcon="true"
+        app:showDescriptionText="true"
+        app:inputMaxLength="36"
+        app:showInfoIcon="false"
+        app:showInfoText="false"
+        app:inputEnabled="false"
+        app:showUnderline="true"
+        app:inputMaxLines="1"
+        app:showLeftIcon="false"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:inputBackground="@drawable/bg_field_gray_cell_white"
+        app:hintText="First Name" />
+
+    <com.nayya.uicomponents.CustomCardActionView
+        android:id="@+id/ccavLastName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:descriptionText="Last Name"
+        app:showEditIcon="false"
+        app:showDescriptionIcon="true"
+        app:showDescriptionText="true"
+        app:inputMaxLength="36"
+        app:showInfoIcon="false"
+        app:showInfoText="false"
+        app:inputEnabled="false"
+        app:showUnderline="true"
+        app:inputMaxLines="1"
+        app:showLeftIcon="false"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:inputBackground="@drawable/bg_field_gray_cell_white"
+        app:hintText="Last Name" />
+</LinearLayout>

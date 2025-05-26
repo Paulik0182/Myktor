@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentCounterpartyDetailsBinding
 import com.nayya.myktor.databinding.LayoutLegalEntityBinding
+import com.nayya.myktor.databinding.PersonNameFieldsBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.ui.login.logoutaccount.ConfirmActionBottomSheet
 import com.nayya.myktor.ui.login.logoutaccount.ConfirmActionType
@@ -31,6 +32,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     private lateinit var viewModel: CounterpartyDetailsViewModel
 
     private lateinit var legalEntityBinding: LayoutLegalEntityBinding
+    private lateinit var personNameDetailsBinding: PersonNameFieldsBinding
 
     private var counterpartyId: Long? = null
 
@@ -54,11 +56,12 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         counterpartyId?.let { viewModel.loadCounterpartyById(it) }
 
         legalEntityBinding = LayoutLegalEntityBinding.bind(binding.includeLegalEntity.root)
+        personNameDetailsBinding = PersonNameFieldsBinding.bind(binding.includePersonNameDetails.root)
 
         validator = CounterpartyValidationDelegate(
             context = requireContext(),
             viewModel = viewModel,
-            binding = binding,
+            binding = personNameDetailsBinding,
             legalEntityBinding = legalEntityBinding
         )
 
@@ -135,9 +138,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         val firmFields = listOf(
-            binding.ccavShortName,
-            binding.ccavFirstName,
-            binding.ccavLastName,
+            personNameDetailsBinding.ccavShortName,
+            personNameDetailsBinding.ccavFirstName,
+            personNameDetailsBinding.ccavLastName,
             legalEntityBinding.ccavCompanyName,
             legalEntityBinding.ccavType,
             legalEntityBinding.ccavNIP,
@@ -226,9 +229,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         viewModel.saveChanges(
-            shortName = binding.ccavShortName.text.orEmpty().trimEnd(),
-            firstName = binding.ccavFirstName.text.orEmpty().trimEnd(),
-            lastName = binding.ccavLastName.text.orEmpty().trimEnd(),
+            shortName = personNameDetailsBinding.ccavShortName.text.orEmpty().trimEnd(),
+            firstName = personNameDetailsBinding.ccavFirstName.text.orEmpty().trimEnd(),
+            lastName = personNameDetailsBinding.ccavLastName.text.orEmpty().trimEnd(),
             companyName = legalEntityBinding.ccavCompanyName.text.orEmpty().trimEnd(),
             type = legalEntityBinding.ccavType.text.orEmpty(),
             nip = legalEntityBinding.ccavNIP.text.orEmpty(),
@@ -352,7 +355,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             .circleCrop()
             .into(binding.ivAvatar)
 
-        binding.ccavFirstName.apply {
+        personNameDetailsBinding.ccavFirstName.apply {
             visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
             setTextAndMode(
                 counterparty.firstName ?: "",
@@ -360,7 +363,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             )
         }
 
-        binding.ccavLastName.apply {
+        personNameDetailsBinding.ccavLastName.apply {
             visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
             setTextAndMode(
                 counterparty.lastName ?: "",
@@ -368,7 +371,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             )
         }
 
-        binding.ccavShortName.setTextAndMode(
+        personNameDetailsBinding.ccavShortName.setTextAndMode(
             counterparty.shortName ?: "",
             readOnly = true
         )
@@ -382,6 +385,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         if (counterparty.isLegalEntity) {
             binding.bankInfo.visibility = View.VISIBLE
             legalEntityBinding.layoutLegalEntity.visibility = View.VISIBLE
+            legalEntityBinding.llTypes.visibility = View.VISIBLE
 
             val contactText = counterparty.counterpartyContact
                 ?.takeIf { it.isNotEmpty() }
@@ -521,18 +525,20 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     }
 
     private fun updateLegalEntityVisibility(isLegalEntity: Boolean) {
-        binding.ccavFirstName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
-        binding.ccavLastName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
+        personNameDetailsBinding.ccavFirstName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
+        personNameDetailsBinding.ccavLastName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
         binding.includeLegalEntity.layoutLegalEntity.visibility =
+            if (isLegalEntity) View.VISIBLE else View.GONE
+        binding.includeLegalEntity.llTypes.visibility =
             if (isLegalEntity) View.VISIBLE else View.GONE
     }
 
     private fun updateEditableStateEditText(isEditable: Boolean) {
 
         val firmFields = listOf(
-            binding.ccavShortName,
-            binding.ccavFirstName,
-            binding.ccavLastName,
+            personNameDetailsBinding.ccavShortName,
+            personNameDetailsBinding.ccavFirstName,
+            personNameDetailsBinding.ccavLastName,
             legalEntityBinding.ccavCompanyName,
             legalEntityBinding.ccavNIP,
             legalEntityBinding.ccavKRS,
@@ -554,7 +560,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             }
         }
 
-        binding.ccavShortName.apply {
+        personNameDetailsBinding.ccavShortName.apply {
             setInputTextColor(ContextCompat.getColor(requireContext(), R.color.black))
         }
 
@@ -576,13 +582,13 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
 
         if (isEditable) {
-            binding.ccavShortName.apply {
+            personNameDetailsBinding.ccavShortName.apply {
                 setReadOnlyMode(false)
             }
-            binding.ccavFirstName.apply {
+            personNameDetailsBinding.ccavFirstName.apply {
                 setReadOnlyMode(false)
             }
-            binding.ccavLastName.apply {
+            personNameDetailsBinding.ccavLastName.apply {
                 setReadOnlyMode(false)
             }
             legalEntityBinding.ccavCompanyName.apply {
@@ -592,13 +598,13 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             }
 
         } else {
-            binding.ccavShortName.apply {
+            personNameDetailsBinding.ccavShortName.apply {
                 setReadOnlyMode(true)
             }
-            binding.ccavFirstName.apply {
+            personNameDetailsBinding.ccavFirstName.apply {
                 setReadOnlyMode(true)
             }
-            binding.ccavLastName.apply {
+            personNameDetailsBinding.ccavLastName.apply {
                 setReadOnlyMode(true)
             }
             legalEntityBinding.ccavCompanyName.apply {
@@ -647,9 +653,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
     private fun hasUnsavedChanges(): Boolean {
         val counterparty = viewModel.counterparty.value ?: return false
-        return binding.ccavShortName.text.orEmpty() != counterparty.shortName ||
-                binding.ccavFirstName.text.orEmpty() != (counterparty.firstName ?: "") ||
-                binding.ccavLastName.text.orEmpty() != (counterparty.lastName ?: "") ||
+        return personNameDetailsBinding.ccavShortName.text.orEmpty() != counterparty.shortName ||
+                personNameDetailsBinding.ccavFirstName.text.orEmpty() != (counterparty.firstName ?: "") ||
+                personNameDetailsBinding.ccavLastName.text.orEmpty() != (counterparty.lastName ?: "") ||
                 binding.scEntityStatus.isChecked != counterparty.isLegalEntity ||
                 legalEntityBinding.cbSupplier.isChecked != counterparty.isSupplier ||
                 legalEntityBinding.cbWarehouse.isChecked != counterparty.isWarehouse ||

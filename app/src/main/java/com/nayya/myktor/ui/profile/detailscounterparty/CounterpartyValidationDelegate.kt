@@ -4,15 +4,15 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import com.nayya.myktor.R
-import com.nayya.myktor.databinding.FragmentCounterpartyDetailsBinding
 import com.nayya.myktor.databinding.LayoutLegalEntityBinding
+import com.nayya.myktor.databinding.PersonNameFieldsBinding
 import com.nayya.myktor.utils.input.InputValidator
 import com.nayya.uicomponents.BottomTextState
 
 class CounterpartyValidationDelegate(
     private val context: Context,
     private val viewModel: CounterpartyDetailsViewModel,
-    private val binding: FragmentCounterpartyDetailsBinding,
+    private val binding: PersonNameFieldsBinding,
     private val legalEntityBinding: LayoutLegalEntityBinding
 ) {
 

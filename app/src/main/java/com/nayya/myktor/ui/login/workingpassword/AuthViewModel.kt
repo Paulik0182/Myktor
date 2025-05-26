@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
 class AuthViewModel(private val repo: AuthRepository) : ViewModel() {
+
     private val _state = MutableLiveData<AuthState>()
     val state: LiveData<AuthState> = _state
 

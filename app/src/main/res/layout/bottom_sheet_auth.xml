@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@drawable/bg_bottom_sheet_rounded_white"
     android:orientation="vertical"
     android:paddingHorizontal="24dp"
@@ -44,9 +46,47 @@
         android:hint="Пароль"
         android:inputType="textPassword" />
 
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+    <!-- Статус юридическое/физическое лицо -->
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/scEntityStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:checked="true"
+        android:enabled="false"
+        android:text="Физическое лицо"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:textSize="16sp"
+        app:thumbTint="@color/switch_thumb_color_disabled"
+        app:trackTint="@color/switch_track_color_disabled" />
+
+    <include
+        android:id="@+id/includePersonNameRegister"
+        layout="@layout/person_name_fields" />
+
+    <include
+        android:id="@+id/includeLegalEntityRegister"
+        layout="@layout/layout_legal_entity" />
+
     <Button
         android:id="@+id/btnAction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Действие" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

@@ -56,63 +56,9 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <com.nayya.uicomponents.CustomCardActionView
-                        android:id="@+id/ccavShortName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:descriptionText="Short Name"
-                        app:showEditIcon="false"
-                        app:showDescriptionIcon="true"
-                        app:showDescriptionText="true"
-                        app:inputMaxLength="21"
-                        app:showInfoIcon="false"
-                        app:showInfoText="false"
-                        app:inputEnabled="false"
-                        app:showUnderline="true"
-                        app:inputMaxLines="1"
-                        app:showLeftIcon="false"
-                        app:inputBackground="@drawable/bg_field_gray_cell_white"
-                        app:hintText="Short Name" />
-
-                    <com.nayya.uicomponents.CustomCardActionView
-                        android:id="@+id/ccavFirstName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:descriptionText="First Name"
-                        app:showEditIcon="false"
-                        app:showDescriptionIcon="true"
-                        app:showDescriptionText="true"
-                        app:inputMaxLength="36"
-                        app:showInfoIcon="false"
-                        app:showInfoText="false"
-                        app:inputEnabled="false"
-                        app:showUnderline="true"
-                        app:inputMaxLines="1"
-                        app:showLeftIcon="false"
-                        android:visibility="gone"
-                        tools:visibility="visible"
-                        app:inputBackground="@drawable/bg_field_gray_cell_white"
-                        app:hintText="First Name" />
-
-                    <com.nayya.uicomponents.CustomCardActionView
-                        android:id="@+id/ccavLastName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:descriptionText="Last Name"
-                        app:showEditIcon="false"
-                        app:showDescriptionIcon="true"
-                        app:showDescriptionText="true"
-                        app:inputMaxLength="36"
-                        app:showInfoIcon="false"
-                        app:showInfoText="false"
-                        app:inputEnabled="false"
-                        app:showUnderline="true"
-                        app:inputMaxLines="1"
-                        app:showLeftIcon="false"
-                        android:visibility="gone"
-                        tools:visibility="visible"
-                        app:inputBackground="@drawable/bg_field_gray_cell_white"
-                        app:hintText="Last Name" />
+                    <include
+                        android:id="@+id/includePersonNameDetails"
+                        layout="@layout/person_name_fields" />
                 </LinearLayout>
             </LinearLayout>
 
