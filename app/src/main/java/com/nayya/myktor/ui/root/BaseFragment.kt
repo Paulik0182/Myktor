@@ -1,14 +1,22 @@
 package com.nayya.myktor.ui.root
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.os.Bundle
 import android.view.View
+import android.view.ViewAnimationUtils
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.nayya.myktor.R
+import java.lang.Math.hypot
 
 abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
 
     protected open val hideBottomNavigation: Boolean = false
+    protected open val enableRevealAnimation: Boolean = false
 
     private var backStackListener: FragmentManager.OnBackStackChangedListener? = null
 
@@ -16,6 +24,24 @@ abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
         super.onStart()
         observeBackStack()
         adjustBottomNavigation()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        if (enableRevealAnimation) {
+            enterWithRevealAnimation()
+
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
+                object : OnBackPressedCallback(true) {
+                    override fun handleOnBackPressed() {
+                        exitWithRevealAnimation {
+                            parentFragmentManager.popBackStack()
+                        }
+                    }
+                }
+            )
+        }
     }
 
     override fun onDestroyView() {
@@ -71,6 +97,50 @@ abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
                 )
             }
         }
+    }
+
+    protected fun enterWithRevealAnimation() {
+        val v = view ?: return
+
+        v.visibility = View.INVISIBLE
+        v.alpha = 0f
+
+        v.post {
+            val centerX = 0
+            val centerY = 0
+            val radius = hypot(v.width.toDouble(), v.height.toDouble()).toFloat()
+
+            val anim = ViewAnimationUtils.createCircularReveal(v, centerX, centerY, 0f, radius).apply {
+                duration = 700
+                interpolator = AccelerateDecelerateInterpolator()
+            }
+
+            v.visibility = View.VISIBLE
+            v.alpha = 1f
+            anim.start()
+        }
+    }
+
+    protected fun exitWithRevealAnimation(onEnd: () -> Unit) {
+        val v = view ?: return onEnd()
+
+        val centerX = 0
+        val centerY = 0
+        val radius = hypot(v.width.toDouble(), v.height.toDouble()).toFloat()
+
+        val anim = ViewAnimationUtils.createCircularReveal(v, centerX, centerY, radius, 0f).apply {
+            duration = 700
+            interpolator = AccelerateDecelerateInterpolator()
+        }
+
+        anim.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                v.visibility = View.INVISIBLE
+                onEnd()
+            }
+        })
+
+        anim.start()
     }
 
     protected inline fun <reified T : Controller> requireController(): T {

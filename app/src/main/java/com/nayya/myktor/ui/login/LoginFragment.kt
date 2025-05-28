@@ -24,6 +24,7 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
 
     // Для того чтобы скрыть нижнюю навигацию и персчитать размеры container
     override val hideBottomNavigation = true
+    override val enableRevealAnimation = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -77,7 +78,9 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
                         parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
                     }
                     // Уведомим MainActivity, что авторизация успешна, и можно закрывать LoginFragment
-                    requireController<LoginController>().onLoginSuccess(state.token)
+                    exitWithRevealAnimation { // анимация при закрытии экрана и авторизации
+                        requireController<LoginController>().onLoginSuccess(state.token)
+                    }
                 }
 
                 is LoginState.Error -> {
