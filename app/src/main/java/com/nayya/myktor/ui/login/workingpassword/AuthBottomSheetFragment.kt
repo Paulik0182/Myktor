@@ -29,6 +29,11 @@ import com.nayya.myktor.ui.profile.detailscounterparty.CounterpartyValidationDel
 import com.nayya.myktor.utils.showSnackbarBottomSheetDialog
 
 // TODO Проблема скролинга на шторке. Не получается заставить контекст скролится при раскрытой клавиатурой!
+//  Как вариант доработки: Сделать дополнительное поле для подтверждения введенного пароля. Сделать
+//  после регистрации сразу автоматическую авторизацию, или как вариант, после закрытия шторки с регистрации
+//  заполнять поля на экране входа.
+//  Дополнительно сделать запоминание пользователя с паролем, но это должно быть только если пользователь этого хочет.
+//  Попробовать прикрутить метрику (отпечатки пальцев)
 class AuthBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var binding: BottomSheetAuthBinding
@@ -81,11 +86,20 @@ class AuthBottomSheetFragment : BottomSheetDialogFragment() {
         setupUiByMode()
         setupObservers()
 
-        if (mode == AuthMode.REGISTER) {
-            forceEditMode()
-            setupChangeListeners()
-            validator.setupAll()
-        }
+
+        // TODO Этот код деактивирует поля для внесения более полной информации о пользователе
+        //  который регистрируется. Также мы скрываем группу элементов (layoutPersonNameFields)
+        //  участвующую в более широком учете информации.
+        //  Решино при регистрации нового пользователя, требовать от пользователя минимум данных,
+        //  далее будем ограничивать пользователя в действиях если нехватает какихто данных.
+        //  В случае решения, требовать на старте заполнять больше информации, нужно перевести BottomSheet
+        //  на фрагмет и сделать постраничное заполнение данных с возможностью пропустить некоторые данные к заполнению.
+//        if (mode == AuthMode.REGISTER) {
+//            forceEditMode()
+//            setupChangeListeners()
+//            validator.setupAll()
+//        }
+        personNameRegisterBinding.layoutPersonNameFields.isVisible =false
 
         binding.btnAction.setOnClickListener {
             when (mode) {
