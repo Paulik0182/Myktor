@@ -2,6 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
     <color name="gray">#EDE9E9</color>
     <color name="green">#87F86F</color>
     <color name="gray_placeholder">#C6C5C5</color>
@@ -10,6 +11,22 @@
     <color name="grey_text">#666666</color>
     <color name="red">#FF001E</color>
     <color name="blue">#1555FA</color>
+
+    <color name="button_muted_olive_yellow">#B9DD41</color>
+    <color name="button_positive_actions">#C0CA33</color>
+    <color name="button_error">#FF3A69</color>
+    <color name="button_important_actions">#E17484</color>
+    <color name="muted_white">#FAFAFA</color>
+    <color name="soft_black">#212121</color>
+    <color name="dark_grey">#323232</color>
+    <color name="average_light_gray">#757575</color>
+
+
+    <color name="primary_500">#6750A4</color>
+    <color name="primary_100">#EADDFF</color>
+    <color name="gray_600">#757575</color>
+    <color name="gray_300">#E0E0E0</color>
+    <color name="gray_100">#F5F5F5</color>
 
     <!-- Menu -->
     <color name="bottom_nav_icon_tint">#A0A0A0</color> <!-- обычный цвет -->

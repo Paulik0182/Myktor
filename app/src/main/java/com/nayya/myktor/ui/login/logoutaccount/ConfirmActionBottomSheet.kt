@@ -1,12 +1,16 @@
 package com.nayya.myktor.ui.login.logoutaccount
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.nayya.myktor.R
 import com.nayya.myktor.databinding.BottomSheetConfirmActionBinding
+import com.nayya.myktor.ui.animator.BottomSheetAnimator
 
 class ConfirmActionBottomSheet : BottomSheetDialogFragment() {
 
@@ -32,7 +36,8 @@ class ConfirmActionBottomSheet : BottomSheetDialogFragment() {
 
         when (actionType) {
             ConfirmActionType.LOGOUT, ConfirmActionType.LOGOUT_ALL -> {
-                binding.tvTitle.text = "Подтверждение ВЫХОДА из личного кабинета"
+                binding.tvTitle.text = "Внимание!"
+                binding.tvSubtitle.text = "Подтверждение ВЫХОДА из личного кабинета"
                 binding.btnPrimary.text = "Выход с данного устройства"
                 binding.btnSecondary.text = "Выход со всех устройств"
                 binding.btnCancel.text = "Отменить"
@@ -48,10 +53,10 @@ class ConfirmActionBottomSheet : BottomSheetDialogFragment() {
 
             ConfirmActionType.DELETE_ACCOUNT -> {
                 binding.tvTitle.text =
-                    "Внимание! Удаление аккаунта.\nЕсли вы подтверждаете удаление аккаунта, то " +
-                            "ваш аккаунт будет заблокирован на 30 дней с последующим удалением." +
-                            "\nЕсли Вы решите восстановить аккаунт в течении указанных 30 дней, " +
-                            "то обратитесь в поддержку"
+                    "Внимание! Удаление аккаунта."
+                binding.tvSubtitle.text = "Если вы подтверждаете удаление аккаунта, то\nВаш " +
+                        "аккаунт будет заблокирован на 30 дней с последующим удалением.\nЕсли Вы " +
+                        "решите восстановить аккаунт в течении указанных 30 дней, то обратитесь в поддержку"
                 binding.btnPrimary.text = "Удалить"
                 binding.btnSecondary.visibility = View.GONE
                 binding.btnCancel.text = "Отменить"
@@ -64,6 +69,14 @@ class ConfirmActionBottomSheet : BottomSheetDialogFragment() {
 
         binding.btnCancel.setOnClickListener { dismiss() }
         binding.btnClose.setOnClickListener { dismiss() }
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme_Compat)
+
+        BottomSheetAnimator.applyEnterExitAnimations(dialog)
+
+        return dialog
     }
 
     private fun observeViewModel() {
