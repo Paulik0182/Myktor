@@ -1,11 +1,40 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.MyKtor" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Основные цвета -->
+        <item name="colorPrimary">@color/primary_500</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/primary_100</item>
+        <item name="colorOnPrimaryContainer">@color/primary_500</item>
+
+        <!-- Цвета текста -->
+        <item name="android:textColorPrimary">@color/soft_black</item>
+        <item name="android:textColorSecondary">@color/gray_600</item>
+
+        <!-- Цвета фона -->
+        <item name="android:windowBackground">@color/muted_white</item>
+        <item name="colorSurface">@color/muted_white</item>
     </style>
 
     <style name="Theme.MyKtor" parent="Base.Theme.MyKtor" />
+
+    <!-- Стиль для главной кнопки -->
+    <style name="Widget.MyApp.Button.Primary" parent="Widget.Material3.Button">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:fontFamily">@font/graphik_compact_regular_app</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@color/primary_500</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.MyApp.MediumComponent</item>
+    </style>
+
+    <!-- Стиль для второстепенной кнопки -->
+    <style name="Widget.MyApp.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/primary_500</item>
+        <item name="android:fontFamily">@font/graphik_compact_regular_app</item>
+        <item name="strokeColor">@color/primary_500</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.MyApp.MediumComponent</item>
+    </style>
 
     <!-- styles BottomSheet -->
     <style name="BottomSheetDialogTheme_Compat" parent="Theme.Material3.Light.BottomSheetDialog">
@@ -18,6 +47,13 @@
 
     <style name="CustomBottomSheetStyle" parent="Widget.Material3.BottomSheet.Modal">
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.BottomSheet</item>
+    </style>
+
+    <!-- Общий стиль для обычных TextView -->
+    <style name="Widget.MyApp.TextView.Base" parent="android:Widget.TextView">
+        <item name="android:fontFamily">@font/graphik_compact_regular_app</item>
+        <item name="android:textColor">@color/soft_black</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="ShapeAppearanceOverlay.BottomSheet" parent="">
@@ -46,6 +82,59 @@
     <style name="ShapeAppearance.MyApp.MediumComponent" parent="ShapeAppearance.Material3.MediumComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">24dp</item>
+    </style>
+
+    <style name="Widget.MyApp.Button.OutlinedGray2" parent="Widget.MyApp.Button.OutlinedGray">
+        <item name="android:textColor">#757575</item>
+        <item name="backgroundTint">@color/button_positive_actions</item>
+        <item name="strokeColor">@color/button_muted_olive_yellow</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <!-- Стили для текстовых ссылок -->
+    <!-- Заголовоки -->
+    <style name="Widget.MyApp.TextView.Headline" parent="Widget.MyApp.TextView.Base">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="Widget.MyApp.TextView.Link" parent="Widget.MyApp.TextView.Base">
+        <item name="android:textColor">@color/primary_500</item>
+    </style>
+
+    <style name="Widget.MyApp.TextView.Link.Secondary" parent="Widget.MyApp.TextView.Base">
+        <item name="android:textColor">@color/gray_600</item>
+    </style>
+
+    <!-- Для полей с водом текста (использую при вводе логина и пароля) -->
+    <style name="Widget.MyApp.TextInputLayout.FilledBox" parent="Widget.Material3.TextInputLayout.FilledBox">
+        <!-- Основные параметры -->
+        <item name="boxStrokeWidth">0dp</item> <!-- Убираем рамку -->
+        <item name="boxStrokeWidthFocused">0dp</item>
+        <item name="android:background">@drawable/edittext_underline</item>
+        <item name="boxStrokeColor">@android:color/transparent</item>
+
+        <item name="android:paddingBottom">2dp</item> <!-- Для лучшего отступа подчеркивания -->
+
+        <item name="hintTextColor">?attr/colorOnSurfaceVariant</item>
+        <item name="hintEnabled">true</item>
+    </style>
+
+    <style name="Widget.MyApp.TextInputLayout.HintRaised" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:translationY">-2dp</item>
+    </style>
+
+    <style name="Widget.MyApp.TextInputEditText.FilledBox" parent="Widget.Material3.TextInputEditText.FilledBox">
+        <item name="android:backgroundTint">@android:color/transparent</item>
+    </style>
+    <!-- Форма для подчеркивания -->
+    <style name="ShapeAppearance.MyApp.TextInputUnderline" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">0dp</item> <!-- Полностью прямоугольная форма -->
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeTopRight">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
 </resources>

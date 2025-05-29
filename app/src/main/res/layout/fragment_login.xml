@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
     android:fitsSystemWindows="true"
-    android:background="?android:windowBackground">
+    android:background="@color/muted_white">
 
     <LinearLayout
         android:id="@+id/container"
@@ -19,69 +20,81 @@
         <!-- Заголовок -->
         <TextView
             android:id="@+id/tvTitle"
+            style="@style/Widget.MyApp.TextView.Headline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Вход в аккаунт"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="32dp"
-            android:textColor="?android:textColorPrimary" />
+            android:layout_marginBottom="20dp"/>
 
         <!-- Email -->
-        <EditText
-            android:id="@+id/etEmail"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:layout_marginBottom="16dp"
-            android:autofillHints="emailAddress"
-            android:importantForAutofill="yes" />
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MyApp.TextInputLayout.FilledBox"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.MyApp.TextInputUnderline"
+            app:hintTextAppearance="@style/Widget.MyApp.TextInputLayout.HintRaised">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                style="@style/Widget.MyApp.TextInputEditText.FilledBox"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Пароль -->
-        <EditText
-            android:id="@+id/etPassword"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Пароль"
-            android:inputType="textPassword"
-            android:layout_marginBottom="24dp"
-            android:autofillHints="password"
-            android:importantForAutofill="yes" />
+            android:layout_marginBottom="15dp"
+            style="@style/Widget.MyApp.TextInputLayout.FilledBox"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.MyApp.TextInputUnderline">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Пароль"
+                android:inputType="textPassword"
+                style="@style/Widget.MyApp.TextInputEditText.FilledBox"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Кнопка Войти -->
         <Button
             android:id="@+id/btnLogin"
+            style="@style/Widget.MyApp.Button.OutlinedGray2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Войти"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="20dp" />
 
         <!-- Восстановление пароля -->
         <TextView
             android:id="@+id/tvResetPassword"
+            style="@style/Widget.MyApp.TextView.Link"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Восстановить пароль"
-            android:textColor="?attr/colorPrimary"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="20dp"
             android:clickable="true"
             android:focusable="true" />
 
         <!-- Разделитель -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="2dp"
             android:layout_marginBottom="24dp"
-            android:background="@android:color/darker_gray" />
+            android:background="@color/gray_300" />
 
         <!-- Зарегистрироваться -->
         <TextView
             android:id="@+id/tvRegister"
+            style="@style/Widget.MyApp.TextView.Link"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Зарегистрироваться"
-            android:textColor="?attr/colorPrimary"
             android:layout_marginBottom="16dp"
             android:clickable="true"
             android:focusable="true" />
@@ -89,10 +102,10 @@
         <!-- Политика конфиденциальности -->
         <TextView
             android:id="@+id/tvPrivacyPolicy"
+            style="@style/Widget.MyApp.TextView.Link"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Политика конфиденциальности"
-            android:textColor="?attr/colorPrimary"
             android:layout_marginBottom="12dp"
             android:clickable="true"
             android:focusable="true" />
@@ -100,10 +113,10 @@
         <!-- Информация для клиентов -->
         <TextView
             android:id="@+id/tvClientInfo"
+            style="@style/Widget.MyApp.TextView.Link"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Информация для клиентов"
-            android:textColor="?attr/colorPrimary"
             android:layout_marginBottom="12dp"
             android:clickable="true"
             android:focusable="true" />

@@ -13,7 +13,7 @@
     <color name="blue">#1555FA</color>
 
     <color name="button_muted_olive_yellow">#B9DD41</color>
-    <color name="button_positive_actions">#C0CA33</color>
+    <color name="button_positive_actions">#48B7E816</color>
     <color name="button_error">#FF3A69</color>
     <color name="button_important_actions">#E17484</color>
     <color name="muted_white">#FAFAFA</color>
@@ -40,5 +40,8 @@
 
     <!-- Для SwitchCompat -->
 
-
+    <!-- Добавьте или обновите эти цвета -->
+    <color name="text_input_fill">@color/muted_white</color> <!-- Цвет фона -->
+    <color name="text_input_stroke">#33000000</color> <!-- Цвет подчеркивания в неактивном состоянии -->
+    <color name="text_input_stroke_focused">@color/primary_500</color> <!-- Цвет подчеркивания при фокусе -->
 </resources>

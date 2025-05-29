@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- ТОЛЬКО нижняя линия -->
+    <item android:top="-100dp" android:start="-100dp" android:end="-100dp" android:bottom="0dp"> <!-- Большой отрицательный top чтобы гарантированно скрыть боковые линии -->
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent"/>
+            <stroke
+                android:width="2dp"
+                android:color="@color/gray_300"/>
+        </shape>
+    </item>
+
+    <!-- Активная линия (управляется через backgroundTint) -->
+    <item android:bottom="0dp" android:top="-100dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent"/>
+            <size android:height="2dp"/>
+        </shape>
+    </item>
+</layer-list>

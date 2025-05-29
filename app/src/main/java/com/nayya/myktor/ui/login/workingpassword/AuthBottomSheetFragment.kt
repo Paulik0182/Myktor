@@ -16,13 +16,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.BottomSheetAuthBinding
 import com.nayya.myktor.databinding.LayoutLegalEntityBinding
 import com.nayya.myktor.databinding.PersonNameFieldsBinding
+import com.nayya.myktor.ui.animator.BottomSheetAnimator
 import com.nayya.myktor.ui.login.DefaultAuthRepository
 import com.nayya.myktor.ui.profile.detailscounterparty.CounterpartyDetailsViewModel
 import com.nayya.myktor.ui.profile.detailscounterparty.CounterpartyValidationDelegate
@@ -131,24 +131,11 @@ class AuthBottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = BottomSheetDialog(requireContext(), theme)
+        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme_Compat)
+        BottomSheetAnimator.applyEnterExitAnimations(dialog)
 
         dialog.setOnShowListener { dlg ->
-            val bottomSheet = (dlg as? BottomSheetDialog)
-                ?.findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet)
-
-            bottomSheet?.let {
-                val behavior = BottomSheetBehavior.from(it).apply {
-                    state = BottomSheetBehavior.STATE_EXPANDED
-                    skipCollapsed = true
-                    isHideable = true
-                    isFitToContents = false
-                    expandedOffset = dpToPx(70) // если нужно отступ — можно dpToPx(100)
-                }
-
-                it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                it.requestLayout()
-            }
+            BottomSheetAnimator.expandFully(dlg as BottomSheetDialog, offsetDp = 70)
         }
 
         return dialog
@@ -168,6 +155,7 @@ class AuthBottomSheetFragment : BottomSheetDialogFragment() {
                 binding.btnAction.text = "Отправить письмо"
                 binding.etEmail.isVisible = true
                 binding.etPassword.isVisible = false
+                binding.linePassword.isVisible = false
                 personNameRegisterBinding.layoutPersonNameFields.isVisible = false
                 legalEntityBinding.layoutLegalEntity.isVisible = false
             }
