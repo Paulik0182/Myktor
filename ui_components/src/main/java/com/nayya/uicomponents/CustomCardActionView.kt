@@ -2,6 +2,7 @@ package com.nayya.uicomponents
 
 import android.content.Context
 import android.graphics.Typeface
+import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
 import android.text.TextUtils
@@ -16,6 +17,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.nayya.uicomponents.databinding.LayoutCardActionViewBinding
+import androidx.core.widget.doAfterTextChanged
 
 class CustomCardActionView @JvmOverloads constructor(
     context: Context,
@@ -544,4 +546,14 @@ class CustomCardActionView @JvmOverloads constructor(
         binding.etInputUser.ellipsize = mode
         binding.tvInputUserReadOnly.ellipsize = mode
     }
+
+    /**
+     * Позволяет использовать doAfterTextChanged { ... }
+     */
+    fun doAfterTextChanged(action: (text: Editable?) -> Unit): TextWatcher {
+        return binding.etInputUser.doAfterTextChanged(action)
+    }
+//    fun getText(): String {
+//        return binding.etInputUser.text?.toString().orEmpty()
+//    }
 }
