@@ -25,6 +25,7 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
     // Для того чтобы скрыть нижнюю навигацию и персчитать размеры container
     override val hideBottomNavigation = true
     override val enableRevealAnimation = true
+    override val revealAnimationOrigin = RevealOrigin.TOP_LEFT
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

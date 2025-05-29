@@ -34,6 +34,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     private lateinit var legalEntityBinding: LayoutLegalEntityBinding
     private lateinit var personNameDetailsBinding: PersonNameFieldsBinding
 
+    override val enableRevealAnimation = true
+    override val revealAnimationOrigin = RevealOrigin.TOP_RIGHT
+
     private var counterpartyId: Long? = null
 
     // Для того чтобы скрыть нижнюю навигацию и персчитать размеры container
@@ -187,7 +190,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                     onDiscard = {
                         val id = counterpartyId
                         if (id != null) {
-                            viewModel.loadCounterpartyById(id) // ⬅️ загружаем заново с сервера
+                            exitWithRevealAnimation { // анимация при закрытии экрана
+                                viewModel.loadCounterpartyById(id) // ⬅️ загружаем заново с сервера
+                            }
                         }
 
                         viewModel.discardChanges()
@@ -679,8 +684,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 navigateAction()
             },
             onDiscard = {
-                viewModel.discardChanges()
-                navigateAction()
+                exitWithRevealAnimation { // анимация при закрытии экрана
+                    viewModel.discardChanges()
+                    navigateAction()
+                }
             },
             onCancel = {
                 // остаться — ничего не делаем
