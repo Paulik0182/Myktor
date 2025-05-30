@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentProfileBinding
+import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.viewBinding
 
@@ -103,9 +104,7 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
             binding.tvNickname.visibility = View.VISIBLE
             binding.ivRightIcon.visibility = View.VISIBLE
 
-            val isLegal = counterparty.isLegalEntity
-            binding.tvCompanyName.visibility = if (isLegal) View.VISIBLE else View.GONE
-            binding.tvFirstName.visibility = if (isLegal) View.GONE else View.VISIBLE
+            renderCounterpartyInfo(counterparty)
 
             binding.tvNickname.text = counterparty.shortName
             binding.tvFirstName.text = counterparty.firstName
@@ -123,6 +122,33 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
         viewModel.menuItems.observe(viewLifecycleOwner) { menuItems ->
             Log.d("DEBUG", "Menu size: ${menuItems.size}")
             adapter.updateItems(menuItems)
+        }
+    }
+
+    private fun renderCounterpartyInfo(counterparty: CounterpartyEntity) {
+        val isLegal = counterparty.isLegalEntity
+        val companyName = counterparty.companyName?.trim()
+        val firstName = counterparty.firstName?.trim()
+        val nickname = counterparty.shortName?.trim()
+
+        // Никнейм отображается всегда (если не пустой)
+        binding.tvNickname.text = nickname
+        binding.tvNickname.visibility = if (!nickname.isNullOrEmpty()) View.VISIBLE else View.GONE
+
+        if (isLegal) {
+            // Юр. лицо — отображаем компанию, скрываем имя
+            binding.tvCompanyName.text = companyName
+            binding.tvCompanyName.visibility = if (!companyName.isNullOrEmpty()) View.VISIBLE else View.GONE
+
+            binding.tvFirstName.text = ""
+            binding.tvFirstName.visibility = View.GONE
+        } else {
+            // Физ. лицо — отображаем имя, скрываем компанию
+            binding.tvFirstName.text = firstName
+            binding.tvFirstName.visibility = if (!firstName.isNullOrEmpty()) View.VISIBLE else View.GONE
+
+            binding.tvCompanyName.text = ""
+            binding.tvCompanyName.visibility = View.GONE
         }
     }
 

@@ -57,7 +57,8 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         counterpartyId?.let { viewModel.loadCounterpartyById(it) }
 
         legalEntityBinding = LayoutLegalEntityBinding.bind(binding.includeLegalEntity.root)
-        personNameDetailsBinding = PersonNameFieldsBinding.bind(binding.includePersonNameDetails.root)
+        personNameDetailsBinding =
+            PersonNameFieldsBinding.bind(binding.includePersonNameDetails.root)
 
         validator = CounterpartyValidationDelegate(
             context = requireContext(),
@@ -361,6 +362,11 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         viewModel.isEditMode.observe(viewLifecycleOwner) { isEditMode ->
             updateToolbarState(isEditMode)
             updateEditableState(isEditMode)
+
+            viewModel.counterparty.value?.let { counterparty ->
+                updateNameFieldsVisibility(counterparty)
+            }
+
             updateEditableStateEditText(isEditMode)
             updateEditableStateCheckBoxes(isEditMode)
 
@@ -383,27 +389,32 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             .circleCrop()
             .into(binding.ivAvatar)
 
-        personNameDetailsBinding.ccavFirstName.apply {
-            visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-            setTextAndMode(
-                counterparty.firstName ?: "",
-                readOnly = true
-            )
-        }
-
-        personNameDetailsBinding.ccavLastName.apply {
-            visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-            setTextAndMode(
-                counterparty.lastName ?: "",
-                readOnly = true
-            )
-        }
+        updateNameFieldsVisibility(counterparty)
 
         personNameDetailsBinding.ccavShortName.setTextAndMode(
             counterparty.shortName ?: "",
             readOnly = true
         )
         bindCounterparty(counterparty)
+    }
+
+    private fun updateNameFieldsVisibility(counterparty: CounterpartyEntity) {
+        val isEditMode = viewModel.isEditMode.value == true
+        val isIndividual = !counterparty.isLegalEntity
+
+        // Поля заполняются только для физических лиц
+        val firstNameVisible = isIndividual && (isEditMode || !counterparty.firstName.isNullOrBlank())
+        val lastNameVisible = isIndividual && (isEditMode || !counterparty.lastName.isNullOrBlank())
+
+        personNameDetailsBinding.ccavFirstName.apply {
+            visibility = if (firstNameVisible) View.VISIBLE else View.GONE
+            setTextAndMode(counterparty.firstName ?: "", readOnly = true)
+        }
+
+        personNameDetailsBinding.ccavLastName.apply {
+            visibility = if (lastNameVisible) View.VISIBLE else View.GONE
+            setTextAndMode(counterparty.lastName ?: "", readOnly = true)
+        }
     }
 
     private fun bindCounterparty(counterparty: CounterpartyEntity) {
@@ -554,8 +565,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     }
 
     private fun updateLegalEntityVisibility(isLegalEntity: Boolean) {
-        personNameDetailsBinding.ccavFirstName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
-        personNameDetailsBinding.ccavLastName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
+        personNameDetailsBinding.ccavFirstName.visibility =
+            if (isLegalEntity) View.GONE else View.VISIBLE
+        personNameDetailsBinding.ccavLastName.visibility =
+            if (isLegalEntity) View.GONE else View.VISIBLE
         binding.includeLegalEntity.layoutLegalEntity.visibility =
             if (isLegalEntity) View.VISIBLE else View.GONE
         binding.includeLegalEntity.llTypes.visibility =
