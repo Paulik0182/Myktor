@@ -233,13 +233,15 @@ data class CounterpartyFormState(
 )
 
 fun CounterpartyFormState.equalsEntity(entity: CounterpartyEntity): Boolean {
-    return shortName == (entity.shortName ?: "") &&
-            firstName == (entity.firstName ?: "") &&
-            lastName == (entity.lastName ?: "") &&
-            companyName == (entity.companyName ?: "") &&
-            nip == (entity.nip ?: "") &&
-            krs == (entity.krs ?: "") &&
-            type == (entity.type ?: "") &&
+    fun String?.normalize() = this?.takeIf { it.isNotBlank() } ?: ""
+
+    return shortName == entity.shortName.normalize() &&
+            firstName == entity.firstName.normalize() &&
+            lastName == entity.lastName.normalize() &&
+            companyName == entity.companyName.normalize() &&
+            nip == entity.nip.normalize() &&
+            krs == entity.krs.normalize() &&
+            type == entity.type.normalize() &&
             isLegalEntity == entity.isLegalEntity &&
             isSupplier == entity.isSupplier &&
             isWarehouse == entity.isWarehouse &&
