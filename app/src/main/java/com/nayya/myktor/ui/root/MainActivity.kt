@@ -1,7 +1,10 @@
 package com.nayya.myktor.ui.root
 
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.Window
+import android.view.WindowInsetsController
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -95,7 +98,7 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
                 R.id.nav_cart -> {
                     // открыть корзину
-                    openRootFragment(LoginFragment.newInstance())
+                    openChildFragment(LoginFragment.newInstance())
                     true
                 }
 
@@ -131,6 +134,22 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 //            .replace(binding.container.id, fragment)
             .addToBackStack(null)
             .commit()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setLightStatusBarIcons(this.window)
+    }
+
+    private fun setLightStatusBarIcons(window: Window) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.setSystemBarsAppearance(
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
+        } else {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
     }
 
     override fun openOrders() {
