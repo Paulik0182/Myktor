@@ -76,24 +76,18 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         binding.contactsInfo.setEditClickListener {
-            tryNavigateWithSaveCheck {
                 openContactsEditor()
-            }
         }
 
         binding.bankInfo.apply {
             setEditClickListener {
-                tryNavigateWithSaveCheck {
                     Toast.makeText(context, "Клик на Банк", Toast.LENGTH_SHORT).show()
-                }
             }
         }
 
         binding.addressesInfo.apply {
             setEditClickListener {
-                tryNavigateWithSaveCheck {
                     Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
-                }
             }
         }
 
@@ -197,24 +191,29 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         binding.toolbar.btnEdit.setOnClickListener {
-            if (viewModel.hasUnsavedChanges.value == true) {
-                // Показать диалог: Сохранить изменения или отменить
-                showUnsavedChangesDialog(
-                    onSave = { saveChangesFragment() },
-                    onDiscard = {
-                        val id = counterpartyId
-                        if (id != null) {
-                            exitWithRevealAnimation { // анимация при закрытии экрана
-                                viewModel.loadCounterpartyById(id) // ⬅️ загружаем заново с сервера
-                            }
-                        }
-
-                        viewModel.discardChanges()
-                    }
-                )
-            } else {
-                viewModel.toggleEditMode()
-            }
+            tryToggleEditModeWithCheck()
+//            val isEditMode = viewModel.isEditMode.value == true
+//            val hasChanges = hasUnsavedChanges()
+//
+//            if (isEditMode && hasChanges) {
+//                // Показать диалог: Сохранить изменения или отменить
+//                showUnsavedChangesDialog(
+//                    onSave = { saveChangesFragment() },
+//                    onDiscard = {
+//                        val id = counterpartyId
+//                        if (id != null) {
+//                            exitWithRevealAnimation { // анимация при закрытии экрана
+//                                viewModel.loadCounterpartyById(id) // ⬅️ загружаем заново с сервера
+//                            }
+//                        }
+//
+//                        viewModel.discardChanges()
+//                        viewModel.setEditMode(false) // обязательно выйти из режима
+//                    }
+//                )
+//            } else {
+//                viewModel.toggleEditMode()
+//            }
         }
     }
 
@@ -701,14 +700,18 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
     private fun tryNavigateWithSaveCheck(navigateAction: () -> Unit) {
         if (!hasUnsavedChanges()) {
-            navigateAction()
+            exitWithRevealAnimation {
+                navigateAction() // ← сюда передаётся goBack(), и он уже безопасен
+            }
             return
         }
 
         showUnsavedChangesDialog(
             onSave = {
                 saveChangesFragment()
-                navigateAction()
+                exitWithRevealAnimation {
+                    navigateAction()
+                }
             },
             onDiscard = {
                 exitWithRevealAnimation { // анимация при закрытии экрана
@@ -720,6 +723,26 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 // остаться — ничего не делаем
             }
         )
+    }
+
+    private fun tryToggleEditModeWithCheck() {
+        val isEditMode = viewModel.isEditMode.value == true
+        val hasChanges = hasUnsavedChanges()
+
+        if (isEditMode && hasChanges) {
+            showUnsavedChangesDialog(
+                onSave = { saveChangesFragment() },
+                onDiscard = {
+                    viewModel.discardChanges()
+                    viewModel.setEditMode(false)
+                },
+                onCancel = {
+                    // ничего не делаем
+                }
+            )
+        } else {
+            viewModel.toggleEditMode()
+        }
     }
 
     companion object {
