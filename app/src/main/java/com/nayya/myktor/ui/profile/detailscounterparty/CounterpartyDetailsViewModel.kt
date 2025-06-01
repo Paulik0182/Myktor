@@ -2,6 +2,7 @@ package com.nayya.myktor.ui.profile.detailscounterparty
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,8 +26,15 @@ class CounterpartyDetailsViewModel : ViewModel() {
     val isEditMode: LiveData<Boolean> = _isEditMode
 
     // Флаг не сохраненых данных.
-    private val _hasUnsavedChanges = MutableLiveData<Boolean>(false)
-    val hasUnsavedChanges: LiveData<Boolean> = _hasUnsavedChanges
+    // ✅ Состояние текущей формы (что введено в UI)
+    private val _formState = MutableLiveData<CounterpartyFormState>()
+    val formState: LiveData<CounterpartyFormState> = _formState
+
+    // ✅ [MODIFIED] hasUnsavedChanges теперь сравнивает formState и оригинальные данные
+    val hasUnsavedChanges = MediatorLiveData<Boolean>().apply {
+        addSource(_formState) { value = compareFormWithOriginal() }
+        addSource(_counterparty) { value = compareFormWithOriginal() }
+    }
 
     private val _countries = MutableLiveData<List<Country>>()
     val countries: LiveData<List<Country>> get() = _countries
@@ -51,11 +59,38 @@ class CounterpartyDetailsViewModel : ViewModel() {
                     RetrofitInstance.api.getCounterpartyById(counterpartyId)
                 }
                 _counterparty.value = result
+
+                // ✅ Сброс formState на базу оригинала
+                _formState.value = CounterpartyFormState(
+                    shortName = result.shortName.orEmpty(),
+                    firstName = result.firstName.orEmpty(),
+                    lastName = result.lastName.orEmpty(),
+                    companyName = result.companyName.orEmpty(),
+                    nip = result.nip.orEmpty(),
+                    krs = result.krs.orEmpty(),
+                    type = result.type.orEmpty(),
+                    isLegalEntity = result.isLegalEntity,
+                    isSupplier = result.isSupplier,
+                    isWarehouse = result.isWarehouse,
+                    isCustomer = result.isCustomer
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.e("CounterpartyDetailsVM", "Ошибка загрузки данных: ${e.localizedMessage}", e)
             }
         }
+    }
+
+    // ✅ Метод обновления полей формы
+    fun updateForm(update: CounterpartyFormState.() -> CounterpartyFormState) {
+        _formState.value = _formState.value?.update() ?: CounterpartyFormState().update()
+    }
+
+    // ✅ Сравниваем formState с оригиналом
+    private fun compareFormWithOriginal(): Boolean {
+        val form = _formState.value ?: return false
+        val original = _counterparty.value ?: return false
+        return !form.equalsEntity(original)
     }
 
     fun toggleEditMode() {
@@ -66,13 +101,23 @@ class CounterpartyDetailsViewModel : ViewModel() {
         _isEditMode.value = isEdit
     }
 
-    fun setHasUnsavedChanges(hasChanges: Boolean) {
-        _hasUnsavedChanges.value = hasChanges
-    }
-
     fun discardChanges() {
-        setHasUnsavedChanges(false)
-        toggleEditMode() // Выходим из режима редактирования без сохранения
+        _isEditMode.value = false
+        _formState.value = _counterparty.value?.let { original ->
+            CounterpartyFormState(
+                shortName = original.shortName.orEmpty(),
+                firstName = original.firstName.orEmpty(),
+                lastName = original.lastName.orEmpty(),
+                companyName = original.companyName.orEmpty(),
+                nip = original.nip.orEmpty(),
+                krs = original.krs.orEmpty(),
+                type = original.type.orEmpty(),
+                isLegalEntity = original.isLegalEntity,
+                isSupplier = original.isSupplier,
+                isWarehouse = original.isWarehouse,
+                isCustomer = original.isCustomer
+            )
+        }
     }
 
     // TODO Перенести в репозиторий или в Интерактор
@@ -87,7 +132,6 @@ class CounterpartyDetailsViewModel : ViewModel() {
                     return@launch
                 }
 
-                setHasUnsavedChanges(true)
                 loadCounterpartyById(counterpartyId) // ← ВСЁ обновится через LiveData
             } catch (e: Exception) {
                 Log.e("ViewModel", "Ошибка обновления контактов: ${e.localizedMessage}", e)
@@ -150,7 +194,6 @@ class CounterpartyDetailsViewModel : ViewModel() {
 
                 if (result != null && result.isSuccessful) {
                     _toastMessage.postValue(Event("Изменения сохранены"))
-                    setHasUnsavedChanges(false)
                     loadCounterpartyById(old.id!!)
                 } else {
                     _toastMessage.postValue(Event("Ошибка при сохранении основных полей"))
@@ -172,4 +215,35 @@ class CounterpartyDetailsViewModel : ViewModel() {
     fun setKrsValid(isValid: Boolean) {
         _isKrsValid.value = isValid
     }
+}
+
+// ✅ [NEW FILE or placed in same ViewModel file]
+data class CounterpartyFormState(
+    val shortName: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val companyName: String = "",
+    val nip: String = "",
+    val krs: String = "",
+    val type: String = "",
+    val isLegalEntity: Boolean = true,
+    val isSupplier: Boolean = false,
+    val isWarehouse: Boolean = false,
+    val isCustomer: Boolean = false
+)
+
+fun CounterpartyFormState.equalsEntity(entity: CounterpartyEntity): Boolean {
+    fun String?.normalize() = this?.takeIf { it.isNotBlank() } ?: ""
+
+    return shortName == entity.shortName.normalize() &&
+            firstName == entity.firstName.normalize() &&
+            lastName == entity.lastName.normalize() &&
+            companyName == entity.companyName.normalize() &&
+            nip == entity.nip.normalize() &&
+            krs == entity.krs.normalize() &&
+            type == entity.type.normalize() &&
+            isLegalEntity == entity.isLegalEntity &&
+            isSupplier == entity.isSupplier &&
+            isWarehouse == entity.isWarehouse &&
+            isCustomer == entity.isCustomer
 }

@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- statusBar + toolbar фон -->
+    <color name="neutral_background_1">#FAFAFA</color> <!-- Почти белый -->
+    <color name="neutral_background_2">#F5F5F5</color> <!-- Светло-серый -->
+    <color name="neutral_background_3">#ECECEC</color> <!-- Чуть темнее -->
+    <color name="app_bar_background_4">#F0F0F4</color>
+    <color name="app_bar_background_5">#EFEFEF</color>
+    <color name="app_bar_background_6">#607D8B</color> <!-- голубовато-серый, универсален -->
+    <color name="app_bar_background_7">#344955</color> <!-- профессионально и неброско -->
+    <color name="app_bar_background_8">#4CAF50</color> <!--  -->
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 

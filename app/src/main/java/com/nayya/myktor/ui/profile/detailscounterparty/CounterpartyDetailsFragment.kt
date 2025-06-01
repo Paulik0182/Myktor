@@ -2,9 +2,7 @@ package com.nayya.myktor.ui.profile.detailscounterparty
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.text.Editable
 import android.text.TextUtils
-import android.text.TextWatcher
 import android.view.View
 import android.widget.CompoundButton
 import android.widget.Toast
@@ -59,7 +57,8 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         counterpartyId?.let { viewModel.loadCounterpartyById(it) }
 
         legalEntityBinding = LayoutLegalEntityBinding.bind(binding.includeLegalEntity.root)
-        personNameDetailsBinding = PersonNameFieldsBinding.bind(binding.includePersonNameDetails.root)
+        personNameDetailsBinding =
+            PersonNameFieldsBinding.bind(binding.includePersonNameDetails.root)
 
         validator = CounterpartyValidationDelegate(
             context = requireContext(),
@@ -77,24 +76,18 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         binding.contactsInfo.setEditClickListener {
-            tryNavigateWithSaveCheck {
-                openContactsEditor()
-            }
+            openContactsEditor()
         }
 
         binding.bankInfo.apply {
             setEditClickListener {
-                tryNavigateWithSaveCheck {
-                    Toast.makeText(context, "Клик на Банк", Toast.LENGTH_SHORT).show()
-                }
+                Toast.makeText(context, "Клик на Банк", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.addressesInfo.apply {
             setEditClickListener {
-                tryNavigateWithSaveCheck {
-                    Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
-                }
+                Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -127,31 +120,46 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
     // Часть механизма отслеживания изменений данных.
     private fun setupTextWatchers() {
-        val watcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
-                Unit
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (!ignoreChanges) {
-                    viewModel.setHasUnsavedChanges(true)
-                }
+        personNameDetailsBinding.ccavShortName.doAfterTextChanged { editable ->
+            if (!ignoreChanges) {
+                viewModel.updateForm { copy(shortName = editable?.toString().orEmpty()) }
             }
-
-            override fun afterTextChanged(s: Editable?) = Unit
         }
 
-        val firmFields = listOf(
-            personNameDetailsBinding.ccavShortName,
-            personNameDetailsBinding.ccavFirstName,
-            personNameDetailsBinding.ccavLastName,
-            legalEntityBinding.ccavCompanyName,
-            legalEntityBinding.ccavType,
-            legalEntityBinding.ccavNIP,
-            legalEntityBinding.ccavKRS
-        )
+        personNameDetailsBinding.ccavFirstName.doAfterTextChanged { editable ->
+            if (!ignoreChanges) {
+                viewModel.updateForm { copy(firstName = editable?.toString().orEmpty()) }
+            }
+        }
 
-        firmFields.forEach { view ->
-            view.addTextChangedListener(watcher)
+        personNameDetailsBinding.ccavLastName.doAfterTextChanged { editable ->
+            if (!ignoreChanges) {
+                viewModel.updateForm { copy(lastName = editable?.toString().orEmpty()) }
+            }
+        }
+
+        legalEntityBinding.ccavCompanyName.doAfterTextChanged { editable ->
+            if (!ignoreChanges) {
+                viewModel.updateForm { copy(companyName = editable?.toString().orEmpty()) }
+            }
+        }
+
+        legalEntityBinding.ccavNIP.doAfterTextChanged { editable ->
+            if (!ignoreChanges) {
+                viewModel.updateForm { copy(nip = editable?.toString().orEmpty()) }
+            }
+        }
+
+        legalEntityBinding.ccavKRS.doAfterTextChanged { editable ->
+            if (!ignoreChanges) {
+                viewModel.updateForm { copy(krs = editable?.toString().orEmpty()) }
+            }
+        }
+
+        legalEntityBinding.ccavType.doAfterTextChanged { editable ->
+            if (!ignoreChanges) {
+                viewModel.updateForm { copy(type = editable?.toString().orEmpty()) }
+            }
         }
     }
 
@@ -183,24 +191,29 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         binding.toolbar.btnEdit.setOnClickListener {
-            if (viewModel.hasUnsavedChanges.value == true) {
-                // Показать диалог: Сохранить изменения или отменить
-                showUnsavedChangesDialog(
-                    onSave = { saveChangesFragment() },
-                    onDiscard = {
-                        val id = counterpartyId
-                        if (id != null) {
-                            exitWithRevealAnimation { // анимация при закрытии экрана
-                                viewModel.loadCounterpartyById(id) // ⬅️ загружаем заново с сервера
-                            }
-                        }
-
-                        viewModel.discardChanges()
-                    }
-                )
-            } else {
-                viewModel.toggleEditMode()
-            }
+            tryToggleEditModeWithCheck()
+//            val isEditMode = viewModel.isEditMode.value == true
+//            val hasChanges = hasUnsavedChanges()
+//
+//            if (isEditMode && hasChanges) {
+//                // Показать диалог: Сохранить изменения или отменить
+//                showUnsavedChangesDialog(
+//                    onSave = { saveChangesFragment() },
+//                    onDiscard = {
+//                        val id = counterpartyId
+//                        if (id != null) {
+//                            exitWithRevealAnimation { // анимация при закрытии экрана
+//                                viewModel.loadCounterpartyById(id) // ⬅️ загружаем заново с сервера
+//                            }
+//                        }
+//
+//                        viewModel.discardChanges()
+//                        viewModel.setEditMode(false) // обязательно выйти из режима
+//                    }
+//                )
+//            } else {
+//                viewModel.toggleEditMode()
+//            }
         }
     }
 
@@ -211,6 +224,16 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     }
 
     private fun saveChangesFragment() {
+        val form = viewModel.formState.value ?: return
+
+        // 🔍 Проверка: есть ли вообще изменения
+        val original = viewModel.counterparty.value
+        if (original != null && form.equalsEntity(original)) {
+            showSnackbar("Изменений не было")
+            viewModel.setEditMode(false)
+            return
+        }
+
         val isLegalEntity = binding.scEntityStatus.isChecked
 
         if (isLegalEntity) {
@@ -224,27 +247,26 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             }
         }
 
-        val isSupplier = legalEntityBinding.cbSupplier.isChecked
-        val isWarehouse = legalEntityBinding.cbWarehouse.isChecked
-        val isCustomer = legalEntityBinding.cbCustomer.isChecked
-
-        if (!isSupplier && !isWarehouse && !isCustomer) {
+        // Валидация
+        if (form.isLegalEntity && !form.isSupplier && !form.isWarehouse && !form.isCustomer) {
             showSnackbar("Выберите хотя бы один тип компании. По умолчанию выбран 'customer'")
             legalEntityBinding.cbCustomer.isChecked = true
+            viewModel.updateForm { copy(isCustomer = true) }
+            return
         }
 
         viewModel.saveChanges(
-            shortName = personNameDetailsBinding.ccavShortName.text.orEmpty().trimEnd(),
-            firstName = personNameDetailsBinding.ccavFirstName.text.orEmpty().trimEnd(),
-            lastName = personNameDetailsBinding.ccavLastName.text.orEmpty().trimEnd(),
-            companyName = legalEntityBinding.ccavCompanyName.text.orEmpty().trimEnd(),
-            type = legalEntityBinding.ccavType.text.orEmpty(),
-            nip = legalEntityBinding.ccavNIP.text.orEmpty(),
-            krs = legalEntityBinding.ccavKRS.text.orEmpty(),
-            isSupplier = legalEntityBinding.cbSupplier.isChecked,
-            isWarehouse = legalEntityBinding.cbWarehouse.isChecked,
-            isCustomer = legalEntityBinding.cbCustomer.isChecked,
-            isLegalEntity = binding.scEntityStatus.isChecked
+            shortName = form.shortName,
+            firstName = form.firstName,
+            lastName = form.lastName,
+            companyName = form.companyName,
+            type = form.type,
+            nip = form.nip,
+            krs = form.krs,
+            isSupplier = form.isSupplier,
+            isWarehouse = form.isWarehouse,
+            isCustomer = form.isCustomer,
+            isLegalEntity = form.isLegalEntity
         )
 
         if (viewModel.isEditMode.value == true) {
@@ -318,7 +340,13 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
         val listeners = CompoundButton.OnCheckedChangeListener { _, _ ->
             if (!ignoreChanges) {
-                viewModel.setHasUnsavedChanges(true)
+                viewModel.updateForm {
+                    copy(
+                        isSupplier = legalEntityBinding.cbSupplier.isChecked,
+                        isWarehouse = legalEntityBinding.cbWarehouse.isChecked,
+                        isCustomer = legalEntityBinding.cbCustomer.isChecked
+                    )
+                }
                 updateTypePreview()
             }
         }
@@ -328,16 +356,25 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         legalEntityBinding.cbCustomer.setOnCheckedChangeListener(listeners)
 
         binding.scEntityStatus.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setHasUnsavedChanges(true)
+            if (!ignoreChanges) {
+                viewModel.updateForm { copy(isLegalEntity = isChecked) }
+            }
+
             binding.scEntityStatus.text = if (isChecked) "Юридическое лицо" else "Физическое лицо"
             updateLegalEntityVisibility(isChecked)
         }
+
     }
 
     private fun observeEditMode() {
         viewModel.isEditMode.observe(viewLifecycleOwner) { isEditMode ->
             updateToolbarState(isEditMode)
             updateEditableState(isEditMode)
+
+            viewModel.counterparty.value?.let { counterparty ->
+                updateNameFieldsVisibility(counterparty)
+            }
+
             updateEditableStateEditText(isEditMode)
             updateEditableStateCheckBoxes(isEditMode)
 
@@ -360,30 +397,39 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             .circleCrop()
             .into(binding.ivAvatar)
 
-        personNameDetailsBinding.ccavFirstName.apply {
-            visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-            setTextAndMode(
-                counterparty.firstName ?: "",
-                readOnly = true
-            )
-        }
+        updateNameFieldsVisibility(counterparty)
 
-        personNameDetailsBinding.ccavLastName.apply {
-            visibility = if (counterparty.isLegalEntity) View.GONE else View.VISIBLE
-            setTextAndMode(
-                counterparty.lastName ?: "",
-                readOnly = true
-            )
-        }
+        val isEditMode = viewModel.isEditMode.value == true
 
         personNameDetailsBinding.ccavShortName.setTextAndMode(
             counterparty.shortName ?: "",
-            readOnly = true
+            readOnly = !isEditMode
         )
         bindCounterparty(counterparty)
     }
 
+    private fun updateNameFieldsVisibility(counterparty: CounterpartyEntity) {
+        val isEditMode = viewModel.isEditMode.value == true
+        val isIndividual = !counterparty.isLegalEntity
+
+        // Поля заполняются только для физических лиц
+        val firstNameVisible =
+            isIndividual && (isEditMode || !counterparty.firstName.isNullOrBlank())
+        val lastNameVisible = isIndividual && (isEditMode || !counterparty.lastName.isNullOrBlank())
+
+        personNameDetailsBinding.ccavFirstName.apply {
+            visibility = if (firstNameVisible) View.VISIBLE else View.GONE
+            setTextAndMode(counterparty.firstName ?: "", readOnly = !isEditMode)
+        }
+
+        personNameDetailsBinding.ccavLastName.apply {
+            visibility = if (lastNameVisible) View.VISIBLE else View.GONE
+            setTextAndMode(counterparty.lastName ?: "", readOnly = !isEditMode)
+        }
+    }
+
     private fun bindCounterparty(counterparty: CounterpartyEntity) {
+        val isEditMode = viewModel.isEditMode.value == true
         binding.contactsInfo.visibility = View.VISIBLE
         binding.addressesInfo.visibility = View.VISIBLE
 
@@ -412,7 +458,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             legalEntityBinding.cbCustomer.isChecked = counterparty.isCustomer
             legalEntityBinding.ccavCompanyName.setTextAndMode(
                 counterparty.companyName ?: "",
-                readOnly = true
+                readOnly = !isEditMode
             )
             legalEntityBinding.ccavType.text = counterparty.type
             legalEntityBinding.ccavNIP.text = counterparty.nip
@@ -468,19 +514,20 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             binding.btnDeleteAccount.visibility = View.GONE
 
             // Когда редактируем — слушаем изменения
-            binding.scEntityStatus.setOnCheckedChangeListener { _, isChecked ->
-                binding.scEntityStatus.text = if (isChecked) {
-                    "Юридическое лицо"
-                } else {
-                    "Физическое лицо"
-                }
-
-                viewModel.setHasUnsavedChanges(true) // <-- СТАВИМ, ЧТО ЕСТЬ ИЗМЕНЕНИЯ
-
-
-                // Вот обработка нажатия на бигунок и изменение видимости некоторых элементов
-                updateLegalEntityVisibility(isChecked)
-            }
+//            binding.scEntityStatus.setOnCheckedChangeListener { _, isChecked ->
+//                binding.scEntityStatus.text = if (isChecked) {
+//                    "Юридическое лицо"
+//                } else {
+//                    "Физическое лицо"
+//                }
+//
+//                if (!ignoreChanges) {
+//                    viewModel.updateForm { copy(isLegalEntity = isChecked) }
+//                }
+//
+//                // Вот обработка нажатия на бигунок и изменение видимости некоторых элементов
+//                updateLegalEntityVisibility(isChecked)
+//            }
         } else {
             binding.contactsInfo.apply {
                 showEditIcon = false
@@ -525,13 +572,15 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 R.color.switch_track_color_disabled
             )
             // Когда НЕ редактируем — убираем слушатель, чтобы не сработал зря
-            binding.scEntityStatus.setOnCheckedChangeListener(null)
+//            binding.scEntityStatus.setOnCheckedChangeListener(null)
         }
     }
 
     private fun updateLegalEntityVisibility(isLegalEntity: Boolean) {
-        personNameDetailsBinding.ccavFirstName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
-        personNameDetailsBinding.ccavLastName.visibility = if (isLegalEntity) View.GONE else View.VISIBLE
+        personNameDetailsBinding.ccavFirstName.visibility =
+            if (isLegalEntity) View.GONE else View.VISIBLE
+        personNameDetailsBinding.ccavLastName.visibility =
+            if (isLegalEntity) View.GONE else View.VISIBLE
         binding.includeLegalEntity.layoutLegalEntity.visibility =
             if (isLegalEntity) View.VISIBLE else View.GONE
         binding.includeLegalEntity.llTypes.visibility =
@@ -657,31 +706,25 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     }
 
     private fun hasUnsavedChanges(): Boolean {
-        val counterparty = viewModel.counterparty.value ?: return false
-        return personNameDetailsBinding.ccavShortName.text.orEmpty() != counterparty.shortName ||
-                personNameDetailsBinding.ccavFirstName.text.orEmpty() != (counterparty.firstName ?: "") ||
-                personNameDetailsBinding.ccavLastName.text.orEmpty() != (counterparty.lastName ?: "") ||
-                binding.scEntityStatus.isChecked != counterparty.isLegalEntity ||
-                legalEntityBinding.cbSupplier.isChecked != counterparty.isSupplier ||
-                legalEntityBinding.cbWarehouse.isChecked != counterparty.isWarehouse ||
-                legalEntityBinding.cbCustomer.isChecked != counterparty.isCustomer ||
-                legalEntityBinding.ccavCompanyName.text.orEmpty() != (counterparty.companyName
-            ?: "") ||
-                legalEntityBinding.ccavType.text.orEmpty() != counterparty.type ||
-                legalEntityBinding.ccavNIP.text.orEmpty() != (counterparty.nip ?: "") ||
-                legalEntityBinding.ccavKRS.text.orEmpty() != (counterparty.krs ?: "")
+        val form = viewModel.formState.value ?: return false
+        val original = viewModel.counterparty.value ?: return false
+        return !form.equalsEntity(original)
     }
 
     private fun tryNavigateWithSaveCheck(navigateAction: () -> Unit) {
         if (!hasUnsavedChanges()) {
-            navigateAction()
+            exitWithRevealAnimation {
+                navigateAction() // ← сюда передаётся goBack(), и он уже безопасен
+            }
             return
         }
 
         showUnsavedChangesDialog(
             onSave = {
                 saveChangesFragment()
-                navigateAction()
+                exitWithRevealAnimation {
+                    navigateAction()
+                }
             },
             onDiscard = {
                 exitWithRevealAnimation { // анимация при закрытии экрана
@@ -693,6 +736,26 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
                 // остаться — ничего не делаем
             }
         )
+    }
+
+    private fun tryToggleEditModeWithCheck() {
+        val isEditMode = viewModel.isEditMode.value == true
+        val hasChanges = hasUnsavedChanges()
+
+        if (isEditMode && hasChanges) {
+            showUnsavedChangesDialog(
+                onSave = { saveChangesFragment() },
+                onDiscard = {
+                    viewModel.discardChanges()
+                    viewModel.setEditMode(false)
+                },
+                onCancel = {
+                    // ничего не делаем
+                }
+            )
+        } else {
+            viewModel.toggleEditMode()
+        }
     }
 
     companion object {

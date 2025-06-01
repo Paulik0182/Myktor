@@ -602,7 +602,5 @@ class CounterpartyValidationDelegate(
         legalEntityBinding.ccavCompanyName.text = legalEntityBinding.ccavCompanyName.text
         legalEntityBinding.ccavNIP.text = legalEntityBinding.ccavNIP.text
         legalEntityBinding.ccavKRS.text = legalEntityBinding.ccavKRS.text
-
-        viewModel.setHasUnsavedChanges(false)
     }
 }
