@@ -76,18 +76,18 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         binding.contactsInfo.setEditClickListener {
-                openContactsEditor()
+            openContactsEditor()
         }
 
         binding.bankInfo.apply {
             setEditClickListener {
-                    Toast.makeText(context, "Клик на Банк", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Клик на Банк", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.addressesInfo.apply {
             setEditClickListener {
-                    Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -399,9 +399,11 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
         updateNameFieldsVisibility(counterparty)
 
+        val isEditMode = viewModel.isEditMode.value == true
+
         personNameDetailsBinding.ccavShortName.setTextAndMode(
             counterparty.shortName ?: "",
-            readOnly = true
+            readOnly = !isEditMode
         )
         bindCounterparty(counterparty)
     }
@@ -411,21 +413,23 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         val isIndividual = !counterparty.isLegalEntity
 
         // Поля заполняются только для физических лиц
-        val firstNameVisible = isIndividual && (isEditMode || !counterparty.firstName.isNullOrBlank())
+        val firstNameVisible =
+            isIndividual && (isEditMode || !counterparty.firstName.isNullOrBlank())
         val lastNameVisible = isIndividual && (isEditMode || !counterparty.lastName.isNullOrBlank())
 
         personNameDetailsBinding.ccavFirstName.apply {
             visibility = if (firstNameVisible) View.VISIBLE else View.GONE
-            setTextAndMode(counterparty.firstName ?: "", readOnly = true)
+            setTextAndMode(counterparty.firstName ?: "", readOnly = !isEditMode)
         }
 
         personNameDetailsBinding.ccavLastName.apply {
             visibility = if (lastNameVisible) View.VISIBLE else View.GONE
-            setTextAndMode(counterparty.lastName ?: "", readOnly = true)
+            setTextAndMode(counterparty.lastName ?: "", readOnly = !isEditMode)
         }
     }
 
     private fun bindCounterparty(counterparty: CounterpartyEntity) {
+        val isEditMode = viewModel.isEditMode.value == true
         binding.contactsInfo.visibility = View.VISIBLE
         binding.addressesInfo.visibility = View.VISIBLE
 
@@ -454,7 +458,7 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             legalEntityBinding.cbCustomer.isChecked = counterparty.isCustomer
             legalEntityBinding.ccavCompanyName.setTextAndMode(
                 counterparty.companyName ?: "",
-                readOnly = true
+                readOnly = !isEditMode
             )
             legalEntityBinding.ccavType.text = counterparty.type
             legalEntityBinding.ccavNIP.text = counterparty.nip
