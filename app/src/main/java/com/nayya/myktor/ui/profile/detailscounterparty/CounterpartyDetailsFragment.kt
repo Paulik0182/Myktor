@@ -224,6 +224,16 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
     }
 
     private fun saveChangesFragment() {
+        val form = viewModel.formState.value ?: return
+
+        // 🔍 Проверка: есть ли вообще изменения
+        val original = viewModel.counterparty.value
+        if (original != null && form.equalsEntity(original)) {
+            showSnackbar("Изменений не было")
+            viewModel.setEditMode(false)
+            return
+        }
+
         val isLegalEntity = binding.scEntityStatus.isChecked
 
         if (isLegalEntity) {
@@ -237,27 +247,26 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             }
         }
 
-        val isSupplier = legalEntityBinding.cbSupplier.isChecked
-        val isWarehouse = legalEntityBinding.cbWarehouse.isChecked
-        val isCustomer = legalEntityBinding.cbCustomer.isChecked
-
-        if (!isSupplier && !isWarehouse && !isCustomer) {
+        // Валидация
+        if (form.isLegalEntity && !form.isSupplier && !form.isWarehouse && !form.isCustomer) {
             showSnackbar("Выберите хотя бы один тип компании. По умолчанию выбран 'customer'")
             legalEntityBinding.cbCustomer.isChecked = true
+            viewModel.updateForm { copy(isCustomer = true) }
+            return
         }
 
         viewModel.saveChanges(
-            shortName = personNameDetailsBinding.ccavShortName.text.orEmpty().trimEnd(),
-            firstName = personNameDetailsBinding.ccavFirstName.text.orEmpty().trimEnd(),
-            lastName = personNameDetailsBinding.ccavLastName.text.orEmpty().trimEnd(),
-            companyName = legalEntityBinding.ccavCompanyName.text.orEmpty().trimEnd(),
-            type = legalEntityBinding.ccavType.text.orEmpty(),
-            nip = legalEntityBinding.ccavNIP.text.orEmpty(),
-            krs = legalEntityBinding.ccavKRS.text.orEmpty(),
-            isSupplier = legalEntityBinding.cbSupplier.isChecked,
-            isWarehouse = legalEntityBinding.cbWarehouse.isChecked,
-            isCustomer = legalEntityBinding.cbCustomer.isChecked,
-            isLegalEntity = binding.scEntityStatus.isChecked
+            shortName = form.shortName,
+            firstName = form.firstName,
+            lastName = form.lastName,
+            companyName = form.companyName,
+            type = form.type,
+            nip = form.nip,
+            krs = form.krs,
+            isSupplier = form.isSupplier,
+            isWarehouse = form.isWarehouse,
+            isCustomer = form.isCustomer,
+            isLegalEntity = form.isLegalEntity
         )
 
         if (viewModel.isEditMode.value == true) {
