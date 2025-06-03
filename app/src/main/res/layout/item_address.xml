@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="12dp"
+        android:paddingEnd="12dp">
+
+        <CheckBox
+            android:id="@+id/checkBoxMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/tvCity"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvRecipient" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrierIconEnd"
+            android:layout_width="8dp"
+            android:layout_height="0dp"
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="checkBoxMain" />
+
+        <TextView
+            android:id="@+id/tvRecipient"
+            style="@style/Widget.MyApp.TextView.Headline"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Имя получателя"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/tvStreet"
+            app:layout_constraintEnd_toStartOf="@+id/ivArrow"
+            app:layout_constraintStart_toEndOf="@id/barrierIconEnd"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvStreet"
+            style="@style/Widget.MyApp.TextView.Link"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="2dp"
+            android:text="Улица 3/16"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toTopOf="@id/tvCity"
+            app:layout_constraintEnd_toStartOf="@+id/ivArrow"
+            app:layout_constraintStart_toEndOf="@id/barrierIconEnd"
+            app:layout_constraintTop_toBottomOf="@id/tvRecipient" />
+
+        <TextView
+            android:id="@+id/tvCity"
+            style="@style/Widget.MyApp.TextView.Link"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="02-469, Польша, Варшава"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ivArrow"
+            app:layout_constraintStart_toEndOf="@id/barrierIconEnd"
+            app:layout_constraintTop_toBottomOf="@id/tvStreet" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrierBottomCell"
+            android:layout_width="8dp"
+            android:layout_height="0dp"
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="tvRecipient, tvStreet, tvCity" />
+
+        <ImageView
+            android:id="@+id/ivArrow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="5dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_arrow_right_2"
+            app:layout_constraintBottom_toBottomOf="@id/tvCity"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvRecipient" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

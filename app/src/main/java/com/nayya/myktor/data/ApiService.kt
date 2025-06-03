@@ -204,4 +204,23 @@ interface ApiService {
 
     @POST("/auth/delete_account")
     suspend fun deleteAccount(): Response<Unit>
+
+    @POST("counterparties/{counterpartyId}/addresses")
+    suspend fun createCounterpartyAddress(
+        @Path("counterpartyId") counterpartyId: Long,
+        @Body request: CounterpartyAddressRequest
+    ): Response<Unit>
+
+    @PUT("addresses/{addressId}")
+    suspend fun updateCounterpartyAddress(
+        @Path("addressId") addressId: Long,
+        @Body request: CounterpartyAddressRequest
+    ): Response<Unit>
+
+    @PATCH("counterparties/{id}/addresses")
+    suspend fun updateAllAddresses(
+        @Path("id") id: Long,
+        @Body addresses: List<CounterpartyAddressRequest>
+    ): Response<Unit>
+
 }

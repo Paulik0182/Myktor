@@ -87,7 +87,11 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
 
         binding.addressesInfo.apply {
             setEditClickListener {
-                Toast.makeText(context, "Клик на Адрес", Toast.LENGTH_SHORT).show()
+                counterpartyId?.let { counterpartyId ->
+                    requireController<CounterpartyDetailsFragment.Controller>().openAddressList(
+                        counterpartyId
+                    )
+                }
             }
         }
 
@@ -756,6 +760,10 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         } else {
             viewModel.toggleEditMode()
         }
+    }
+
+    interface Controller : BaseFragment.Controller {
+        fun openAddressList(counterpartyId: Long)
     }
 
     companion object {

@@ -9,7 +9,7 @@
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="8dp" />
-            <solid android:color="@color/uiKitColorBackgroundSecondary" />
+            <solid android:color="@color/uiKitColorDisabledPrimary" />
         </shape>
     </item>
 </selector>

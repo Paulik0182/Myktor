@@ -5,7 +5,7 @@
     android:id="@+id/clRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/muted_white">
 
     <include
         android:id="@+id/toolbar"
@@ -84,17 +84,17 @@
                 android:layout_height="wrap_content"
                 app:descriptionText="Особенность"
                 app:editIconRes="@drawable/ic_edit"
+                app:hintText="Контакты"
                 app:infoText="Контакты"
+                app:inputBackground="@drawable/bg_field_gray_cell_white"
+                app:inputEnabled="false"
+                app:inputHorizontallyScrolling="false"
+                app:inputMaxLines="5"
                 app:leftIconRes="@drawable/ic_contacts_book"
                 app:showDescriptionIcon="false"
                 app:showDescriptionText="false"
                 app:showInfoIcon="false"
-                app:showInfoText="false"
-                app:inputEnabled="false"
-                app:inputMaxLines="5"
-                app:inputHorizontallyScrolling="false"
-                app:inputBackground="@drawable/bg_field_gray_cell_white"
-                app:hintText="Контакты" />
+                app:showInfoText="false" />
 
             <include
                 android:id="@+id/includeLegalEntity"
@@ -107,16 +107,16 @@
                 android:layout_height="wrap_content"
                 app:descriptionText="Особенность"
                 app:editIconRes="@drawable/ic_edit"
+                app:hintText="Адрес"
                 app:infoText="Адрес"
+                app:inputBackground="@drawable/bg_field_gray_cell_white"
+                app:inputEnabled="false"
+                app:inputMaxLines="5"
                 app:leftIconRes="@drawable/ic_address_book"
                 app:showDescriptionIcon="false"
                 app:showDescriptionText="false"
                 app:showInfoIcon="false"
-                app:showInfoText="false"
-                app:inputEnabled="false"
-                app:inputMaxLines="5"
-                app:inputBackground="@drawable/bg_field_gray_cell_white"
-                app:hintText="Адрес" />
+                app:showInfoText="false" />
 
             <!-- Банки -->
             <com.nayya.uicomponents.CustomCardActionView
@@ -125,16 +125,16 @@
                 android:layout_height="wrap_content"
                 app:descriptionText="Особенность"
                 app:editIconRes="@drawable/ic_edit"
+                app:hintText="Банковский счет"
                 app:infoText="Банковский счет"
+                app:inputBackground="@drawable/bg_field_gray_cell_white"
+                app:inputEnabled="false"
+                app:inputMaxLines="3"
                 app:leftIconRes="@drawable/ic_bank_account_book"
                 app:showDescriptionIcon="false"
                 app:showDescriptionText="false"
                 app:showInfoIcon="false"
-                app:showInfoText="false"
-                app:inputEnabled="false"
-                app:inputMaxLines="3"
-                app:inputBackground="@drawable/bg_field_gray_cell_white"
-                app:hintText="Банковский счет" />
+                app:showInfoText="false" />
 
             <!-- Кнопки -->
             <Button

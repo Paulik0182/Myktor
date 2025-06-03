@@ -13,6 +13,7 @@ import com.nayya.myktor.R
 import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.data.prefs.TokenStorage
 import com.nayya.myktor.databinding.ActivityMainBinding
+import com.nayya.myktor.domain.counterpartyentity.CounterpartyAddresse
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.OrderEntity
 import com.nayya.myktor.domain.productentity.CategoryEntity
@@ -29,6 +30,8 @@ import com.nayya.myktor.ui.product.productview.ViewProductFragment
 import com.nayya.myktor.ui.product.counterparties.CounterpartiesFragment
 import com.nayya.myktor.ui.profile.ProfileFragment
 import com.nayya.myktor.ui.profile.ProfileMenuType
+import com.nayya.myktor.ui.profile.address.AddressListFragment
+import com.nayya.myktor.ui.profile.address.addressedit.AddressEditFragment
 import com.nayya.myktor.ui.profile.detailscounterparty.CounterpartyDetailsFragment
 import com.nayya.myktor.utils.ViewBindingActivity
 
@@ -44,7 +47,9 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     SubcategoryFragment.Controller,
     ViewProductFragment.Controller,
     ProfileFragment.Controller,
-    LoginFragment.LoginController {
+    LoginFragment.LoginController,
+    CounterpartyDetailsFragment.Controller,
+    AddressListFragment.Controller {
 
     private lateinit var tokenStorage: TokenStorage
 
@@ -217,5 +222,13 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
 
     override fun onClientInfoClicked() {
         Toast.makeText(this, "Информация для клиентов", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun openAddressEdit(address: CounterpartyAddresse?) {
+        openChildFragment(AddressEditFragment.newInstance(address))
+    }
+
+    override fun openAddressList(counterpartyId: Long) {
+        openChildFragment(AddressListFragment.newInstance(counterpartyId))
     }
 }

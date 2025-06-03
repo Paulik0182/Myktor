@@ -29,4 +29,5 @@ data class CounterpartyAddresse(
     val entranceNumber: String?,
     val floor: String?,
     val numberIntercom: String?,
+    val isMain: Boolean = false
 ) : java.io.Serializable
