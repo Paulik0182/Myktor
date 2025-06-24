@@ -7,7 +7,6 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewAnimationUtils
-import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
@@ -92,48 +91,39 @@ abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
 
     private fun adjustBottomNavigation() {
         val bottomNav = requireActivity().findViewById<View>(R.id.bottom_navigation)
-        val coordinator =
-            requireActivity().findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
         val container = requireActivity().findViewById<View>(R.id.container)
 
         if (hideBottomNavigation) {
-            bottomNav.animate()
-                .translationY(bottomNav.height.toFloat())
-                .setDuration(200)
-                .withEndAction {
-                    // Убираем отступ снизу у КОНТЕЙНЕРА фрагментов
-                    container.setPadding(0, 0, 0, 0)
-                    bottomNav.visibility = View.GONE
-
-                }
-                .start()
+            // Только если навигация ещё видна
+            if (bottomNav.visibility != View.GONE) {
+                bottomNav.animate()
+                    .translationY(bottomNav.height.toFloat())
+                    .setDuration(200)
+                    .withEndAction {
+                        container.setPadding(0, 0, 0, 0)
+                        bottomNav.visibility = View.GONE
+                    }
+                    .start()
+            } else {
+                // Уже скрыта, но перестрахуемся
+                container.setPadding(0, 0, 0, 0)
+            }
 
         } else {
-            bottomNav.visibility = View.VISIBLE
+            // Только если навигация ещё не видна
+            if (bottomNav.visibility != View.VISIBLE) {
+                bottomNav.visibility = View.VISIBLE
+                bottomNav.translationY = bottomNav.height.toFloat()
+            }
+
             bottomNav.animate()
                 .translationY(0f)
                 .setDuration(200)
+                .withEndAction {
+                    // Устанавливаем паддинг после полной отрисовки
+                    container.setPadding(0, 0, 0, bottomNav.height)
+                }
                 .start()
-
-            // Ставим отступ снизу у КОНТЕЙНЕРА фрагментов
-            bottomNav.post {
-                container.setPadding(
-                    0, 0, 0, bottomNav.height
-                )
-            }
-
-//            bottomNav.post { // TODO возможно это более надежный вариант.
-//                if (bottomNav.isLaidOut) {
-//                    container.setPadding(0, 0, 0, bottomNav.height)
-//                } else {
-//                    bottomNav.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-//                        override fun onGlobalLayout() {
-//                            bottomNav.viewTreeObserver.removeOnGlobalLayoutListener(this)
-//                            container.setPadding(0, 0, 0, bottomNav.height)
-//                        }
-//                    })
-//                }
-//            }
         }
     }
 
