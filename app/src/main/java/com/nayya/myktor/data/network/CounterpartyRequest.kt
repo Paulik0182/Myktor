@@ -82,17 +82,18 @@ data class CounterpartyAddressRequest(
     val id: Long? = null,
     val countryId: Long,
     val cityId: Long,
-    val postalCode: String?,
+    val postalCode: String? = null,
     val streetName: String,
     val houseNumber: String,
-    val locationNumber: String?,
-    val latitude: Double?,
-    val longitude: Double?,
+    val locationNumber: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
 
-    val entranceNumber: String?,
-    val floor: String?,
-    val numberIntercom: String?,
-    val isMain: Boolean?
+    val entranceNumber: String? = null,
+    val floor: String? = null,
+    val numberIntercom: String? = null,
+    val isMain: Boolean,
+    val fullName: String? = null
 )
 
 @Serializable

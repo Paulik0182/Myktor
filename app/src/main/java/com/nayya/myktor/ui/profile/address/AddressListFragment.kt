@@ -2,7 +2,10 @@ package com.nayya.myktor.ui.profile.address
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentAddressListBinding
@@ -10,6 +13,7 @@ import com.nayya.myktor.domain.counterpartyentity.CounterpartyAddresse
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.viewBinding
+import kotlinx.coroutines.launch
 
 class AddressListFragment : BaseFragment(R.layout.fragment_address_list) {
 
@@ -43,19 +47,37 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list) {
         initAddButton()
 
         counterpartyId?.let { viewModel.loadAddresses(it) }
+
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (viewModel.needSave) {
+                        viewModel.saveChanges()
+                        parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+                    }
+                    exitWithRevealAnimation { goBack() }
+                }
+            }
+        )
     }
 
     private fun initToolbar() {
         binding.toolbar.btnBack.setOnClickListener {
-            exitWithRevealAnimation {
-                goBack()
+            safeExitWithSave {
+                exitWithRevealAnimation { goBack() }
             }
         }
-        binding.toolbar.btnSave.setOnClickListener {
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (viewModel.needSave) {
             viewModel.saveChanges()
-            // оповещение
-            view?.post {
-                parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+            viewLifecycleOwner.lifecycleScope.launch {
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                    parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+                }
             }
         }
     }
@@ -72,14 +94,6 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list) {
 
     private fun observeViewModel() {
         viewModel.addresses.observe(viewLifecycleOwner) { adapter.submitList(it) }
-        viewModel.saveButtonEnabled.observe(viewLifecycleOwner) { enabled ->
-            if (enabled) {
-                binding.toolbar.btnSave.visibility = View.VISIBLE
-            } else {
-                binding.toolbar.btnSave.visibility = View.GONE
-            }
-
-        }
         viewModel.navigateToEdit.observe(viewLifecycleOwner) { address ->
             address?.let {
                 requireController<AddressListFragment.Controller>().openAddressEdit(it)
@@ -89,8 +103,18 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list) {
 
     private fun initAddButton() {
         binding.btnAddAddress.setOnClickListener {
-            viewModel.onAddAddress()
+            safeExitWithSave {
+                viewModel.onAddAddress()
+            }
         }
+    }
+
+    private fun safeExitWithSave(action: () -> Unit) {
+        if (viewModel.needSave) {
+            viewModel.saveChanges()
+            parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+        }
+        action()
     }
 
     interface Controller : BaseFragment.Controller {

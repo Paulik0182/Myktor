@@ -1,5 +1,6 @@
 package com.nayya.myktor.ui.profile.address
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,9 +17,6 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
     private val _addresses = MutableLiveData<List<AddressUiModel>>()
     val addresses: LiveData<List<AddressUiModel>> = _addresses
 
-    private val _saveButtonEnabled = MutableLiveData(false)
-    val saveButtonEnabled: LiveData<Boolean> = _saveButtonEnabled
-
     private val _navigateToEdit = MutableLiveData<CounterpartyAddresse?>()
     val navigateToEdit: LiveData<CounterpartyAddresse?> = _navigateToEdit
 
@@ -30,10 +28,20 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
     private var originalMainAddressId: Long? = null
     private var currentMainAddressId: Long? = null
     private var initialStates = mutableMapOf<Long, Boolean>()
+
+    val needSave: Boolean
+        get() = hasChanges()
+
     fun loadAddresses(counterpartyId: Long) {
         this.counterpartyId = counterpartyId
         viewModelScope.launch {
-            val loaded = repository.getAddresses(counterpartyId)
+            var loaded = repository.getAddresses(counterpartyId)
+
+            // Если единственный адрес — и он не isMain, делаем его главным
+            if (loaded.size == 1 && !loaded[0].isMain) {
+                loaded = listOf(loaded[0].copy(isMain = true))
+            }
+
             addressEntities.clear()
             addressEntities.addAll(loaded)
 
@@ -49,7 +57,6 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
             currentMainAddressId = originalMainAddressId
 
             _addresses.postValue(loaded.map { it.toUiModel() })
-            _saveButtonEnabled.postValue(false)
         }
     }
 
@@ -82,7 +89,6 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
     fun deleteAddress(address: AddressUiModel) {
         addressEntities.removeAll { it.id == address.id }
         _addresses.postValue(addressEntities.map { it.toUiModel() })
-        _saveButtonEnabled.postValue(true)
     }
 
     fun setAsMainAddress(address: AddressUiModel) {
@@ -97,17 +103,22 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
             if (it.id == address.id) it.copy(isMain = true)
             else it.copy(isMain = false)
         }
+        Log.d("Address", "After setAsMain: " + addressEntities.joinToString("\n") {
+            "ID=${it.id}, isMain=${it.isMain}, street=${it.streetName}"
+        })
         _addresses.postValue(addressEntities.map { it.toUiModel() })
-
-        // Проверяем изменения
-        _saveButtonEnabled.postValue(hasChanges())
     }
 
     fun saveChanges() {
         viewModelScope.launch {
+            Log.d("Address", "Saving addresses: " + addressEntities.joinToString("\n") {
+                "ID=${it.id}, isMain=${it.isMain}, street=${it.streetName}"
+            })
+
             val success =
                 repository.updateAddressList(counterpartyId, addressEntities.map { it.toRequest() })
             if (success) {
+                Log.d("Address", "Successfully saved changes")
                 // После сохранения обновляем исходное состояние
                 originalMainAddressId = currentMainAddressId
                 // Обновляем initialStates
@@ -117,7 +128,8 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
                         initialStates[id] = address.isMain
                     }
                 }
-                _saveButtonEnabled.postValue(false)
+            } else {
+                Log.e("Address", "Failed to save changes")
             }
         }
     }
@@ -188,11 +200,20 @@ class AddressPreviewRepository : AddressListRepository {
         counterpartyId: Long,
         addresses: List<CounterpartyAddressRequest>,
     ): Boolean {
+        Log.d("Address", "Sending to server:\n" + addresses.joinToString("\n") {
+            "ID=${it.id}, isMain=${it.isMain}, street=${it.streetName}"
+        })
         return try {
             val response = api.updateAllAddresses(counterpartyId, addresses)
+            Log.d("Address", "Response code: ${response.code()}, success: ${response.isSuccessful}")
+            if (!response.isSuccessful) {
+                Log.e("Address", "Error body: ${response.errorBody()?.string()}")
+            }
             response.isSuccessful
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e("Address", "Exception while saving: ${e.message}", e)
+
             false
         }
     }
