@@ -225,7 +225,11 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>(ActivityMainBindin
     }
 
     override fun openAddressEdit(address: CounterpartyAddresse?) {
-        openChildFragment(AddressEditFragment.newInstance(address))
+        openChildFragment(AddressEditFragment.newInstance(address = address))
+    }
+
+    override fun openAddressCreate(counterpartyId: Long) {
+        openChildFragment(AddressEditFragment.newInstance(counterpartyId = counterpartyId))
     }
 
     override fun openAddressList(counterpartyId: Long) {

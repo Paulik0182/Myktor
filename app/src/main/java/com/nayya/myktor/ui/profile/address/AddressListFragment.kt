@@ -48,6 +48,10 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list) {
 
         counterpartyId?.let { viewModel.loadAddresses(it) }
 
+        parentFragmentManager.setFragmentResultListener("counterparty_updated", viewLifecycleOwner) { _, _ ->
+            counterpartyId?.let { viewModel.loadAddresses(it) }
+        }
+
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
@@ -105,6 +109,11 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list) {
         binding.btnAddAddress.setOnClickListener {
             safeExitWithSave {
                 viewModel.onAddAddress()
+                counterpartyId?.let { id ->
+                    requireController<AddressListFragment.Controller>().openAddressCreate(
+                        id
+                    )
+                }
             }
         }
     }
@@ -119,6 +128,7 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list) {
 
     interface Controller : BaseFragment.Controller {
         fun openAddressEdit(address: CounterpartyAddresse?)
+        fun openAddressCreate(counterpartyId: Long)
     }
 
     companion object {

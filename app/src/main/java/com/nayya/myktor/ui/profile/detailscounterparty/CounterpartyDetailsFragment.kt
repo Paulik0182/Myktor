@@ -99,6 +99,12 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
             counterpartyId?.let { viewModel.loadCounterpartyById(it) } // ← повторно загружаем с сервера
         }
 
+        setFragmentResultListener("counterparty_updated_details") { _, _ ->
+            counterpartyId?.let { id ->
+                viewModel.loadCounterpartyById(id)
+            }
+        }
+
         saveDate()
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,

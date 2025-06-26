@@ -211,8 +211,9 @@ interface ApiService {
         @Body request: CounterpartyAddressRequest
     ): Response<Unit>
 
-    @PUT("addresses/{addressId}")
+    @PUT("counterparties/{counterpartyId}/addresses/{addressId}")
     suspend fun updateCounterpartyAddress(
+        @Path("counterpartyId") counterpartyId: Long,
         @Path("addressId") addressId: Long,
         @Body request: CounterpartyAddressRequest
     ): Response<Unit>
