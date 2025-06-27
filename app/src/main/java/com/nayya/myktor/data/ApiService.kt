@@ -8,6 +8,7 @@ import com.nayya.myktor.data.network.CounterpartyPatchRequest
 import com.nayya.myktor.data.network.CounterpartyRequest
 import com.nayya.myktor.data.network.ProductCreateRequest
 import com.nayya.myktor.data.network.RepresentativeRequest
+import com.nayya.myktor.domain.counterpartyentity.City
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyEntity
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.domain.counterpartyentity.OrderEntity
@@ -150,6 +151,12 @@ interface ApiService {
 
     @GET("/countries")
     suspend fun getCountries(): List<Country>
+
+    @GET("cities/{countryId}")
+    suspend fun getCitiesByCountry(
+        @Path("countryId") countryId: Long,
+        @Query("lang") lang: String = "ru"
+    ): List<City>
 
     @PATCH("counterparties/{id}/basic")
     suspend fun patchBasicFields(

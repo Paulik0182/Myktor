@@ -1,13 +1,16 @@
 package com.nayya.myktor.ui.profile.address.addressedit
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.nayya.myktor.data.RetrofitInstance
 import com.nayya.myktor.data.network.CounterpartyAddressRequest
+import com.nayya.myktor.domain.counterpartyentity.City
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyAddresse
+import com.nayya.myktor.domain.counterpartyentity.Country
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import retrofit2.Response
@@ -16,11 +19,22 @@ class AddressEditViewModel(
     private val repository: AddressEditRepository
 ) : ViewModel() {
 
+    private val _countries = MutableLiveData<List<Country>>()
+    val countries: LiveData<List<Country>> = _countries
+
+    private val _cities = MutableLiveData<List<City>>()
+    val cities: LiveData<List<City>> = _cities
+
+    private var selectedCountryId: Long? = null
 
     val navigateBack = MutableLiveData(false)
     val isLoading = MutableLiveData(false)
     var counterpartyId: Long = 0L
         private set
+
+    init {
+        loadCountries()
+    }
 
     fun setCounterpartyId(id: Long) {
         counterpartyId = id
@@ -47,14 +61,39 @@ class AddressEditViewModel(
         }
     }
 
+    fun loadCountries() {
+        viewModelScope.launch {
+            isLoading.postValue(true)
+            try {
+                _countries.postValue(repository.getCountries())
+            } catch (e: Exception) {
+                Log.e("AddressEditVM", "Error loading countries", e)
+            } finally {
+                isLoading.postValue(false)
+            }
+        }
+    }
+
+    fun loadCities(countryId: Long) {
+        viewModelScope.launch {
+            isLoading.postValue(true)
+            try {
+                selectedCountryId = countryId
+                _cities.postValue(repository.getCitiesByCountry(countryId))
+            } catch (e: Exception) {
+                Log.e("AddressEditVM", "Error loading cities", e)
+            } finally {
+                isLoading.postValue(false)
+            }
+        }
+    }
+
     fun resolveCountryId(countryName: String): Long {
-        // Пока заглушка.
-        return 1L
+        return _countries.value?.find { it.name == countryName }?.id ?: 0L
     }
 
     fun resolveCityId(cityName: String): Long {
-        // Пока заглушка.
-        return 1L
+        return _cities.value?.find { it.name == cityName }?.id ?: 0L
     }
 }
 
@@ -66,6 +105,10 @@ class AddressEditModelFactory : ViewModelProvider.Factory {
 
 interface AddressEditRepository {
     suspend fun saveOrUpdateAddress(address: CounterpartyAddresse): Boolean
+
+    suspend fun getCountries(): List<Country>
+
+    suspend fun getCitiesByCountry(countryId: Long): List<City>
 }
 
 class AddressModifyRepository : AddressEditRepository {
@@ -103,6 +146,14 @@ class AddressModifyRepository : AddressEditRepository {
 
             false
         }
+    }
+
+    override suspend fun getCountries(): List<Country> {
+        return api.getCountries()
+    }
+
+    override suspend fun getCitiesByCountry(countryId: Long): List<City> {
+        return api.getCitiesByCountry(countryId)
     }
 
     private fun logResponse(response: Response<Unit>) {

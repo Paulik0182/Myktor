@@ -7,6 +7,7 @@ import androidx.fragment.app.viewModels
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentAddressEditBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyAddresse
+import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.showSnackbar
@@ -22,6 +23,9 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
     private var address: CounterpartyAddresse? = null
     private var counterpartyId: Long? = null
 
+    private lateinit var countryAdapter: AddressAutoCompleteAdapter
+    private lateinit var cityAdapter: AddressAutoCompleteAdapter
+
     // Для того чтобы скрыть нижнюю навигацию и персчитать размеры container
     override val hideBottomNavigation = true
     override val enableRevealAnimation = true
@@ -32,6 +36,9 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
 
         address = arguments?.getSerializable("address") as? CounterpartyAddresse
         counterpartyId = arguments?.getLong(COUNTERPARTY_ADDRESS_ID)
+
+        countryAdapter = AddressAutoCompleteAdapter(requireContext(), emptyList())
+        cityAdapter = AddressAutoCompleteAdapter(requireContext(), emptyList())
 
         // Устанавливаем counterpartyId в зависимости от режима
         when {
@@ -53,6 +60,8 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
 
         initToolbar()
         initViews()
+        setupCountrySelection()
+        setupCitySelection()
         observeViewModel()
     }
 
@@ -66,8 +75,8 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
 
     private fun initViews() {
         address?.let {
-            binding.etCountry.setText(it.countryName)
-            binding.etCity.setText(it.cityName)
+            binding.actvCountry.setAdapter(countryAdapter)
+            binding.actvCity.setAdapter(cityAdapter)
             binding.ccavPostalCode.text = it.postalCode
             binding.ccavStreet.text = it.streetName
             binding.ccavHouseNumber.text = it.houseNumber
@@ -84,13 +93,21 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
     }
 
     private fun createOrUpdateAddress() {
+        val countryName = binding.actvCountry.text.toString()
+        val cityName = binding.actvCity.text.toString()
+
+        if (countryName.isBlank() || cityName.isBlank()) {
+            showSnackbar("Выберите страну и город")
+            return
+        }
+
         val newAddress = CounterpartyAddresse(
             id = address?.id,
             counterpartyId = viewModel.counterpartyId,
-            countryId = viewModel.resolveCountryId(binding.etCountry.text.toString()),
-            countryName = binding.etCountry.text.toString(),
-            cityId = viewModel.resolveCityId(binding.etCity.text.toString()),
-            cityName = binding.etCity.text.toString(),
+            countryId = viewModel.resolveCountryId(countryName),
+            countryName = countryName,
+            cityId = viewModel.resolveCityId(cityName),
+            cityName = cityName,
             postalCode = binding.ccavPostalCode.text.toString(),
             streetName = binding.ccavStreet.text.toString(),
             houseNumber = binding.ccavHouseNumber.text.toString(),
@@ -112,7 +129,43 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
         viewModel.saveAddress(newAddress)
     }
 
+    private fun setupCountrySelection() {
+        binding.actvCountry.setOnItemClickListener { _, _, position, _ ->
+            val country = countryAdapter.getItem(position) as Country
+            country.id?.let { viewModel.loadCities(it) }
+            binding.actvCity.isEnabled = true
+            binding.actvCity.text.clear()
+        }
+    }
+
+    private fun setupCitySelection() {
+        binding.actvCity.setOnItemClickListener { _, _, position, _ ->
+            // Можно добавить дополнительную логику при выборе города
+        }
+    }
+
     private fun observeViewModel() {
+        viewModel.countries.observe(viewLifecycleOwner) { countries ->
+            countryAdapter.clear()
+            countryAdapter.addAll(countries)
+
+            // Если редактируем существующий адрес - устанавливаем выбранную страну
+            address?.let {
+                binding.actvCountry.setText(it.countryName, false)
+                viewModel.loadCities(it.countryId)
+            }
+        }
+
+        viewModel.cities.observe(viewLifecycleOwner) { cities ->
+            cityAdapter.clear()
+            cityAdapter.addAll(cities)
+
+            // Если редактируем существующий адрес - устанавливаем выбранный город
+            address?.let {
+                binding.actvCity.setText(it.cityName, false)
+            }
+        }
+
         viewModel.navigateBack.observe(viewLifecycleOwner) { shouldClose ->
             if (shouldClose) {
                 parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())

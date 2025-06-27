@@ -44,11 +44,12 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cbIsMain">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCountry"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actvCountry"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Страна" />
+                    android:hint="Страна"
+                    android:inputType="none"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -60,11 +61,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/layoutCountry">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCity"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actvCity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Город" />
+                    android:hint="Город"
+                    android:inputType="none"
+                    android:enabled="false"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.nayya.uicomponents.CustomCardActionView
