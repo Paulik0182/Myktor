@@ -57,10 +57,12 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
                 // Режим редактирования - берем из существующего адреса
                 viewModel.setCounterpartyId(address!!.counterpartyId)
             }
+
             counterpartyId != null -> {
                 // Режим создания - берем из аргументов
                 viewModel.setCounterpartyId(counterpartyId!!)
             }
+
             else -> {
                 // Ошибка - нет нужных данных
                 showSnackbar("Не указан контрагент")
@@ -141,34 +143,80 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
         viewModel.saveAddress(newAddress)
     }
 
-    private fun setupCountrySelection() {
-        binding.includeSpinnerCountry.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val country = countrySpinnerAdapter.getItem(position)
-                country?.let {
-                    Log.d("@@@", "Выбрана страна: $country")
+    private fun updateCityList(cities: List<City>, selectCityId: Long? = null) {
+        val emptyCity = City(id = null, name = "")
 
-                    if (!isFirstCountryLoad) {
-                        isCountryChangedByUser = true
-                        // Очищаем города при изменении страны пользователем
-                        cityList = emptyList()
-                        citySpinnerAdapter.clear()
-                        citySpinnerAdapter.notifyDataSetChanged()
-                        viewModel.loadCities(it.id!!)
+        // Если в режиме редактирования текущий город отсутствует в пришедших городах — добавим его
+        var newCityList: MutableList<City> = when {
+            isFirstCityLoad && address != null -> {
+                val exists = cities.any { it.id == address!!.cityId }
+                val list = if (!exists && address!!.cityId != null) {
+                    cities.toMutableList().apply {
+                        add(0, City(id = address!!.cityId, name = address!!.cityName ?: ""))
+                    }
+                } else {
+                    cities.toMutableList()
+                }
+                list
+            }
+            else -> cities.toMutableList()
+        }
+
+        // Только если режим создания ИЛИ пользователь сменил страну — добавляем пустой город
+        if (isCountryChangedByUser || (address == null && isFirstCityLoad)) {
+            newCityList = mutableListOf(emptyCity).apply { addAll(newCityList) }
+        }
+
+        cityList = newCityList
+
+        // Обновляем адаптер
+        citySpinnerAdapter.clear()
+        citySpinnerAdapter.addAll(cityList)
+        citySpinnerAdapter.notifyDataSetChanged()
+
+        // По умолчанию всегда выбираем либо selectCityId, либо первый элемент (пустой)
+        val cityIndex = cityList.indexOfFirst { it.id == selectCityId }
+        binding.includeSpinnerCity.spinner.setSelection(if (cityIndex >= 0) cityIndex else 0, false)
+    }
+
+    private fun setupCountrySelection() {
+        binding.includeSpinnerCountry.spinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long,
+                ) {
+                    val country = countrySpinnerAdapter.getItem(position)
+                    country?.let {
+                        Log.d("@@@", "Выбрана страна: $country")
+
+                        if (!isFirstCountryLoad) {
+                            isCountryChangedByUser = true
+                            viewModel.loadCities(it.id!!)
+                        }
                     }
                 }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
     }
 
     private fun setupCitySelection() {
-        binding.includeSpinnerCity.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                // Можно добавить дополнительную логику при выборе города
+        binding.includeSpinnerCity.spinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long,
+                ) {
+                    // Можно добавить дополнительную логику при выборе города
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
     }
 
     private fun observeViewModel() {
@@ -196,38 +244,18 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
         viewModel.cities.observe(viewLifecycleOwner) { cities ->
             Log.d("@@@", "Города получены: size=${cities.size}, list=$cities")
 
-            cityList = if (isCountryChangedByUser || (address == null && isFirstCityLoad)) {
-                // Для режима создания или при смене страны - добавляем пустой город первым
-                listOf(City(id = null, name = "")) + cities
-            } else {
-                // Для режима редактирования - просто список городов
-                cities
+            // Выбираем нужный город:
+            val selectCityId = when {
+                isFirstCityLoad && address != null -> address!!.cityId    // редактирование
+                isFirstCityLoad && address == null -> 1L                  // режим создания, Варшава
+                isCountryChangedByUser -> null                            // смена страны - пустой город
+                else -> null
             }
 
-            citySpinnerAdapter.clear()
-            citySpinnerAdapter.addAll(cityList)
-            citySpinnerAdapter.notifyDataSetChanged()
+            updateCityList(cities, selectCityId)
 
-            if (isFirstCityLoad) {
-                if (address == null) {
-                    // Режим создания - выбираем Варшаву (id 1), если она есть в списке
-                    val warsawIndex = cityList.indexOfFirst { it.id == 1L }
-                    if (warsawIndex >= 0) {
-                        binding.includeSpinnerCity.spinner.setSelection(warsawIndex, false)
-                    }
-                } else {
-                    // Режим редактирования - выбираем город из адреса
-                    val cityIndex = cityList.indexOfFirst { it.id == address!!.cityId }
-                    if (cityIndex >= 0) {
-                        binding.includeSpinnerCity.spinner.setSelection(cityIndex, false)
-                    }
-                }
-                isFirstCityLoad = false
-            } else if (isCountryChangedByUser) {
-                // При смене страны выбираем пустой город
-                binding.includeSpinnerCity.spinner.setSelection(0, false)
-                isCountryChangedByUser = false
-            }
+            isFirstCityLoad = false
+            isCountryChangedByUser = false
         }
 
         viewModel.navigateBack.observe(viewLifecycleOwner) { shouldClose ->
@@ -245,7 +273,7 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
         @JvmStatic
         fun newInstance(
             address: CounterpartyAddresse? = null,
-            counterpartyId: Long? = null
+            counterpartyId: Long? = null,
         ): AddressEditFragment {
             return AddressEditFragment().apply {
                 arguments = Bundle().apply {
