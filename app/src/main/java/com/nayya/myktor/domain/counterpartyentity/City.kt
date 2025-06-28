@@ -8,5 +8,5 @@ data class City(
     val name: String,
     val translations: List<CityTranslation> = emptyList(),
     val country: List<Country>? = emptyList(),
-    val countryId: Long?,
+    val countryId: Long? = null,
 ) : java.io.Serializable

@@ -38,7 +38,7 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
 
     private var isFirstCountryLoad = true
     private var isFirstCityLoad = true
-    val cityPlaceholder = City(id = null, name = "Город", countryId = null)
+    private var isCountryChangedByUser = false
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -142,22 +142,20 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
     }
 
     private fun setupCountrySelection() {
-
-
         binding.includeSpinnerCountry.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val country = countrySpinnerAdapter.getItem(position)
                 country?.let {
                     Log.d("@@@", "Выбрана страна: $country")
 
-                    // Очищаем города и показываем placeholder "Город"
-                    cityList = emptyList()
-                    citySpinnerAdapter.clear()
-                    citySpinnerAdapter.add(cityPlaceholder)
-                    citySpinnerAdapter.notifyDataSetChanged()
-
-                    isFirstCityLoad = false // чтобы не выбирать автоматически город после загрузки
-                    viewModel.loadCities(it.id!!)
+                    if (!isFirstCountryLoad) {
+                        isCountryChangedByUser = true
+                        // Очищаем города при изменении страны пользователем
+                        cityList = emptyList()
+                        citySpinnerAdapter.clear()
+                        citySpinnerAdapter.notifyDataSetChanged()
+                        viewModel.loadCities(it.id!!)
+                    }
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -180,38 +178,56 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
             countrySpinnerAdapter.addAll(countries)
             countrySpinnerAdapter.notifyDataSetChanged()
 
-            // Только при первом запуске — выставляем нужную страну!
             if (isFirstCountryLoad) {
                 val defaultCountryIndex = if (address == null) {
-                    countries.indexOfFirst { it.id == 1L } // Польша
+                    // Режим создания - выбираем Польшу (id 1)
+                    countries.indexOfFirst { it.id == 1L }
                 } else {
+                    // Режим редактирования - выбираем страну из адреса
                     countries.indexOfFirst { it.id == address!!.countryId }
                 }
                 if (defaultCountryIndex >= 0) {
-                    binding.includeSpinnerCountry.spinner.setSelection(defaultCountryIndex)
+                    binding.includeSpinnerCountry.spinner.setSelection(defaultCountryIndex, false)
                 }
                 isFirstCountryLoad = false
             }
         }
+
         viewModel.cities.observe(viewLifecycleOwner) { cities ->
             Log.d("@@@", "Города получены: size=${cities.size}, list=$cities")
 
-            cityList = cities
+            cityList = if (isCountryChangedByUser || (address == null && isFirstCityLoad)) {
+                // Для режима создания или при смене страны - добавляем пустой город первым
+                listOf(City(id = null, name = "")) + cities
+            } else {
+                // Для режима редактирования - просто список городов
+                cities
+            }
+
             citySpinnerAdapter.clear()
-            citySpinnerAdapter.addAll(cities)
+            citySpinnerAdapter.addAll(cityList)
             citySpinnerAdapter.notifyDataSetChanged()
 
-            // В режиме создания: если страна Польша — по умолчанию выбрать Варшаву
-            if (isFirstCityLoad && address == null && (binding.includeSpinnerCountry.spinner.selectedItem as? Country)?.id == 1L) {
-                val warsawIndex = cities.indexOfFirst { it.id == 1L }
-                if (warsawIndex >= 0) binding.includeSpinnerCity.spinner.setSelection(warsawIndex)
+            if (isFirstCityLoad) {
+                if (address == null) {
+                    // Режим создания - выбираем Варшаву (id 1), если она есть в списке
+                    val warsawIndex = cityList.indexOfFirst { it.id == 1L }
+                    if (warsawIndex >= 0) {
+                        binding.includeSpinnerCity.spinner.setSelection(warsawIndex, false)
+                    }
+                } else {
+                    // Режим редактирования - выбираем город из адреса
+                    val cityIndex = cityList.indexOfFirst { it.id == address!!.cityId }
+                    if (cityIndex >= 0) {
+                        binding.includeSpinnerCity.spinner.setSelection(cityIndex, false)
+                    }
+                }
+                isFirstCityLoad = false
+            } else if (isCountryChangedByUser) {
+                // При смене страны выбираем пустой город
+                binding.includeSpinnerCity.spinner.setSelection(0, false)
+                isCountryChangedByUser = false
             }
-            // В режиме редактирования: если город совпадает с адресом
-            else if (isFirstCityLoad && address != null) {
-                val cityIndex = cities.indexOfFirst { it.id == address!!.cityId }
-                if (cityIndex >= 0) binding.includeSpinnerCity.spinner.setSelection(cityIndex)
-            }
-            isFirstCityLoad = false
         }
 
         viewModel.navigateBack.observe(viewLifecycleOwner) { shouldClose ->
