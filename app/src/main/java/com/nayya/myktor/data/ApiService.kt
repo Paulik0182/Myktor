@@ -152,7 +152,7 @@ interface ApiService {
     @GET("/countries")
     suspend fun getCountries(): List<Country>
 
-    @GET("cities/{countryId}")
+    @GET("countries/cities/{countryId}")
     suspend fun getCitiesByCountry(
         @Path("countryId") countryId: Long,
         @Query("lang") lang: String = "ru"

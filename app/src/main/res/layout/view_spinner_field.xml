@@ -1,0 +1,59 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp">
+
+    <!-- Сам Spinner -->
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:id="@+id/spinner"
+        style="@style/CustomSpinnerStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:spinnerMode="dropdown"
+        android:background="@android:color/transparent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <!-- Подчеркивание -->
+    <View
+        android:id="@+id/vUnderline"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginEnd="12dp"
+        android:background="@color/your_line_color"
+        app:layout_constraintTop_toBottomOf="@id/spinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/ivDescriptionIcon"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/input_description_icon"
+        android:tint="@color/input_bottom_color"
+        app:layout_constraintBottom_toBottomOf="@id/tvDescription"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvDescription"/>
+
+    <!-- Описание/подпись -->
+    <TextView
+        android:id="@+id/tvDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Description"
+        android:textColor="@color/input_bottom_color"
+        android:gravity="bottom"
+        android:maxLines="2"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="4dp"
+        android:paddingVertical="1dp"
+        android:textSize="12sp"
+        android:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/vUnderline"
+        app:layout_constraintStart_toEndOf="@id/ivDescriptionIcon"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

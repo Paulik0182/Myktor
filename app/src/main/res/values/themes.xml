@@ -139,4 +139,9 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
+    <!-- Для выпадающего списка при выборе Страны и Города -->
+    <style name="CustomSpinnerStyle" parent="Widget.AppCompat.Spinner">
+        <item name="android:dropDownHeight">300dp</item>
+    </style>
+
 </resources>

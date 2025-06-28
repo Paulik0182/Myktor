@@ -3,9 +3,11 @@ package com.nayya.myktor.ui.profile.address.addressedit
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
 import androidx.fragment.app.viewModels
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentAddressEditBinding
+import com.nayya.myktor.domain.counterpartyentity.City
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyAddresse
 import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.ui.root.BaseFragment
@@ -23,22 +25,31 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
     private var address: CounterpartyAddresse? = null
     private var counterpartyId: Long? = null
 
-    private lateinit var countryAdapter: AddressAutoCompleteAdapter
-    private lateinit var cityAdapter: AddressAutoCompleteAdapter
+    private lateinit var countrySpinnerAdapter: CountrySpinnerAdapter
+    private lateinit var citySpinnerAdapter: CitySpinnerAdapter
+    private var countryList: List<Country> = emptyList()
+    private var cityList: List<City> = emptyList()
+
 
     // Для того чтобы скрыть нижнюю навигацию и персчитать размеры container
     override val hideBottomNavigation = true
     override val enableRevealAnimation = true
     override val revealAnimationOrigin = RevealOrigin.RIGHT_CENTER
 
+    private var isFirstCountryLoad = true
+    private var isFirstCityLoad = true
+    val cityPlaceholder = City(id = null, name = "Город", countryId = null)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         address = arguments?.getSerializable("address") as? CounterpartyAddresse
         counterpartyId = arguments?.getLong(COUNTERPARTY_ADDRESS_ID)
 
-        countryAdapter = AddressAutoCompleteAdapter(requireContext(), emptyList())
-        cityAdapter = AddressAutoCompleteAdapter(requireContext(), emptyList())
+        countrySpinnerAdapter = CountrySpinnerAdapter(requireContext(), countryList.toMutableList())
+        citySpinnerAdapter = CitySpinnerAdapter(requireContext(), cityList.toMutableList())
+
+        binding.includeSpinnerCountry.spinner.adapter = countrySpinnerAdapter
+        binding.includeSpinnerCity.spinner.adapter = citySpinnerAdapter
 
         // Устанавливаем counterpartyId в зависимости от режима
         when {
@@ -74,9 +85,10 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
     }
 
     private fun initViews() {
+        binding.includeSpinnerCountry.tvDescription.text = "Страна"
+        binding.includeSpinnerCity.tvDescription.text = "Город"
+
         address?.let {
-            binding.actvCountry.setAdapter(countryAdapter)
-            binding.actvCity.setAdapter(cityAdapter)
             binding.ccavPostalCode.text = it.postalCode
             binding.ccavStreet.text = it.streetName
             binding.ccavHouseNumber.text = it.houseNumber
@@ -93,10 +105,10 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
     }
 
     private fun createOrUpdateAddress() {
-        val countryName = binding.actvCountry.text.toString()
-        val cityName = binding.actvCity.text.toString()
+        val selectedCountry = binding.includeSpinnerCountry.spinner.selectedItem as? Country
+        val selectedCity = binding.includeSpinnerCity.spinner.selectedItem as? City
 
-        if (countryName.isBlank() || cityName.isBlank()) {
+        if (selectedCountry == null || selectedCity == null) {
             showSnackbar("Выберите страну и город")
             return
         }
@@ -104,10 +116,10 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
         val newAddress = CounterpartyAddresse(
             id = address?.id,
             counterpartyId = viewModel.counterpartyId,
-            countryId = viewModel.resolveCountryId(countryName),
-            countryName = countryName,
-            cityId = viewModel.resolveCityId(cityName),
-            cityName = cityName,
+            countryId = selectedCountry.id ?: 0L,
+            countryName = selectedCountry.name,
+            cityId = selectedCity.id ?: 0L,
+            cityName = selectedCity.name,
             postalCode = binding.ccavPostalCode.text.toString(),
             streetName = binding.ccavStreet.text.toString(),
             houseNumber = binding.ccavHouseNumber.text.toString(),
@@ -130,40 +142,76 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
     }
 
     private fun setupCountrySelection() {
-        binding.actvCountry.setOnItemClickListener { _, _, position, _ ->
-            val country = countryAdapter.getItem(position) as Country
-            country.id?.let { viewModel.loadCities(it) }
-            binding.actvCity.isEnabled = true
-            binding.actvCity.text.clear()
+
+
+        binding.includeSpinnerCountry.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val country = countrySpinnerAdapter.getItem(position)
+                country?.let {
+                    Log.d("@@@", "Выбрана страна: $country")
+
+                    // Очищаем города и показываем placeholder "Город"
+                    cityList = emptyList()
+                    citySpinnerAdapter.clear()
+                    citySpinnerAdapter.add(cityPlaceholder)
+                    citySpinnerAdapter.notifyDataSetChanged()
+
+                    isFirstCityLoad = false // чтобы не выбирать автоматически город после загрузки
+                    viewModel.loadCities(it.id!!)
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
     private fun setupCitySelection() {
-        binding.actvCity.setOnItemClickListener { _, _, position, _ ->
-            // Можно добавить дополнительную логику при выборе города
+        binding.includeSpinnerCity.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                // Можно добавить дополнительную логику при выборе города
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
     private fun observeViewModel() {
         viewModel.countries.observe(viewLifecycleOwner) { countries ->
-            countryAdapter.clear()
-            countryAdapter.addAll(countries)
+            countryList = countries
+            countrySpinnerAdapter.clear()
+            countrySpinnerAdapter.addAll(countries)
+            countrySpinnerAdapter.notifyDataSetChanged()
 
-            // Если редактируем существующий адрес - устанавливаем выбранную страну
-            address?.let {
-                binding.actvCountry.setText(it.countryName, false)
-                viewModel.loadCities(it.countryId)
+            // Только при первом запуске — выставляем нужную страну!
+            if (isFirstCountryLoad) {
+                val defaultCountryIndex = if (address == null) {
+                    countries.indexOfFirst { it.id == 1L } // Польша
+                } else {
+                    countries.indexOfFirst { it.id == address!!.countryId }
+                }
+                if (defaultCountryIndex >= 0) {
+                    binding.includeSpinnerCountry.spinner.setSelection(defaultCountryIndex)
+                }
+                isFirstCountryLoad = false
             }
         }
-
         viewModel.cities.observe(viewLifecycleOwner) { cities ->
-            cityAdapter.clear()
-            cityAdapter.addAll(cities)
+            Log.d("@@@", "Города получены: size=${cities.size}, list=$cities")
 
-            // Если редактируем существующий адрес - устанавливаем выбранный город
-            address?.let {
-                binding.actvCity.setText(it.cityName, false)
+            cityList = cities
+            citySpinnerAdapter.clear()
+            citySpinnerAdapter.addAll(cities)
+            citySpinnerAdapter.notifyDataSetChanged()
+
+            // В режиме создания: если страна Польша — по умолчанию выбрать Варшаву
+            if (isFirstCityLoad && address == null && (binding.includeSpinnerCountry.spinner.selectedItem as? Country)?.id == 1L) {
+                val warsawIndex = cities.indexOfFirst { it.id == 1L }
+                if (warsawIndex >= 0) binding.includeSpinnerCity.spinner.setSelection(warsawIndex)
             }
+            // В режиме редактирования: если город совпадает с адресом
+            else if (isFirstCityLoad && address != null) {
+                val cityIndex = cities.indexOfFirst { it.id == address!!.cityId }
+                if (cityIndex >= 0) binding.includeSpinnerCity.spinner.setSelection(cityIndex)
+            }
+            isFirstCityLoad = false
         }
 
         viewModel.navigateBack.observe(viewLifecycleOwner) { shouldClose ->

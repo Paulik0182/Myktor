@@ -78,6 +78,7 @@ class AddressEditViewModel(
         viewModelScope.launch {
             isLoading.postValue(true)
             try {
+                Log.d("AddressEditVM", "Загружаем города для страны $countryId")
                 selectedCountryId = countryId
                 _cities.postValue(repository.getCitiesByCountry(countryId))
             } catch (e: Exception) {
@@ -86,14 +87,6 @@ class AddressEditViewModel(
                 isLoading.postValue(false)
             }
         }
-    }
-
-    fun resolveCountryId(countryName: String): Long {
-        return _countries.value?.find { it.name == countryName }?.id ?: 0L
-    }
-
-    fun resolveCityId(cityName: String): Long {
-        return _cities.value?.find { it.name == cityName }?.id ?: 0L
     }
 }
 
