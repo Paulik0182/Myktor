@@ -14,6 +14,13 @@ import kotlinx.coroutines.launch
 
 class AddressListViewModel(private val repository: AddressListRepository) : ViewModel() {
 
+    companion object {
+        const val MAX_ADDRESSES = 5
+    }
+
+    private val _addressCount = MutableLiveData(0)
+    val addressCount: LiveData<Int> = _addressCount
+
     private val _addresses = MutableLiveData<List<AddressUiModel>>()
     val addresses: LiveData<List<AddressUiModel>> = _addresses
 
@@ -45,6 +52,8 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
             addressEntities.clear()
             addressEntities.addAll(loaded)
 
+            updateAddressCountState()
+
             // Сохраняем исходные состояния isMain
             initialStates.clear()
             loaded.forEach { address ->
@@ -58,6 +67,10 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
 
             _addresses.postValue(loaded.map { it.toUiModel() })
         }
+    }
+
+    private fun updateAddressCountState() {
+        _addressCount.postValue(addressEntities.size)
     }
 
     private fun hasChanges(): Boolean {
@@ -118,6 +131,7 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
                         }
                     }
 
+                    updateAddressCountState()
                     _addresses.postValue(addressEntities.map { it.toUiModel() })
                 } else {
                     // Здесь можно показать ошибку через отдельное LiveData

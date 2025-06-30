@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentAddressListBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyAddresse
+import com.nayya.myktor.ui.dialogs.InfoDialogHelper
 import com.nayya.myktor.ui.login.logoutaccount.ConfirmActionBottomSheet
 import com.nayya.myktor.ui.login.logoutaccount.ConfirmActionType
 import com.nayya.myktor.ui.profile.address.addressedit.AddressUiModel
@@ -157,16 +158,27 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
                 requireController<AddressListFragment.Controller>().openAddressEdit(it)
             }
         }
+
+        viewModel.addressCount.observe(viewLifecycleOwner) { count ->
+            binding.toolbar.tvTitle.text = "Адреса $count/${AddressListViewModel.MAX_ADDRESSES}"
+        }
     }
 
     private fun initAddButton() {
         binding.btnAddAddress.setOnClickListener {
-            safeExitWithSave {
-                viewModel.onAddAddress()
-                counterpartyId?.let { id ->
-                    requireController<AddressListFragment.Controller>().openAddressCreate(
-                        id
-                    )
+            // Проверяем в момент нажатия
+            if ((viewModel.addressCount.value ?: 0) >= AddressListViewModel.MAX_ADDRESSES) {
+                InfoDialogHelper.show(
+                    requireContext(),
+                    "Максимально можно внести пять адресов.\n" +
+                            "Вы можете удалить не нужный адрес сдвинув выбранный адрес влево."
+                )
+            } else {
+                safeExitWithSave {
+                    viewModel.onAddAddress()
+                    counterpartyId?.let { id ->
+                        requireController<AddressListFragment.Controller>().openAddressCreate(id)
+                    }
                 }
             }
         }
