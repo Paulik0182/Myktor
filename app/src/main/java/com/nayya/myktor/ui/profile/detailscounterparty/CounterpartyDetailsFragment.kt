@@ -96,7 +96,9 @@ class CounterpartyDetailsFragment : BaseFragment(R.layout.fragment_counterparty_
         }
 
         setFragmentResultListener("contacts_updated") { _, _ ->
-            counterpartyId?.let { viewModel.loadCounterpartyById(it) } // ← повторно загружаем с сервера
+            counterpartyId?.let {
+                viewModel.loadCounterpartyById(it)
+            } // ← повторно загружаем с сервера
         }
 
         setFragmentResultListener("counterparty_updated_details") { _, _ ->

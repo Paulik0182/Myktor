@@ -1,18 +1,10 @@
 package com.nayya.myktor.ui.profile.address
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentAddressListBinding
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyAddresse
@@ -22,10 +14,9 @@ import com.nayya.myktor.ui.profile.address.addressedit.AddressUiModel
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.viewBinding
-import kotlinx.coroutines.launch
 
 class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
-    ConfirmActionBottomSheet.ConfirmActionCallback{
+    ConfirmActionBottomSheet.ConfirmActionCallback {
 
     private val binding by viewBinding<FragmentAddressListBinding>()
     private val viewModel: AddressListViewModel by viewModels {
@@ -43,10 +34,12 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
 
     private var pendingDeleteAddress: AddressUiModel? = null
 
+    private var wasChanged = false
+
     override fun onConfirmDeleteAddress() {
         pendingDeleteAddress?.let { address ->
             viewModel.deleteAddress(address)
-            parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+            wasChanged = true
             pendingDeleteAddress = null
         }
     }
@@ -68,7 +61,10 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
 
         counterpartyId?.let { viewModel.loadAddresses(it) }
 
-        parentFragmentManager.setFragmentResultListener("counterparty_updated", viewLifecycleOwner) { _, _ ->
+        parentFragmentManager.setFragmentResultListener(
+            "counterparty_updated",
+            viewLifecycleOwner
+        ) { _, _ ->
             counterpartyId?.let { viewModel.loadAddresses(it) }
         }
 
@@ -76,6 +72,7 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
+                    sendResultIfNeeded()
                     if (viewModel.needSave) {
                         viewModel.saveChanges()
                         parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
@@ -88,6 +85,7 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
 
     private fun initToolbar() {
         binding.toolbar.btnBack.setOnClickListener {
+            sendResultIfNeeded()
             safeExitWithSave {
                 exitWithRevealAnimation { goBack() }
             }
@@ -98,11 +96,14 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
         super.onPause()
         if (viewModel.needSave) {
             viewModel.saveChanges()
-            viewLifecycleOwner.lifecycleScope.launch {
-                if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                    parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
-                }
-            }
+            wasChanged = true
+        }
+    }
+
+    private fun sendResultIfNeeded() {
+        if (wasChanged) {
+            parentFragmentManager.setFragmentResult("counterparty_updated_details", Bundle())
+            wasChanged = false
         }
     }
 
@@ -114,49 +115,11 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
         binding.recyclerViewAddresses.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewAddresses.adapter = adapter
 
-        val swipeCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            override fun onMove(
-                rv: RecyclerView, vh: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder
-            ): Boolean = false
-
-            override fun onSwiped(vh: RecyclerView.ViewHolder, direction: Int) {
-                val position = vh.adapterPosition
-                val address = adapter.currentList.getOrNull(position) ?: return
-                // Показываем BottomSheet и возвращаем item назад:
-                adapter.notifyItemChanged(position)
-                showConfirmDelete(address)
-            }
-
-            override fun onChildDraw(
-                c: Canvas, rv: RecyclerView, vh: RecyclerView.ViewHolder, dX: Float, dY: Float,
-                actionState: Int, isCurrentlyActive: Boolean
-            ) {
-                // фон и иконка удаления
-                val itemView = vh.itemView
-                val paint = Paint()
-                paint.color = Color.parseColor("#FFFFFFFF")
-
-                if (dX < 0) {
-                    // Свайп влево
-                    c.drawRect(
-                        itemView.right + dX, itemView.top.toFloat(),
-                        itemView.right.toFloat(), itemView.bottom.toFloat(),
-                        paint
-                    )
-                    val icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_delete)
-                    val iconMargin = (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
-                    icon?.setBounds(
-                        itemView.right - iconMargin - (icon?.intrinsicWidth ?: 0),
-                        itemView.top + iconMargin,
-                        itemView.right - iconMargin,
-                        itemView.bottom - iconMargin
-                    )
-                    icon?.draw(c)
-                }
-                super.onChildDraw(c, rv, vh, dX, dY, actionState, isCurrentlyActive)
-            }
+        val freeSwipe = FreeSwipeCallback(requireContext()) { position ->
+            val address = adapter.currentList.getOrNull(position) ?: return@FreeSwipeCallback
+            showConfirmDelete(address)
         }
-        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.recyclerViewAddresses)
+        freeSwipe.attachTo(binding.recyclerViewAddresses)
     }
 
     private fun showConfirmDelete(address: AddressUiModel) {
@@ -164,6 +127,7 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
 
         val addressString = listOfNotNull(
             address.country,
+            address.postalCode,
             address.city,
             address.street,
             address.houseNumber,
@@ -171,7 +135,8 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
         ).filter { it.isNotBlank() }
             .joinToString(", ")
 
-        val subtitle = "Вы уверены, что хотите удалить адрес:\n$addressString?\nОтменить действие будет невозможно"
+        val subtitle =
+            "Вы уверены, что хотите удалить адрес:\n$addressString?\nОтменить действие будет невозможно"
 
         ConfirmActionBottomSheet.newInstance(
             ConfirmActionType.DELETE_ADDRESS,
@@ -204,7 +169,8 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
     private fun safeExitWithSave(action: () -> Unit) {
         if (viewModel.needSave) {
             viewModel.saveChanges()
-            parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+//            parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+            wasChanged = true
         }
         action()
     }
