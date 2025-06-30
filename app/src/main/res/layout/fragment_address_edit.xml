@@ -36,14 +36,36 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <com.nayya.uicomponents.CustomCardActionView
+                android:id="@+id/ccavRecipientName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:descriptionText="Получатель. Обязательное поле"
+                app:hintText="Получатель"
+                app:inputBackground="@drawable/bg_field_gray_cell_white"
+                app:inputEnabled="true"
+                app:inputMaxLength="111"
+                app:inputMaxLines="2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cbIsMain"
+                app:showDescriptionIcon="true"
+                app:showDescriptionText="true"
+                app:showEditIcon="false"
+                app:showInfoIcon="false"
+                app:showInfoText="false"
+                app:showLeftIcon="false"
+                app:showUnderline="true" />
+
             <LinearLayout
                 android:id="@+id/containerIncludeSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cbIsMain"
+                app:layout_constraintTop_toBottomOf="@id/ccavRecipientName"
                 android:popupBackground="@drawable/edit_text_background">
 
             <include

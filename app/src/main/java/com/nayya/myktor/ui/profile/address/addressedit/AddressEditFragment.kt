@@ -120,6 +120,11 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
             binding.ccavFloor.text = it.floor
             binding.ccavNumberIntercom.text = it.numberIntercom
             binding.cbIsMain.isChecked = it.isMain
+
+            val fullName = it.counterpartyFirstLastName?.firstOrNull()
+                ?: it.counterpartyShortName?.firstOrNull()
+                ?: ""
+            binding.ccavRecipientName.text = fullName
         }
 
         binding.btnApply.setOnClickListener {
@@ -135,6 +140,8 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
             showSnackbar("Выберите страну и город")
             return
         }
+
+        val recipientName = binding.ccavRecipientName.text.toString().trim()
 
         val newAddress = CounterpartyAddresse(
             id = address?.id,
@@ -154,7 +161,7 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
             numberIntercom = binding.ccavNumberIntercom.text.toString().takeIf { it.isNotEmpty() },
             counterpartyContactId = null,
             counterpartyShortName = emptyList(),
-            counterpartyFirstLastName = emptyList(),
+            counterpartyFirstLastName = listOf(recipientName),
             country = null,
             city = null,
             isMain = binding.cbIsMain.isChecked
