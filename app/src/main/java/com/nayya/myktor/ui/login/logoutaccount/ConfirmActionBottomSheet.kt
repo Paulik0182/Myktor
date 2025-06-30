@@ -18,7 +18,7 @@ class ConfirmActionBottomSheet : BottomSheetDialogFragment() {
     private val binding get() = _binding!!
 
     private val viewModel: ConfirmActionViewModel by viewModels {
-        LogoutViewModelFactory(DefaultLogoutRepository())
+        ConfirmViewModelFactory(DefaultConfirmRepository())
     }
 
     override fun onCreateView(
@@ -65,6 +65,20 @@ class ConfirmActionBottomSheet : BottomSheetDialogFragment() {
                     viewModel.deleteAccount()
                 }
             }
+
+            ConfirmActionType.DELETE_ADDRESS -> {
+                binding.tvTitle.text = "Внимание! Удаление адреса?"
+                binding.tvSubtitle.text = "Вы уверены, что хотите удалить этот адрес?\nОтменить действие будет невозможно."
+                binding.btnPrimary.text = "Удалить"
+                binding.btnSecondary.visibility = View.GONE
+                binding.btnCancel.text = "Отменить"
+
+                binding.btnPrimary.setOnClickListener {
+                    // Вызвать удаление через callback/VM
+                    (parentFragment as? ConfirmActionCallback)?.onConfirmDeleteAddress()
+                    dismiss()
+                }
+            }
         }
 
         binding.btnCancel.setOnClickListener { dismiss() }
@@ -94,6 +108,10 @@ class ConfirmActionBottomSheet : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    interface ConfirmActionCallback {
+        fun onConfirmDeleteAddress()
     }
 
     companion object {

@@ -61,7 +61,7 @@ class AddressEditViewModel(
         }
     }
 
-    fun loadCountries() {
+    private fun loadCountries() {
         viewModelScope.launch {
             isLoading.postValue(true)
             try {
@@ -88,6 +88,25 @@ class AddressEditViewModel(
             }
         }
     }
+
+    fun deleteAddress(counterpartyId: Long, addressId: Long) {
+        isLoading.postValue(true)
+        viewModelScope.launch {
+            try {
+                val success = repository.deleteAddress(counterpartyId, addressId)
+                if (success) {
+                    Log.d("AddressEdit", "Адрес успешно удалён")
+                    navigateBack.postValue(true)
+                } else {
+                    Log.e("AddressEdit", "Ошибка при удалении адреса")
+                }
+            } catch (e: Exception) {
+                Log.e("AddressEdit", "Ошибка сети при удалении адреса", e)
+            } finally {
+                isLoading.postValue(false)
+            }
+        }
+    }
 }
 
 class AddressEditModelFactory : ViewModelProvider.Factory {
@@ -102,6 +121,9 @@ interface AddressEditRepository {
     suspend fun getCountries(): List<Country>
 
     suspend fun getCitiesByCountry(countryId: Long): List<City>
+
+    suspend fun deleteAddress(counterpartyId: Long, addressId: Long): Boolean
+
 }
 
 class AddressModifyRepository : AddressEditRepository {
@@ -147,6 +169,17 @@ class AddressModifyRepository : AddressEditRepository {
 
     override suspend fun getCitiesByCountry(countryId: Long): List<City> {
         return api.getCitiesByCountry(countryId)
+    }
+
+    override suspend fun deleteAddress(counterpartyId: Long, addressId: Long): Boolean {
+        return try {
+            val response = api.deleteCounterpartyAddress(counterpartyId, addressId)
+            Log.d("AddressEdit", "Delete response: ${response.code()} ${response.isSuccessful}")
+            response.isSuccessful
+        } catch (e: Exception) {
+            Log.e("AddressEdit", "Ошибка при удалении адреса", e)
+            false
+        }
     }
 
     private fun logResponse(response: Response<Unit>) {

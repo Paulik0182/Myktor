@@ -231,4 +231,10 @@ interface ApiService {
         @Body addresses: List<CounterpartyAddressRequest>
     ): Response<Unit>
 
+    @DELETE("counterparties/{id}/addresses/{addressId}")
+    suspend fun deleteCounterpartyAddress(
+        @Path("id") counterpartyId: Long,
+        @Path("addressId") addressId: Long
+    ): Response<Unit>
+
 }

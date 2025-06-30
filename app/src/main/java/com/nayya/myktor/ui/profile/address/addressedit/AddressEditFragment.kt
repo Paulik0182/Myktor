@@ -10,12 +10,15 @@ import com.nayya.myktor.databinding.FragmentAddressEditBinding
 import com.nayya.myktor.domain.counterpartyentity.City
 import com.nayya.myktor.domain.counterpartyentity.CounterpartyAddresse
 import com.nayya.myktor.domain.counterpartyentity.Country
+import com.nayya.myktor.ui.login.logoutaccount.ConfirmActionBottomSheet
+import com.nayya.myktor.ui.login.logoutaccount.ConfirmActionType
 import com.nayya.myktor.ui.root.BaseFragment
 import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.showSnackbar
 import com.nayya.myktor.utils.viewBinding
 
-class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
+class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
+    ConfirmActionBottomSheet.ConfirmActionCallback {
 
     private val binding by viewBinding<FragmentAddressEditBinding>()
     private val viewModel: AddressEditViewModel by viewModels {
@@ -30,6 +33,11 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
     private var countryList: List<Country> = emptyList()
     private var cityList: List<City> = emptyList()
 
+    override fun onConfirmDeleteAddress() {
+        address?.let { addr ->
+            viewModel.deleteAddress(addr.counterpartyId, addr.id ?: return@let)
+        }
+    }
 
     // Для того чтобы скрыть нижнюю навигацию и персчитать размеры container
     override val hideBottomNavigation = true
@@ -79,10 +87,20 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
     }
 
     private fun initToolbar() {
+        binding.toolbar.btnEdit.visibility = View.GONE
+        binding.toolbar.btnSave.visibility = View.GONE
+        binding.toolbar.btnDelete.visibility = if (address != null) View.VISIBLE else View.GONE
+
         binding.toolbar.btnBack.setOnClickListener {
             exitWithRevealAnimation {
                 goBack()
             }
+        }
+
+        binding.toolbar.btnDelete.setOnClickListener {
+            ConfirmActionBottomSheet
+                .newInstance(ConfirmActionType.DELETE_ADDRESS)
+                .show(childFragmentManager, "delete_address")
         }
     }
 
@@ -159,6 +177,7 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit) {
                 }
                 list
             }
+
             else -> cities.toMutableList()
         }
 

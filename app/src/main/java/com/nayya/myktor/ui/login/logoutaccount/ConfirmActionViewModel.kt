@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ConfirmActionViewModel(private val repository: LogoutRepository) : ViewModel() {
+class ConfirmActionViewModel(private val repository: ConfirmRepository) : ViewModel() {
 
     private val _actionCompleted = MutableLiveData<Unit>()
     val actionCompleted: LiveData<Unit> get() = _actionCompleted
@@ -60,7 +60,7 @@ class ConfirmActionViewModel(private val repository: LogoutRepository) : ViewMod
     }
 }
 
-class LogoutViewModelFactory(private val repository: LogoutRepository) : ViewModelProvider.Factory {
+class ConfirmViewModelFactory(private val repository: ConfirmRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ConfirmActionViewModel::class.java)) {
             return ConfirmActionViewModel(repository) as T
@@ -74,13 +74,13 @@ sealed class LogoutState {
     data class Error(val code: String, val message: String) : LogoutState()
 }
 
-interface LogoutRepository {
+interface ConfirmRepository {
     suspend fun logout()
     suspend fun logoutAll()
     suspend fun deleteAccount()
 }
 
-class DefaultLogoutRepository : LogoutRepository {
+class DefaultConfirmRepository : ConfirmRepository {
     override suspend fun logout() {
         RetrofitInstance.api.logout()
     }
