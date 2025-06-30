@@ -32,6 +32,8 @@ class AddressEditViewModel(
     var counterpartyId: Long = 0L
         private set
 
+    val counterpartyName = MutableLiveData<String>()
+
     init {
         loadCountries()
     }
@@ -107,6 +109,16 @@ class AddressEditViewModel(
             }
         }
     }
+
+    fun loadCounterpartyName(counterpartyId: Long) {
+        viewModelScope.launch {
+            try {
+                counterpartyName.postValue(repository.getCounterpartyName(counterpartyId))
+            } catch (e: Exception) {
+                counterpartyName.postValue("")
+            }
+        }
+    }
 }
 
 class AddressEditModelFactory : ViewModelProvider.Factory {
@@ -123,7 +135,7 @@ interface AddressEditRepository {
     suspend fun getCitiesByCountry(countryId: Long): List<City>
 
     suspend fun deleteAddress(counterpartyId: Long, addressId: Long): Boolean
-
+    suspend fun getCounterpartyName(counterpartyId: Long): String?
 }
 
 class AddressModifyRepository : AddressEditRepository {
@@ -179,6 +191,27 @@ class AddressModifyRepository : AddressEditRepository {
         } catch (e: Exception) {
             Log.e("AddressEdit", "Ошибка при удалении адреса", e)
             false
+        }
+    }
+
+    override suspend fun getCounterpartyName(counterpartyId: Long): String? {
+        return try {
+            val counterparty = api.getCounterpartyById(counterpartyId)
+            listOfNotNull(
+                counterparty?.firstName,
+                counterparty?.lastName
+            )
+                .filter { !it.isNullOrBlank() }
+                .joinToString(" ")
+                .ifBlank {
+                    counterparty?.companyName
+                }
+                ?.ifBlank {
+                    counterparty?.shortName
+                }
+                ?: "Без имени"
+        } catch (e: Exception) {
+            null
         }
     }
 

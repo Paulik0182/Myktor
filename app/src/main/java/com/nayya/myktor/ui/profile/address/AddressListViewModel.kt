@@ -218,7 +218,9 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
             entranceNumber = this.entranceNumber,
             floor = this.floor,
             numberIntercom = this.numberIntercom,
-            isMain = this.isMain
+            isMain = this.isMain,
+            fullName = this.counterpartyFirstLastName?.firstOrNull()
+                ?: this.counterpartyShortName?.firstOrNull() ?: ""
         )
     }
 }

@@ -24,8 +24,19 @@ class AddressListAdapter(
 
         fun bind(address: AddressUiModel) = with(binding) {
             tvRecipient.text = address.fullName
-            tvStreet.text = address.street
-            tvCity.text = "${address.postalCode}, ${address.city}"
+
+            val streetParts = mutableListOf<String>()
+            streetParts += address.street
+            if (!address.houseNumber.isNullOrBlank()) streetParts += address.houseNumber
+            if (!address.locationNumber.isNullOrBlank()) streetParts += address.locationNumber
+            binding.tvStreet.text = streetParts.joinToString(", ")
+
+            val cityParts = listOf(
+                address.country,
+                address.postalCode,
+                address.city
+            ).filter { !it.isNullOrBlank() }
+            binding.tvCity.text = cityParts.joinToString(", ")
 
             checkBoxMain.setOnCheckedChangeListener(null) // важно сбросить старый listener
             checkBoxMain.isChecked = address.isMain

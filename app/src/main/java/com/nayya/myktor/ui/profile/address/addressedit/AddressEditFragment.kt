@@ -84,6 +84,16 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         setupCountrySelection()
         setupCitySelection()
         observeViewModel()
+
+        if (address == null && counterpartyId != null) {
+            viewModel.loadCounterpartyName(counterpartyId!!)
+        }
+
+        viewModel.counterpartyName.observe(viewLifecycleOwner) { name ->
+            if (address == null && binding.ccavRecipientName.text.isNullOrBlank()) {
+                binding.ccavRecipientName.text = name
+            }
+        }
     }
 
     private fun initToolbar() {
