@@ -87,8 +87,22 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
     }
 
     fun deleteAddress(address: AddressUiModel) {
-        addressEntities.removeAll { it.id == address.id }
-        _addresses.postValue(addressEntities.map { it.toUiModel() })
+        viewModelScope.launch {
+            try {
+                val success = repository.deleteAddress(counterpartyId, address.id ?: return@launch)
+                if (success) {
+                    // Обновляем локальный список после удачного удаления на сервере
+                    addressEntities.removeAll { it.id == address.id }
+                    _addresses.postValue(addressEntities.map { it.toUiModel() })
+                } else {
+                    // Здесь можно показать ошибку через отдельное LiveData
+                    Log.e("AddressListVM", "Ошибка удаления адреса")
+                }
+            } catch (e: Exception) {
+                Log.e("AddressListVM", "Ошибка сети при удалении адреса", e)
+                // Здесь можно показать ошибку пользователю
+            }
+        }
     }
 
     fun setAsMainAddress(address: AddressUiModel) {
@@ -182,6 +196,7 @@ interface AddressListRepository {
         counterpartyId: Long,
         addresses: List<CounterpartyAddressRequest>,
     ): Boolean
+    suspend fun deleteAddress(counterpartyId: Long, addressId: Long): Boolean
 }
 
 class AddressPreviewRepository : AddressListRepository {
@@ -214,6 +229,17 @@ class AddressPreviewRepository : AddressListRepository {
             e.printStackTrace()
             Log.e("Address", "Exception while saving: ${e.message}", e)
 
+            false
+        }
+    }
+
+    override suspend fun deleteAddress(counterpartyId: Long, addressId: Long): Boolean {
+        return try {
+            val response = api.deleteCounterpartyAddress(counterpartyId, addressId)
+            Log.d("AddressList", "Delete response: ${response.code()} ${response.isSuccessful}")
+            response.isSuccessful
+        } catch (e: Exception) {
+            Log.e("AddressList", "Ошибка при удалении адреса", e)
             false
         }
     }

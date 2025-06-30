@@ -10,7 +10,6 @@ import com.nayya.myktor.ui.profile.address.addressedit.AddressUiModel
 
 class AddressListAdapter(
     private val onEdit: (AddressUiModel) -> Unit,
-    private val onDelete: (AddressUiModel) -> Unit,
     private val onSetMain: (AddressUiModel) -> Unit,
 ) : ListAdapter<AddressUiModel, AddressListAdapter.AddressViewHolder>(DiffCallback()) {
 

@@ -99,7 +99,10 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
 
         binding.toolbar.btnDelete.setOnClickListener {
             ConfirmActionBottomSheet
-                .newInstance(ConfirmActionType.DELETE_ADDRESS)
+                .newInstance(
+                    ConfirmActionType.DELETE_ADDRESS,
+                    subtitle = "Вы уверены, что хотите удалить этот адрес?\nОтменить действие будет невозможно."
+                )
                 .show(childFragmentManager, "delete_address")
         }
     }
