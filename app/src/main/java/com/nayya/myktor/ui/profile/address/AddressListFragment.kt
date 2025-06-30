@@ -115,10 +115,16 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
         binding.recyclerViewAddresses.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewAddresses.adapter = adapter
 
-        val freeSwipe = FreeSwipeCallback(requireContext()) { position ->
-            val address = adapter.currentList.getOrNull(position) ?: return@FreeSwipeCallback
-            showConfirmDelete(address)
-        }
+        val freeSwipe = FreeSwipeCallback(
+            requireContext(),
+            onDelete = { position ->
+                val address = adapter.currentList.getOrNull(position) ?: return@FreeSwipeCallback
+                showConfirmDelete(address)
+            },
+            onSwipingStateChanged = { isSwiping ->
+                adapter.setSwiping(isSwiping) // Передаем состояние свайпа в адаптер
+            }
+        )
         freeSwipe.attachTo(binding.recyclerViewAddresses)
     }
 

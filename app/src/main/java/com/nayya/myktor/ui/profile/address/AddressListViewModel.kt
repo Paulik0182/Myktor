@@ -89,10 +89,35 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
     fun deleteAddress(address: AddressUiModel) {
         viewModelScope.launch {
             try {
-                val success = repository.deleteAddress(counterpartyId, address.id ?: return@launch)
+                val addressId = address.id ?: return@launch
+                val isMainToDelete = addressEntities.find { it.id == addressId }?.isMain == true
+
+                val success = repository.deleteAddress(counterpartyId, addressId)
                 if (success) {
                     // Обновляем локальный список после удачного удаления на сервере
-                    addressEntities.removeAll { it.id == address.id }
+                    addressEntities.removeAll { it.id == addressId }
+
+                    // Если удалили главный адрес — делаем новым главным первый из оставшихся
+                    if (isMainToDelete && addressEntities.isNotEmpty()) {
+                        // Обнуляем всем isMain
+                        addressEntities.replaceAll { it.copy(isMain = false) }
+                        // Назначаем новым главным первый адрес
+                        val first = addressEntities.first()
+                        val index = addressEntities.indexOf(first)
+                        addressEntities[index] = first.copy(isMain = true)
+                        currentMainAddressId = first.id
+                    } else if (addressEntities.none { it.isMain }) {
+                        // На всякий случай: если после удаления ни один не остался главным
+                        if (addressEntities.isNotEmpty()) {
+                            val first = addressEntities.first()
+                            val index = addressEntities.indexOf(first)
+                            addressEntities[index] = first.copy(isMain = true)
+                            currentMainAddressId = first.id
+                        } else {
+                            currentMainAddressId = null
+                        }
+                    }
+
                     _addresses.postValue(addressEntities.map { it.toUiModel() })
                 } else {
                     // Здесь можно показать ошибку через отдельное LiveData

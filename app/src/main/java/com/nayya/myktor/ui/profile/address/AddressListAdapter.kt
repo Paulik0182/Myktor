@@ -13,6 +13,12 @@ class AddressListAdapter(
     private val onSetMain: (AddressUiModel) -> Unit,
 ) : ListAdapter<AddressUiModel, AddressListAdapter.AddressViewHolder>(DiffCallback()) {
 
+    private var isSwiping = false
+
+    fun setSwiping(swiping: Boolean) {
+        isSwiping = swiping
+    }
+
     inner class AddressViewHolder(private val binding: ItemAddressBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -20,18 +26,19 @@ class AddressListAdapter(
             tvRecipient.text = address.fullName
             tvStreet.text = address.street
             tvCity.text = "${address.postalCode}, ${address.city}"
-            checkBoxMain.isChecked = address.isMain
-
-            cardContainer.setOnClickListener {
-                onEdit(address)
-            }
 
             checkBoxMain.setOnCheckedChangeListener(null) // важно сбросить старый listener
             checkBoxMain.isChecked = address.isMain
             checkBoxMain.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked && !address.isMain) { // только если состояние действительно изменилось
+                if (isChecked && !address.isMain && !isSwiping) { // только если состояние действительно изменилось
                     onSetMain(address)
                 }
+            }
+
+            checkBoxMain.isChecked = address.isMain
+
+            cardContainer.setOnClickListener {
+                onEdit(address)
             }
         }
     }

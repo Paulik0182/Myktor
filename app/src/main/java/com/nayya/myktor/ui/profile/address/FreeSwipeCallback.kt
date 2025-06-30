@@ -13,12 +13,14 @@ import kotlin.math.pow
 
 class FreeSwipeCallback(
     val context: Context,
-    val onDelete: (Int) -> Unit
+    val onDelete: (Int) -> Unit,
+    val onSwipingStateChanged: (Boolean) -> Unit
 ) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
 
     private var swipedPosition = -1
     private var currentDx = 0f
     private var recyclerView: RecyclerView? = null
+    private var isActiveSwipe = false
 
     override fun onMove(
         recyclerView: RecyclerView,
@@ -28,10 +30,28 @@ class FreeSwipeCallback(
 
     // НЕ ограничиваем dX!
     override fun onChildDraw(
-        c: Canvas, rv: RecyclerView, vh: RecyclerView.ViewHolder, dX: Float, dY: Float,
-        actionState: Int, isCurrentlyActive: Boolean
+        c: Canvas,
+        rv: RecyclerView,
+        vh: RecyclerView.ViewHolder,
+        dX: Float,
+        dY: Float,
+        actionState: Int,
+        isCurrentlyActive: Boolean
     ) {
         recyclerView = rv
+
+        // Управление состоянием свайпа
+        when {
+            isCurrentlyActive && !isActiveSwipe -> {
+                isActiveSwipe = true
+                onSwipingStateChanged(true)
+            }
+            !isCurrentlyActive && isActiveSwipe -> {
+                isActiveSwipe = false
+                onSwipingStateChanged(false)
+            }
+        }
+
         // Делаем плавнее
         val slowDx = dX * 0.6f
         // это эффект упругости свайпа
@@ -74,11 +94,21 @@ class FreeSwipeCallback(
         }
     }
 
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        // Гарантированно сбрасываем состояние при завершении взаимодействия
+        if (isActiveSwipe) {
+            isActiveSwipe = false
+            onSwipingStateChanged(false)
+        }
+    }
+
     // Слушаем отпускание пальца!
     fun attachTo(rv: RecyclerView) {
         ItemTouchHelper(this).attachToRecyclerView(rv)
         rv.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP && swipedPosition != -1) {
+
                 // если dX больше 18% ширины — показать диалог
                 if (currentDx < -rv.width * 0.13f) {
                     onDelete(swipedPosition)
