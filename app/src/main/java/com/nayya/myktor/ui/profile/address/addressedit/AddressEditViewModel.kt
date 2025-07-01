@@ -2,6 +2,7 @@ package com.nayya.myktor.ui.profile.address.addressedit
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -33,6 +34,41 @@ class AddressEditViewModel(
         private set
 
     val counterpartyName = MutableLiveData<String>()
+
+    private val _isEditMode = MutableLiveData<Boolean>(false)
+    val isEditMode: LiveData<Boolean> = _isEditMode
+
+    private val _isRecipientNameValid = MutableLiveData<Boolean>(true)
+    val isRecipientNameValid: LiveData<Boolean> = _isRecipientNameValid
+
+    private val _isPostalCodeValid = MutableLiveData<Boolean>(true)
+    val isPostalCodeValid: LiveData<Boolean> = _isPostalCodeValid
+
+    private val _isStreetValid = MutableLiveData<Boolean>(true)
+    val isStreetValid: LiveData<Boolean> = _isStreetValid
+
+    private val _isHouseNumberValid = MutableLiveData<Boolean>(true)
+    val isHouseNumberValid: LiveData<Boolean> = _isHouseNumberValid
+
+    private val _isLocationNumberValid = MutableLiveData<Boolean>(true)
+    val isLocationNumberValid: LiveData<Boolean> = _isLocationNumberValid
+
+    private val _isEntranceNumberValid = MutableLiveData<Boolean>(true)
+    val isEntranceNumberValid: LiveData<Boolean> = _isEntranceNumberValid
+
+    private val _isFloorValid = MutableLiveData<Boolean>(true)
+    val isFloorValid: LiveData<Boolean> = _isFloorValid
+
+    private val _isNumberIntercomValid = MutableLiveData<Boolean>(true)
+    val isNumberIntercomValid: LiveData<Boolean> = _isNumberIntercomValid
+
+    val originalAddress = MutableLiveData<CounterpartyAddresse>()
+    val formState = MutableLiveData<AddressFormState>()
+
+    val hasUnsavedChanges = MediatorLiveData<Boolean>().apply {
+        addSource(formState) { value = compareFormWithOriginal() }
+        addSource(originalAddress) { value = compareFormWithOriginal() }
+    }
 
     init {
         loadCountries()
@@ -118,6 +154,110 @@ class AddressEditViewModel(
                 counterpartyName.postValue("")
             }
         }
+    }
+
+    // синхронизирует форму с сущностью (использовать при открытии экрана)
+    fun setInitialAddress(address: CounterpartyAddresse) {
+        originalAddress.value = address
+        formState.value = address.toFormState()
+    }
+
+    // --- Обновление отдельных полей формы (например, при TextChanged)
+    fun updateForm(update: AddressFormState.() -> AddressFormState) {
+        formState.value = formState.value?.update() ?: AddressFormState().update()
+    }
+
+    private fun compareFormWithOriginal(): Boolean {
+        val form = formState.value ?: return false
+        val original = originalAddress.value ?: return false
+        return !form.equalsEntity(original)
+    }
+
+    fun setRecipientNameValid(isValid: Boolean) {
+        _isRecipientNameValid.value = isValid
+    }
+
+    fun setPostalCodeValid(isValid: Boolean) {
+        _isPostalCodeValid.value = isValid
+    }
+
+    fun setStreetValid(isValid: Boolean) {
+        _isStreetValid.value = isValid
+    }
+
+    fun setHouseNumberValid(isValid: Boolean) {
+        _isHouseNumberValid.value = isValid
+    }
+
+    fun setLocationNumberValid(isValid: Boolean) {
+        _isLocationNumberValid.value = isValid
+    }
+
+    fun setEntranceNumberValid(isValid: Boolean) {
+        _isEntranceNumberValid.value = isValid
+    }
+
+    fun setFloorValid(isValid: Boolean) {
+        _isFloorValid.value = isValid
+    }
+
+    fun setNumberIntercomValid(isValid: Boolean) {
+        _isNumberIntercomValid.value = isValid
+    }
+
+    fun toggleEditMode() {
+        _isEditMode.value = !(_isEditMode.value ?: false)
+    }
+
+    fun setEditMode(isEdit: Boolean) {
+        _isEditMode.value = isEdit
+    }
+
+
+    // Преобразование сущности в состояние формы (очень важно)
+    private fun CounterpartyAddresse.toFormState(): AddressFormState {
+        return AddressFormState(
+            recipientName = counterpartyFirstLastName?.firstOrNull()
+                ?: counterpartyShortName?.firstOrNull() ?: "",
+            postalCode = postalCode.orEmpty(),
+            streetName = streetName.orEmpty(),
+            houseNumber = houseNumber.orEmpty(),
+            locationNumber = locationNumber.orEmpty(),
+            entranceNumber = entranceNumber.orEmpty(),
+            floor = floor.orEmpty(),
+            numberIntercom = numberIntercom.orEmpty(),
+            countryId = countryId,
+            cityId = cityId,
+            isMain = isMain
+        )
+    }
+
+    // Преобразование формы обратно в сущность (для сохранения)
+    fun getAddressToSave(): CounterpartyAddresse {
+        val form = formState.value!!
+        return CounterpartyAddresse(
+            id = originalAddress.value?.id,
+            counterpartyId = counterpartyId,
+            countryId = form.countryId ?: 0L,
+            countryName = null, // присвоить если надо
+            cityId = form.cityId ?: 0L,
+            cityName = null,
+            postalCode = form.postalCode,
+            streetName = form.streetName,
+            houseNumber = form.houseNumber,
+            locationNumber = form.locationNumber.takeIf { it.isNotBlank() },
+            latitude = null,
+            longitude = null,
+            entranceNumber = form.entranceNumber.takeIf { it.isNotBlank() },
+            floor = form.floor.takeIf { it.isNotBlank() },
+            numberIntercom = form.numberIntercom.takeIf { it.isNotBlank() },
+            counterpartyContactId = null,
+            counterpartyShortName = emptyList(),
+            counterpartyFirstLastName = listOf(form.recipientName),
+            country = null,
+            city = null,
+            isMain = form.isMain
+        )
     }
 }
 
@@ -269,3 +409,33 @@ data class AddressUiModel(
     val numberIntercom: String?,
     val isMain: Boolean = false,
 )
+
+data class AddressFormState(
+    val recipientName: String = "",
+    val postalCode: String = "",
+    val streetName: String = "",
+    val houseNumber: String = "",
+    val locationNumber: String = "",
+    val entranceNumber: String = "",
+    val floor: String = "",
+    val numberIntercom: String = "",
+    val countryId: Long? = null,
+    val cityId: Long? = null,
+    val isMain: Boolean = false
+)
+
+fun AddressFormState.equalsEntity(entity: CounterpartyAddresse): Boolean {
+    fun String?.normalize() = this?.trim().takeIf { !it.isNullOrBlank() } ?: ""
+
+    return recipientName.normalize() == (entity.counterpartyFirstLastName?.firstOrNull().normalize())
+            && postalCode.normalize() == entity.postalCode.normalize()
+            && streetName.normalize() == entity.streetName.normalize()
+            && houseNumber.normalize() == entity.houseNumber.normalize()
+            && locationNumber.normalize() == entity.locationNumber.normalize()
+            && entranceNumber.normalize() == entity.entranceNumber.normalize()
+            && floor.normalize() == entity.floor.normalize()
+            && numberIntercom.normalize() == entity.numberIntercom.normalize()
+            && countryId == entity.countryId
+            && cityId == entity.cityId
+            && isMain == entity.isMain
+}

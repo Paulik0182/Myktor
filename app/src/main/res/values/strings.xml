@@ -49,6 +49,9 @@
     <string name="error_exact_length">Должно быть %1$d символов</string>
     <string name="exact_length">Введите %1$d символов</string>
     <string name="error_only_letters_allowed">Разрешены только буквы (латиница, кириллица), пробел и тире</string>
+    <string name="error_only_single_space">Не должно быть двойных пробелов</string>
+    <string name="error_no_leading_trailing_space">Не должно быть пробела в начале или конце</string>
+    <string name="error_line_breaks_not_allowed">Переносы строк запрещены</string>
 
     <plurals name="remaining_characters">
         <item quantity="one">Остался символ - %d</item>

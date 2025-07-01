@@ -18,6 +18,7 @@ object LocaleUtils {
     }
 
     fun Fragment.goBack() {
+        if (!isAdded || !isResumed) return
         parentFragmentManager.popBackStack()
     }
 

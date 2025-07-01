@@ -173,5 +173,63 @@ class InputValidator {
                 context.getString(R.string.error_invalid_characters_for_unique_name)
             } else null
         }
+
+        /**
+         * Проверяет строку по заданному регулярному выражению.
+         * Если строка не соответствует паттерну — возвращает сообщение об ошибке.
+         * Также проверяет наличие emoji (запрещает их).
+         *
+         * @param context Context для получения строк из ресурсов.
+         * @param text Проверяемый текст.
+         * @param pattern Регулярное выражение для проверки (например, ALLOWED_CHARACTERS_REGEX).
+         * @param errorResId ID строки ошибки для вывода при ошибке валидации.
+         */
+        fun validateByPattern(
+            context: Context,
+            text: String,
+            pattern: Regex
+        ): String? {
+            if (!pattern.matches(text)) {
+                return context.getString(R.string.error_invalid_characters)
+            }
+
+            // Проверка на emoji
+            val containsEmoji = text.any { char ->
+                Character.getType(char) == Character.SURROGATE.toInt()
+            }
+            return if (containsEmoji) {
+                context.getString(R.string.error_emoji_not_allowed)
+            } else null
+        }
+
+        /**
+         * Проверка на наличие двойных и более пробелов подряд.
+         * Возвращает ошибку, если найдено два и более пробела подряд.
+         */
+        fun validateOnlySingleSpaces(context: Context, text: String): String? {
+            return if (text.contains("  ")) {
+                context.getString(R.string.error_only_single_space)
+            } else null
+        }
+
+        /**
+         * Проверка на ведущие или завершающие пробелы.
+         * Возвращает ошибку, если строка начинается или заканчивается пробелом.
+         */
+        fun validateNoLeadingTrailingSpace(context: Context, text: String): String? {
+            return if (text.startsWith(" ") || text.endsWith(" ")) {
+                context.getString(R.string.error_no_leading_trailing_space)
+            } else null
+        }
+
+        /**
+         * Проверка на отсутствие переносов строки (\n или \r) в тексте.
+         * Возвращает ошибку, если найден перенос строки.
+         */
+        fun validateNoLineBreaks(context: Context, text: String): String? {
+            return if (text.contains("\n") || text.contains("\r")) {
+                context.getString(R.string.error_line_breaks_not_allowed)
+            } else null
+        }
     }
 }

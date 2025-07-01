@@ -1,5 +1,6 @@
 package com.nayya.myktor.ui.profile.address.addressedit
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -47,6 +48,9 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
     private var isFirstCountryLoad = true
     private var isFirstCityLoad = true
     private var isCountryChangedByUser = false
+
+    private lateinit var validator: AddressFieldsValidationDelegate
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -79,6 +83,23 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
             }
         }
 
+        if (address != null) {
+            viewModel.setInitialAddress(address!!)  // ← вот это важно!
+        } else {
+            // Новый адрес: создаём пустую форму вручную (можно доработать)
+            viewModel.formState.value = AddressFormState()
+        }
+
+        validator = AddressFieldsValidationDelegate(
+            context = requireContext(),
+            binding = binding,
+            viewModel = viewModel
+        )
+
+        validator.setupAll()
+
+        viewModel.setEditMode(true)
+
         initToolbar()
         initViews()
         setupCountrySelection()
@@ -102,8 +123,10 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         binding.toolbar.btnDelete.visibility = if (address != null) View.VISIBLE else View.GONE
 
         binding.toolbar.btnBack.setOnClickListener {
-            exitWithRevealAnimation {
-                goBack()
+            tryNavigateWithSaveCheck {
+                exitWithRevealAnimation {
+                    goBack()
+                }
             }
         }
 
@@ -138,11 +161,23 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         }
 
         binding.btnApply.setOnClickListener {
+            validator.trimAllFieldsOnSave()
             createOrUpdateAddress()
         }
     }
 
     private fun createOrUpdateAddress() {
+
+        // Проверка валидации через ViewModel
+        if (!viewModel.isRecipientNameValid.value!! ||
+            !viewModel.isPostalCodeValid.value!! ||
+            !viewModel.isStreetValid.value!! ||
+            !viewModel.isHouseNumberValid.value!!
+        ) {
+            showSnackbar("Проверьте обязательные поля")
+            return
+        }
+
         val selectedCountry = binding.includeSpinnerCountry.spinner.selectedItem as? Country
         val selectedCity = binding.includeSpinnerCity.spinner.selectedItem as? City
 
@@ -151,31 +186,39 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
             return
         }
 
-        val recipientName = binding.ccavRecipientName.text.toString().trim()
+        // Обновить формстейт перед сохранением
+        viewModel.updateForm {
+            copy(
+                countryId = selectedCountry.id,
+                cityId = selectedCity.id
+            )
+        }
 
-        val newAddress = CounterpartyAddresse(
-            id = address?.id,
-            counterpartyId = viewModel.counterpartyId,
-            countryId = selectedCountry.id ?: 0L,
-            countryName = selectedCountry.name,
-            cityId = selectedCity.id ?: 0L,
-            cityName = selectedCity.name,
-            postalCode = binding.ccavPostalCode.text.toString(),
-            streetName = binding.ccavStreet.text.toString(),
-            houseNumber = binding.ccavHouseNumber.text.toString(),
-            locationNumber = binding.ccavLocationNumber.text.toString().takeIf { it.isNotEmpty() },
-            latitude = null,
-            longitude = null,
-            entranceNumber = binding.ccavEntranceNumber.text.toString().takeIf { it.isNotEmpty() },
-            floor = binding.ccavFloor.text.toString().takeIf { it.isNotEmpty() },
-            numberIntercom = binding.ccavNumberIntercom.text.toString().takeIf { it.isNotEmpty() },
-            counterpartyContactId = null,
-            counterpartyShortName = emptyList(),
-            counterpartyFirstLastName = listOf(recipientName),
-            country = null,
-            city = null,
-            isMain = binding.cbIsMain.isChecked
-        )
+//        val recipientName = binding.ccavRecipientName.text.toString().trim()
+        val newAddress = viewModel.getAddressToSave()
+//        val newAddress2 = CounterpartyAddresse(
+//            id = address?.id,
+//            counterpartyId = viewModel.counterpartyId,
+//            countryId = selectedCountry.id ?: 0L,
+//            countryName = selectedCountry.name,
+//            cityId = selectedCity.id ?: 0L,
+//            cityName = selectedCity.name,
+//            postalCode = binding.ccavPostalCode.text.toString(),
+//            streetName = binding.ccavStreet.text.toString(),
+//            houseNumber = binding.ccavHouseNumber.text.toString(),
+//            locationNumber = binding.ccavLocationNumber.text.toString().takeIf { it.isNotEmpty() },
+//            latitude = null,
+//            longitude = null,
+//            entranceNumber = binding.ccavEntranceNumber.text.toString().takeIf { it.isNotEmpty() },
+//            floor = binding.ccavFloor.text.toString().takeIf { it.isNotEmpty() },
+//            numberIntercom = binding.ccavNumberIntercom.text.toString().takeIf { it.isNotEmpty() },
+//            counterpartyContactId = null,
+//            counterpartyShortName = emptyList(),
+//            counterpartyFirstLastName = listOf(recipientName),
+//            country = null,
+//            city = null,
+//            isMain = binding.cbIsMain.isChecked
+//        )
 
         Log.d("AddressEdit", "Создан/обновлен адрес: $newAddress")
         viewModel.saveAddress(newAddress)
@@ -304,6 +347,49 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
                 goBack()
             }
         }
+    }
+
+    private fun tryNavigateWithSaveCheck(navigateAction: () -> Unit) {
+        if (!hasUnsavedChanges()) {
+            exitWithRevealAnimation {
+                navigateAction() // ← сюда передаётся goBack(), и он уже безопасен
+            }
+            return
+        }
+
+        showUnsavedChangesDialog(
+            onSave = {
+                createOrUpdateAddress()
+                exitWithRevealAnimation { navigateAction() }
+            },
+            onDiscard = {
+                viewModel.setInitialAddress(viewModel.originalAddress.value!!)
+                exitWithRevealAnimation { navigateAction() }
+            },
+            onCancel = {
+                // остаться — ничего не делаем
+            }
+        )
+    }
+
+    private fun showUnsavedChangesDialog(
+        onSave: (() -> Unit)? = null,
+        onDiscard: (() -> Unit)? = null,
+        onCancel: (() -> Unit)? = null,
+    ) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Несохранённые изменения")
+            .setMessage("Вы хотите сохранить изменения?")
+            .setPositiveButton("Сохранить") { _, _ -> onSave?.invoke() }
+            .setNegativeButton("Отменить") { _, _ -> onDiscard?.invoke() }
+            .setNeutralButton("Остаться") { _, _ -> onCancel?.invoke() }
+            .show()
+    }
+
+    private fun hasUnsavedChanges(): Boolean {
+        val form = viewModel.formState.value ?: return false
+        val original = viewModel.originalAddress.value ?: return false
+        return !form.equalsEntity(original)
     }
 
     companion object {
