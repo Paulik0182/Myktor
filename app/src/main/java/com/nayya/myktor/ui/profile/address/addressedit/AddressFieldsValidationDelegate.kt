@@ -8,12 +8,20 @@ import com.nayya.myktor.databinding.FragmentAddressEditBinding
 import com.nayya.myktor.utils.input.InputValidator
 import com.nayya.uicomponents.BottomTextState
 import com.nayya.uicomponents.CustomCardActionView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class AddressFieldsValidationDelegate(
     private val context: Context,
     private val binding: FragmentAddressEditBinding,
     private val viewModel: AddressEditViewModel,
+    private val coroutineScope: CoroutineScope
 ) {
+
+    private var isFirstEntry = true
+
     fun setupAll() {
         setupRecipientNameValidation()
         setupPostalCodeValidation()
@@ -28,12 +36,24 @@ class AddressFieldsValidationDelegate(
     // --- fullName ---
     private fun setupRecipientNameValidation() {
         val field = binding.ccavRecipientName
+
+        // Удобная функция для смены текста
+        val showDescription: (String) -> Unit = { text ->
+            field.setBottomTextState(
+                BottomTextState.Description(
+                    showDescriptionText = true,
+                    descriptionText = text
+                )
+            )
+        }
+
+        // Начальное состояние
+        showDescription(if (field.text.isNullOrBlank()) RECIPIENT_DESCRIPTION else RECIPIENT_PLACEHOLDER)
+
         field.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
-                Unit
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable?) {
@@ -42,84 +62,75 @@ class AddressFieldsValidationDelegate(
 
                 val original = s?.toString() ?: ""
                 val cursorPosition = field.getSelection()
-
-                // Удаляем переносы строк, заменяем множественные пробелы на один
-                var cleaned = original
-                    .replace("\n", "")
-                    .replace(Regex(" {2,}"), " ")
+                val cleaned = original.replace("\n", "").replace(Regex(" {2,}"), " ")
                 if (cleaned != original) {
                     field.text = cleaned
                     field.setSelection(minOf(cursorPosition, cleaned.length))
                 }
                 val trimmedText = cleaned.trim()
-
                 viewModel.updateForm { copy(recipientName = trimmedText) }
 
-                val error = when {
-                    InputValidator.validateEmpty(context, trimmedText) != null ->
-                        InputValidator.validateEmpty(context, trimmedText)
-
-                    InputValidator.validateLength(context, trimmedText, 100) != null ->
-                        InputValidator.validateLength(context, trimmedText, 100)
-
-                    InputValidator.validateMinAllowedInitialLength(
-                        context,
-                        trimmedText,
-                        5
-                    ) != null ->
-                        InputValidator.validateMinAllowedInitialLength(context, trimmedText, 5)
-
-                    InputValidator.validateByPattern(
-                        context = context,
-                        text = trimmedText,
-                        pattern = ALLOWED_CHARACTERS_REGEX
-                    ) != null ->
-                        InputValidator.validateByPattern(
-                            context = context,
-                            text = trimmedText,
-                            pattern = ALLOWED_CHARACTERS_REGEX
-                        )
-
-                    InputValidator.validateOnlySingleSpaces(context, trimmedText) != null ->
-                        InputValidator.validateOnlySingleSpaces(context, trimmedText)
-
-                    InputValidator.validateNoLeadingTrailingSpace(context, trimmedText) != null ->
-                        InputValidator.validateNoLeadingTrailingSpace(context, trimmedText)
-
-                    InputValidator.validateNoLineBreaks(context, trimmedText) != null ->
-                        InputValidator.validateNoLineBreaks(context, trimmedText)
-
-                    else -> null
+                // Показываем описание на первом входе
+                if (isFirstEntry) {
+                    showDescription(if (trimmedText.isBlank()) RECIPIENT_DESCRIPTION else RECIPIENT_PLACEHOLDER)
+                    isFirstEntry = false
+                    isEditing = false
+                    return
                 }
 
-                // Обновляем валидность во ViewModel
+                // Валидация
+                val error = InputValidator.validateEmpty(context, trimmedText)
+                    ?: InputValidator.validateLength(context, trimmedText, 100)
+                    ?: InputValidator.validateMinAllowedInitialLength(context, trimmedText, 5)
+                    ?: InputValidator.validateByPattern(context, trimmedText, ALLOWED_CHARACTERS_REGEX)
+                    ?: InputValidator.validateOnlySingleSpaces(context, trimmedText)
+                    ?: InputValidator.validateNoLeadingTrailingSpace(context, trimmedText)
+                    ?: InputValidator.validateNoLineBreaks(context, trimmedText)
+
                 viewModel.setRecipientNameValid(error == null)
 
-                // UI
                 if (viewModel.isEditMode.value == true) {
-                    if (error != null) {
-                        field.setBottomTextState(
-                            BottomTextState.Error(
-                                showErrorText = true,
-                                showErrorIcon = true,
-                                errorText = error
-                            )
-                        )
-                    } else {
-                        val remaining = 100 - trimmedText.length
-                        if (remaining in 0..100) // TODO тут нужно чтобы подсчет велся не от нуля , чтобы показывалось что поле обязательное
+                    descriptionResetJob?.cancel()
+                    when {
+                        error != null -> {
                             field.setBottomTextState(
-                                BottomTextState.Description(
-                                    showDescriptionText = true,
-                                    descriptionText = context.resources.getQuantityString(
-                                        R.plurals.remaining_characters,
-                                        remaining,
-                                        remaining
-                                    )
+                                BottomTextState.Error(
+                                    showErrorText = true,
+                                    showErrorIcon = true,
+                                    errorText = error
                                 )
                             )
-                        else
-                            field.setBottomTextState(BottomTextState.Empty)
+                        }
+                        trimmedText.isEmpty() -> {
+                            showDescription(RECIPIENT_DESCRIPTION)
+                        }
+                        else -> {
+                            val remaining = 100 - trimmedText.length
+                            if (remaining in 0..100) {
+                                val tempDescription = context.resources.getQuantityString(
+                                    R.plurals.remaining_characters, remaining, remaining
+                                )
+                                showDescription(tempDescription)
+                                descriptionResetJob = coroutineScope.launch {
+                                    delay(FIELD_HINT_DELAY_MS)
+                                    val currentText = field.text.toString()
+                                    val currentError = InputValidator.validateEmpty(context, currentText)
+                                        ?: InputValidator.validateLength(context, currentText, 100)
+                                        ?: InputValidator.validateMinAllowedInitialLength(context, currentText, 5)
+                                        ?: InputValidator.validateByPattern(context, currentText, ALLOWED_CHARACTERS_REGEX)
+                                        ?: InputValidator.validateOnlySingleSpaces(context, currentText)
+                                        ?: InputValidator.validateNoLeadingTrailingSpace(context, currentText)
+                                        ?: InputValidator.validateNoLineBreaks(context, currentText)
+                                    if (currentError == null && currentText.isNotEmpty()) {
+                                        showDescription(RECIPIENT_PLACEHOLDER)
+                                    } else if (currentText.isBlank()) {
+                                        showDescription(RECIPIENT_DESCRIPTION)
+                                    }
+                                }
+                            } else {
+                                field.setBottomTextState(BottomTextState.Empty)
+                            }
+                        }
                     }
                 }
                 isEditing = false
@@ -130,11 +141,31 @@ class AddressFieldsValidationDelegate(
     // --- postalCode ---
     private fun setupPostalCodeValidation() {
         val field = binding.ccavPostalCode
+
+        var isFirstEntry = true
+        var descriptionResetJob: Job? = null
+
+        // Первое состояние при открытии
+        if (field.text.isNullOrBlank()) {
+            field.setBottomTextState(
+                BottomTextState.Description(
+                    showDescriptionText = true,
+                    descriptionText = POSTAL_CODE_DESCRIPTION
+                )
+            )
+        } else {
+            field.setBottomTextState(
+                BottomTextState.Description(
+                    showDescriptionText = true,
+                    descriptionText = POSTAL_CODE_PLACEHOLDER
+                )
+            )
+        }
+
         field.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
-                Unit
 
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable?) {
@@ -143,9 +174,7 @@ class AddressFieldsValidationDelegate(
 
                 val original = s?.toString() ?: ""
                 val cursorPosition = field.getSelection()
-                var cleaned = original
-                    .replace("\n", "")
-                    .replace(Regex(" {2,}"), " ")
+                val cleaned = original.replace("\n", "").replace(Regex(" {2,}"), " ")
                 if (cleaned != original) {
                     field.text = cleaned
                     field.setSelection(minOf(cursorPosition, cleaned.length))
@@ -154,45 +183,42 @@ class AddressFieldsValidationDelegate(
 
                 viewModel.updateForm { copy(postalCode = trimmedText) }
 
-                val error = when {
-                    InputValidator.validateEmpty(context, trimmedText) != null ->
-                        InputValidator.validateEmpty(context, trimmedText)
-
-                    InputValidator.validateLength(context, trimmedText, 9) != null ->
-                        InputValidator.validateLength(context, trimmedText, 9)
-
-                    InputValidator.validateMinAllowedInitialLength(
-                        context,
-                        trimmedText,
-                        2
-                    ) != null ->
-                        InputValidator.validateMinAllowedInitialLength(context, trimmedText, 2)
-
-                    InputValidator.validateByPattern(
-                        context = context,
-                        text = trimmedText,
-                        pattern = ALLOWED_HOUSE_NUMBER_REGEX
-                    ) != null ->
-                        InputValidator.validateByPattern(
-                            context = context,
-                            text = trimmedText,
-                            pattern = ALLOWED_HOUSE_NUMBER_REGEX
+                // Первая загрузка: всегда дефолт/placeholder
+                if (isFirstEntry) {
+                    if (trimmedText.isBlank()) {
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = POSTAL_CODE_DESCRIPTION
+                            )
                         )
-
-                    InputValidator.validateOnlySingleSpaces(context, trimmedText) != null ->
-                        InputValidator.validateOnlySingleSpaces(context, trimmedText)
-
-                    InputValidator.validateNoLeadingTrailingSpace(context, trimmedText) != null ->
-                        InputValidator.validateNoLeadingTrailingSpace(context, trimmedText)
-
-                    InputValidator.validateNoLineBreaks(context, trimmedText) != null ->
-                        InputValidator.validateNoLineBreaks(context, trimmedText)
-
-                    else -> null
+                    } else {
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = POSTAL_CODE_PLACEHOLDER
+                            )
+                        )
+                    }
+                    isFirstEntry = false
+                    isEditing = false
+                    return
                 }
+
+                val error = InputValidator.validateEmpty(context, trimmedText)
+                    ?: InputValidator.validateLength(context, trimmedText, 9)
+                    ?: InputValidator.validateMinAllowedInitialLength(context, trimmedText, 2)
+                    ?: InputValidator.validateByPattern(context, trimmedText, ALLOWED_HOUSE_NUMBER_REGEX)
+                    ?: InputValidator.validateOnlySingleSpaces(context, trimmedText)
+                    ?: InputValidator.validateNoLeadingTrailingSpace(context, trimmedText)
+                    ?: InputValidator.validateNoLineBreaks(context, trimmedText)
+
                 viewModel.setPostalCodeValid(error == null)
+
                 if (viewModel.isEditMode.value == true) {
+                    descriptionResetJob?.cancel()
                     if (error != null) {
+                        // Ошибка
                         field.setBottomTextState(
                             BottomTextState.Error(
                                 showErrorText = true,
@@ -201,22 +227,63 @@ class AddressFieldsValidationDelegate(
                             )
                         )
                     } else {
-                        val remaining = 9 - trimmedText.length
-                        if (remaining in 0..9)
+                        if (trimmedText.isEmpty()) {
+                            // Если пусто — всегда дефолтное описание!
                             field.setBottomTextState(
                                 BottomTextState.Description(
                                     showDescriptionText = true,
-                                    descriptionText = context.resources.getQuantityString(
-                                        R.plurals.remaining_characters,
-                                        remaining,
-                                        remaining
-                                    )
+                                    descriptionText = POSTAL_CODE_DESCRIPTION
                                 )
                             )
-                        else
-                            field.setBottomTextState(BottomTextState.Empty)
+                        } else {
+                            // Временное описание (сколько осталось символов)
+                            val remaining = 9 - trimmedText.length
+                            if (remaining in 0..9) {
+                                val tempDescription = context.resources.getQuantityString(
+                                    R.plurals.remaining_characters, remaining, remaining
+                                )
+                                field.setBottomTextState(
+                                    BottomTextState.Description(
+                                        showDescriptionText = true,
+                                        descriptionText = tempDescription
+                                    )
+                                )
+                                // Через 3 секунды вернуть плейсхолдер/дефолт
+                                descriptionResetJob = coroutineScope.launch {
+                                    delay(FIELD_HINT_DELAY_MS)
+                                    val currentText = field.text.toString()
+                                    val currentError = InputValidator.validateEmpty(context, currentText)
+                                        ?: InputValidator.validateLength(context, currentText, 9)
+                                        ?: InputValidator.validateMinAllowedInitialLength(context, currentText, 2)
+                                        ?: InputValidator.validateByPattern(context, currentText, ALLOWED_HOUSE_NUMBER_REGEX)
+                                        ?: InputValidator.validateOnlySingleSpaces(context, currentText)
+                                        ?: InputValidator.validateNoLeadingTrailingSpace(context, currentText)
+                                        ?: InputValidator.validateNoLineBreaks(context, currentText)
+                                    if (currentError == null && currentText.isNotEmpty()) {
+                                        // Вернуть плейсхолдер для непустого
+                                        field.setBottomTextState(
+                                            BottomTextState.Description(
+                                                showDescriptionText = true,
+                                                descriptionText = POSTAL_CODE_PLACEHOLDER
+                                            )
+                                        )
+                                    } else if (currentText.isBlank()) {
+                                        // Вернуть дефолт если пусто
+                                        field.setBottomTextState(
+                                            BottomTextState.Description(
+                                                showDescriptionText = true,
+                                                descriptionText = POSTAL_CODE_DESCRIPTION
+                                            )
+                                        )
+                                    }
+                                }
+                            } else {
+                                field.setBottomTextState(BottomTextState.Empty)
+                            }
+                        }
                     }
                 }
+
                 isEditing = false
             }
         })
@@ -225,11 +292,31 @@ class AddressFieldsValidationDelegate(
     // --- streetName ---
     private fun setupStreetValidation() {
         val field = binding.ccavStreet
+
+        var isFirstEntry = true
+        var descriptionResetJob: Job? = null
+
+        // Первое состояние при открытии
+        if (field.text.isNullOrBlank()) {
+            field.setBottomTextState(
+                BottomTextState.Description(
+                    showDescriptionText = true,
+                    descriptionText = STREET_DESCRIPTION
+                )
+            )
+        } else {
+            field.setBottomTextState(
+                BottomTextState.Description(
+                    showDescriptionText = true,
+                    descriptionText = STREET_PLACEHOLDER
+                )
+            )
+        }
+
         field.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
-                Unit
 
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable?) {
@@ -238,9 +325,7 @@ class AddressFieldsValidationDelegate(
 
                 val original = s?.toString() ?: ""
                 val cursorPosition = field.getSelection()
-                var cleaned = original
-                    .replace("\n", "")
-                    .replace(Regex(" {2,}"), " ")
+                val cleaned = original.replace("\n", "").replace(Regex(" {2,}"), " ")
                 if (cleaned != original) {
                     field.text = cleaned
                     field.setSelection(minOf(cursorPosition, cleaned.length))
@@ -249,44 +334,40 @@ class AddressFieldsValidationDelegate(
 
                 viewModel.updateForm { copy(streetName = trimmedText) }
 
-                val error = when {
-                    InputValidator.validateEmpty(context, trimmedText) != null ->
-                        InputValidator.validateEmpty(context, trimmedText)
-
-                    InputValidator.validateLength(context, trimmedText, 60) != null ->
-                        InputValidator.validateLength(context, trimmedText, 60)
-
-                    InputValidator.validateMinAllowedInitialLength(
-                        context,
-                        trimmedText,
-                        4
-                    ) != null ->
-                        InputValidator.validateMinAllowedInitialLength(context, trimmedText, 4)
-
-                    InputValidator.validateByPattern(
-                        context = context,
-                        text = trimmedText,
-                        pattern = ALLOWED_ADDRESS_DESCRIPTION_REGEX
-                    ) != null ->
-                        InputValidator.validateByPattern(
-                            context = context,
-                            text = trimmedText,
-                            pattern = ALLOWED_ADDRESS_DESCRIPTION_REGEX
+                // Первая загрузка: всегда дефолт/placeholder
+                if (isFirstEntry) {
+                    if (trimmedText.isBlank()) {
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = STREET_DESCRIPTION
+                            )
                         )
-
-                    InputValidator.validateOnlySingleSpaces(context, trimmedText) != null ->
-                        InputValidator.validateOnlySingleSpaces(context, trimmedText)
-
-                    InputValidator.validateNoLeadingTrailingSpace(context, trimmedText) != null ->
-                        InputValidator.validateNoLeadingTrailingSpace(context, trimmedText)
-
-                    InputValidator.validateNoLineBreaks(context, trimmedText) != null ->
-                        InputValidator.validateNoLineBreaks(context, trimmedText)
-
-                    else -> null
+                    } else {
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = STREET_PLACEHOLDER
+                            )
+                        )
+                    }
+                    isFirstEntry = false
+                    isEditing = false
+                    return
                 }
+
+                val error = InputValidator.validateEmpty(context, trimmedText)
+                    ?: InputValidator.validateLength(context, trimmedText, 60)
+                    ?: InputValidator.validateMinAllowedInitialLength(context, trimmedText, 4)
+                    ?: InputValidator.validateByPattern(context, trimmedText, ALLOWED_ADDRESS_DESCRIPTION_REGEX)
+                    ?: InputValidator.validateOnlySingleSpaces(context, trimmedText)
+                    ?: InputValidator.validateNoLeadingTrailingSpace(context, trimmedText)
+                    ?: InputValidator.validateNoLineBreaks(context, trimmedText)
+
                 viewModel.setStreetValid(error == null)
+
                 if (viewModel.isEditMode.value == true) {
+                    descriptionResetJob?.cancel()
                     if (error != null) {
                         field.setBottomTextState(
                             BottomTextState.Error(
@@ -296,20 +377,56 @@ class AddressFieldsValidationDelegate(
                             )
                         )
                     } else {
-                        val remaining = 60 - trimmedText.length
-                        if (remaining in 0..60)
+                        if (trimmedText.isEmpty()) {
                             field.setBottomTextState(
                                 BottomTextState.Description(
                                     showDescriptionText = true,
-                                    descriptionText = context.resources.getQuantityString(
-                                        R.plurals.remaining_characters,
-                                        remaining,
-                                        remaining
-                                    )
+                                    descriptionText = STREET_DESCRIPTION
                                 )
                             )
-                        else
-                            field.setBottomTextState(BottomTextState.Empty)
+                        } else {
+                            val remaining = 50 - trimmedText.length
+                            if (remaining in 0..50) {
+                                val tempDescription = context.resources.getQuantityString(
+                                    R.plurals.remaining_characters, remaining, remaining
+                                )
+                                field.setBottomTextState(
+                                    BottomTextState.Description(
+                                        showDescriptionText = true,
+                                        descriptionText = tempDescription
+                                    )
+                                )
+                                // Таймер — через 3 сек вернуть плейсхолдер или дефолт
+                                descriptionResetJob = coroutineScope.launch {
+                                    delay(FIELD_HINT_DELAY_MS)
+                                    val currentText = field.text.toString()
+                                    val currentError = InputValidator.validateEmpty(context, currentText)
+                                        ?: InputValidator.validateLength(context, currentText, 60)
+                                        ?: InputValidator.validateMinAllowedInitialLength(context, currentText, 4)
+                                        ?: InputValidator.validateByPattern(context, currentText, ALLOWED_ADDRESS_DESCRIPTION_REGEX)
+                                        ?: InputValidator.validateOnlySingleSpaces(context, currentText)
+                                        ?: InputValidator.validateNoLeadingTrailingSpace(context, currentText)
+                                        ?: InputValidator.validateNoLineBreaks(context, currentText)
+                                    if (currentError == null && currentText.isNotEmpty()) {
+                                        field.setBottomTextState(
+                                            BottomTextState.Description(
+                                                showDescriptionText = true,
+                                                descriptionText = STREET_PLACEHOLDER
+                                            )
+                                        )
+                                    } else if (currentText.isBlank()) {
+                                        field.setBottomTextState(
+                                            BottomTextState.Description(
+                                                showDescriptionText = true,
+                                                descriptionText = STREET_DESCRIPTION
+                                            )
+                                        )
+                                    }
+                                }
+                            } else {
+                                field.setBottomTextState(BottomTextState.Empty)
+                            }
+                        }
                     }
                 }
                 isEditing = false
@@ -320,11 +437,31 @@ class AddressFieldsValidationDelegate(
     // --- houseNumber ---
     private fun setupHouseNumberValidation() {
         val field = binding.ccavHouseNumber
+
+        var isFirstEntry = true
+        var descriptionResetJob: Job? = null
+
+        // Первое состояние при открытии
+        if (field.text.isNullOrBlank()) {
+            field.setBottomTextState(
+                BottomTextState.Description(
+                    showDescriptionText = true,
+                    descriptionText = HOUSE_NUMBER_DESCRIPTION
+                )
+            )
+        } else {
+            field.setBottomTextState(
+                BottomTextState.Description(
+                    showDescriptionText = true,
+                    descriptionText = HOUSE_NUMBER_PLACEHOLDER
+                )
+            )
+        }
+
         field.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
-                Unit
 
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable?) {
@@ -333,9 +470,7 @@ class AddressFieldsValidationDelegate(
 
                 val original = s?.toString() ?: ""
                 val cursorPosition = field.getSelection()
-                var cleaned = original
-                    .replace("\n", "")
-                    .replace(Regex(" {2,}"), " ")
+                val cleaned = original.replace("\n", "").replace(Regex(" {2,}"), " ")
                 if (cleaned != original) {
                     field.text = cleaned
                     field.setSelection(minOf(cursorPosition, cleaned.length))
@@ -344,37 +479,39 @@ class AddressFieldsValidationDelegate(
 
                 viewModel.updateForm { copy(houseNumber = trimmedText) }
 
-                val error = when {
-                    InputValidator.validateEmpty(context, trimmedText) != null ->
-                        InputValidator.validateEmpty(context, trimmedText)
-
-                    InputValidator.validateLength(context, trimmedText, 5) != null ->
-                        InputValidator.validateLength(context, trimmedText, 5)
-
-                    InputValidator.validateByPattern(
-                        context = context,
-                        text = trimmedText,
-                        pattern = ALLOWED_ADDRESS_NUMBER_REGEX
-                    ) != null ->
-                        InputValidator.validateByPattern(
-                            context = context,
-                            text = trimmedText,
-                            pattern = ALLOWED_ADDRESS_NUMBER_REGEX
+                // Первая загрузка: всегда дефолт/placeholder
+                if (isFirstEntry) {
+                    if (trimmedText.isBlank()) {
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = HOUSE_NUMBER_DESCRIPTION
+                            )
                         )
-
-                    InputValidator.validateOnlySingleSpaces(context, trimmedText) != null ->
-                        InputValidator.validateOnlySingleSpaces(context, trimmedText)
-
-                    InputValidator.validateNoLeadingTrailingSpace(context, trimmedText) != null ->
-                        InputValidator.validateNoLeadingTrailingSpace(context, trimmedText)
-
-                    InputValidator.validateNoLineBreaks(context, trimmedText) != null ->
-                        InputValidator.validateNoLineBreaks(context, trimmedText)
-
-                    else -> null
+                    } else {
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = HOUSE_NUMBER_PLACEHOLDER
+                            )
+                        )
+                    }
+                    isFirstEntry = false
+                    isEditing = false
+                    return
                 }
+
+                val error = InputValidator.validateEmpty(context, trimmedText)
+                    ?: InputValidator.validateLength(context, trimmedText, 5)
+                    ?: InputValidator.validateByPattern(context, trimmedText, ALLOWED_ADDRESS_NUMBER_REGEX)
+                    ?: InputValidator.validateOnlySingleSpaces(context, trimmedText)
+                    ?: InputValidator.validateNoLeadingTrailingSpace(context, trimmedText)
+                    ?: InputValidator.validateNoLineBreaks(context, trimmedText)
+
                 viewModel.setHouseNumberValid(error == null)
+
                 if (viewModel.isEditMode.value == true) {
+                    descriptionResetJob?.cancel()
                     if (error != null) {
                         field.setBottomTextState(
                             BottomTextState.Error(
@@ -384,20 +521,55 @@ class AddressFieldsValidationDelegate(
                             )
                         )
                     } else {
-                        val remaining = 5 - trimmedText.length
-                        if (remaining in 0..5)
+                        if (trimmedText.isEmpty()) {
                             field.setBottomTextState(
                                 BottomTextState.Description(
                                     showDescriptionText = true,
-                                    descriptionText = context.resources.getQuantityString(
-                                        R.plurals.remaining_characters,
-                                        remaining,
-                                        remaining
-                                    )
+                                    descriptionText = HOUSE_NUMBER_DESCRIPTION
                                 )
                             )
-                        else
-                            field.setBottomTextState(BottomTextState.Empty)
+                        } else {
+                            val remaining = 5 - trimmedText.length
+                            if (remaining in 0..5) {
+                                val tempDescription = context.resources.getQuantityString(
+                                    R.plurals.remaining_characters, remaining, remaining
+                                )
+                                field.setBottomTextState(
+                                    BottomTextState.Description(
+                                        showDescriptionText = true,
+                                        descriptionText = tempDescription
+                                    )
+                                )
+                                // Таймер — через 3 сек вернуть плейсхолдер или дефолт
+                                descriptionResetJob = coroutineScope.launch {
+                                    delay(FIELD_HINT_DELAY_MS)
+                                    val currentText = field.text.toString()
+                                    val currentError = InputValidator.validateEmpty(context, currentText)
+                                        ?: InputValidator.validateLength(context, currentText, 5)
+                                        ?: InputValidator.validateByPattern(context, currentText, ALLOWED_ADDRESS_NUMBER_REGEX)
+                                        ?: InputValidator.validateOnlySingleSpaces(context, currentText)
+                                        ?: InputValidator.validateNoLeadingTrailingSpace(context, currentText)
+                                        ?: InputValidator.validateNoLineBreaks(context, currentText)
+                                    if (currentError == null && currentText.isNotEmpty()) {
+                                        field.setBottomTextState(
+                                            BottomTextState.Description(
+                                                showDescriptionText = true,
+                                                descriptionText = HOUSE_NUMBER_PLACEHOLDER
+                                            )
+                                        )
+                                    } else if (currentText.isBlank()) {
+                                        field.setBottomTextState(
+                                            BottomTextState.Description(
+                                                showDescriptionText = true,
+                                                descriptionText = HOUSE_NUMBER_DESCRIPTION
+                                            )
+                                        )
+                                    }
+                                }
+                            } else {
+                                field.setBottomTextState(BottomTextState.Empty)
+                            }
+                        }
                     }
                 }
                 isEditing = false
@@ -408,39 +580,51 @@ class AddressFieldsValidationDelegate(
     // --- locationNumber, entranceNumber, floor ---
     private fun setupLocationNumberValidation() {
         setupOptionalFieldValidation(
-            binding.ccavLocationNumber,
-            5,
-            ALLOWED_SHORT_FIELD_REGEX,
-            viewModel::setLocationNumberValid
-        ) { value -> viewModel.updateForm { copy(locationNumber = value) } }
+            field = binding.ccavLocationNumber,
+            maxLen = 5,
+            regex = ALLOWED_SHORT_FIELD_REGEX,
+            setValid = viewModel::setLocationNumberValid,
+            updateFormField = { value -> viewModel.updateForm { copy(locationNumber = value) } },
+            fullDescription = "Номер квартиры (локации). Не обязательное поле",
+            shortDescription = "Номер квартиры (локации)",
+        )
     }
 
     private fun setupEntranceNumberValidation() {
         setupOptionalFieldValidation(
-            binding.ccavEntranceNumber,
-            5,
-            ALLOWED_SHORT_FIELD_REGEX,
-            viewModel::setEntranceNumberValid
-        ) { value -> viewModel.updateForm { copy(entranceNumber = value) } }
+            field = binding.ccavEntranceNumber,
+            maxLen = 5,
+            regex = ALLOWED_SHORT_FIELD_REGEX,
+            setValid = viewModel::setEntranceNumberValid,
+            updateFormField = { value -> viewModel.updateForm { copy(entranceNumber = value) } },
+            fullDescription = "Номер подъезда. Не обязательное поле",
+            shortDescription = "Номер подъезда",
+        )
     }
 
     private fun setupFloorValidation() {
         setupOptionalFieldValidation(
-            binding.ccavFloor,
-            5,
-            ALLOWED_SHORT_FIELD_REGEX,
-            viewModel::setFloorValid
-        ) { value -> viewModel.updateForm { copy(floor = value) } }
+            field = binding.ccavFloor,
+            maxLen = 5,
+            regex = ALLOWED_SHORT_FIELD_REGEX,
+            setValid = viewModel::setFloorValid,
+            updateFormField = { value -> viewModel.updateForm { copy(floor = value) } },
+            fullDescription = "Этаж. Не обязательное поле",
+            shortDescription = "Этаж",
+        )
     }
 
     // --- numberIntercom ---
     private fun setupNumberIntercomValidation() {
         setupOptionalFieldValidation(
-            binding.ccavNumberIntercom,
-            15,
-            ALLOWED_INTERCOM_NUMBER_REGEX,
-            viewModel::setNumberIntercomValid
-        ) { value -> viewModel.updateForm { copy(numberIntercom = value) } }
+            field = binding.ccavNumberIntercom,
+            maxLen = 15,
+            regex = ALLOWED_INTERCOM_NUMBER_REGEX,
+            setValid = viewModel::setNumberIntercomValid,
+            updateFormField = { value -> viewModel.updateForm { copy(numberIntercom = value) } },
+            fullDescription = "Код домофона. Не обязательное поле",
+            shortDescription = "Код домофона",
+        )
     }
 
     // --- общая функция для необязательных полей ---
@@ -449,58 +633,95 @@ class AddressFieldsValidationDelegate(
         maxLen: Int,
         regex: Regex,
         setValid: (Boolean) -> Unit,
-        updateFormField: (String) -> Unit
+        updateFormField: (String) -> Unit,
+        fullDescription: String,
+        shortDescription: String,
     ) {
+        var isFirstEntry = true
+        var descriptionResetJob: Job? = null
+
+        // Инициализация состояния при старте (пусто или есть значение)
+        if (field.text.isNullOrBlank()) {
+            field.setBottomTextState(
+                BottomTextState.Description(
+                    showDescriptionText = true,
+                    descriptionText = fullDescription
+                )
+            )
+        } else {
+            field.setBottomTextState(
+                BottomTextState.Description(
+                    showDescriptionText = true,
+                    descriptionText = shortDescription
+                )
+            )
+        }
+
         field.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
-                Unit
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable?) {
                 if (isEditing) return
                 isEditing = true
+
                 val original = s?.toString() ?: ""
                 val cursorPosition = field.getSelection()
-                var cleaned = original
-                    .replace("\n", "")
-                    .replace(Regex(" {2,}"), " ")
+                var cleaned = original.replace("\n", "").replace(Regex(" {2,}"), " ")
                 if (cleaned != original) {
                     field.text = cleaned
                     field.setSelection(minOf(cursorPosition, cleaned.length))
                 }
                 val trimmedText = cleaned.trim()
 
-                // ⬇️ вот тут обновляем formState!
                 updateFormField(trimmedText)
 
+                // Первая загрузка — только описание
+                if (isFirstEntry) {
+                    if (trimmedText.isBlank()) {
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = fullDescription
+                            )
+                        )
+                    } else {
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = shortDescription
+                            )
+                        )
+                    }
+                    isFirstEntry = false
+                    isEditing = false
+                    return
+                }
+
+                // Валидация
                 var error: String? = null
                 if (trimmedText.isNotEmpty()) {
                     error = when {
                         trimmedText.length > maxLen ->
                             context.getString(R.string.error_max_length, maxLen)
-
                         !trimmedText.matches(regex) ->
                             context.getString(R.string.error_invalid_characters)
-
                         trimmedText.contains("  ") ->
                             context.getString(R.string.error_only_single_space)
-
                         trimmedText.startsWith(" ") || trimmedText.endsWith(" ") ->
                             context.getString(R.string.error_no_leading_trailing_space)
-
                         InputValidator.validateName(context, trimmedText) != null ->
                             InputValidator.validateName(context, trimmedText)
-
                         trimmedText.contains("\n") || trimmedText.contains("\r") ->
                             context.getString(R.string.error_invalid_characters)
-
                         else -> null
                     }
                 }
                 setValid(error == null)
+
                 if (viewModel.isEditMode.value == true) {
+                    descriptionResetJob?.cancel()
                     if (error != null) {
                         field.setBottomTextState(
                             BottomTextState.Error(
@@ -509,23 +730,56 @@ class AddressFieldsValidationDelegate(
                                 errorText = error
                             )
                         )
-                    } else if (trimmedText.isNotEmpty()) {
+                    } else if (trimmedText.isEmpty()) {
+                        // Пустое поле — расширенное описание
+                        field.setBottomTextState(
+                            BottomTextState.Description(
+                                showDescriptionText = true,
+                                descriptionText = fullDescription
+                            )
+                        )
+                    } else {
+                        // Показываем счетчик, возвращаем краткую надпись через 3 сек
                         val remaining = maxLen - trimmedText.length
-                        if (remaining in 0..maxLen)
+                        if (remaining in 0..maxLen) {
+                            val tempDescription = context.resources.getQuantityString(
+                                R.plurals.remaining_characters, remaining, remaining
+                            )
                             field.setBottomTextState(
                                 BottomTextState.Description(
                                     showDescriptionText = true,
-                                    descriptionText = context.resources.getQuantityString(
-                                        R.plurals.remaining_characters,
-                                        remaining,
-                                        remaining
-                                    )
+                                    descriptionText = tempDescription
                                 )
                             )
-                        else
+                            descriptionResetJob = coroutineScope.launch {
+                                delay(FIELD_HINT_DELAY_MS)
+                                val currentText = field.text.toString()
+                                val hasError = currentText.length > maxLen ||
+                                        !currentText.matches(regex) ||
+                                        currentText.contains("  ") ||
+                                        currentText.startsWith(" ") ||
+                                        currentText.endsWith(" ") ||
+                                        InputValidator.validateName(context, currentText) != null ||
+                                        currentText.contains("\n") || currentText.contains("\r")
+                                if (!hasError && currentText.isNotEmpty()) {
+                                    field.setBottomTextState(
+                                        BottomTextState.Description(
+                                            showDescriptionText = true,
+                                            descriptionText = shortDescription
+                                        )
+                                    )
+                                } else if (currentText.isBlank()) {
+                                    field.setBottomTextState(
+                                        BottomTextState.Description(
+                                            showDescriptionText = true,
+                                            descriptionText = fullDescription
+                                        )
+                                    )
+                                }
+                            }
+                        } else {
                             field.setBottomTextState(BottomTextState.Empty)
-                    } else {
-                        field.setBottomTextState(BottomTextState.Empty)
+                        }
                     }
                 }
                 isEditing = false
@@ -634,5 +888,19 @@ class AddressFieldsValidationDelegate(
          */
         private val ALLOWED_INTERCOM_NUMBER_REGEX = Regex("^[A-Za-z0-9\\-/# ]{1,15}$")
 
+        private var descriptionResetJob: Job? = null
+        private const val RECIPIENT_DESCRIPTION = "Получатель. Обязательное поле"
+        private const val RECIPIENT_PLACEHOLDER = "Получатель"
+
+        private const val POSTAL_CODE_DESCRIPTION = "Почтовый индекс. Обязательное поле"
+        private const val POSTAL_CODE_PLACEHOLDER = "Почтовый индекс"
+
+        private const val STREET_DESCRIPTION = "Улица. Обязательное поле"
+        private const val STREET_PLACEHOLDER = "Улица"
+
+        private const val HOUSE_NUMBER_DESCRIPTION = "Номер дома. Обязательное поле"
+        private const val HOUSE_NUMBER_PLACEHOLDER = "Номер дома"
+
+        private const val FIELD_HINT_DELAY_MS = 3_000L
     }
 }

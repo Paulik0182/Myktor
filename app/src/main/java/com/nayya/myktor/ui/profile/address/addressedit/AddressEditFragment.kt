@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentAddressEditBinding
 import com.nayya.myktor.domain.counterpartyentity.City
@@ -93,7 +94,8 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         validator = AddressFieldsValidationDelegate(
             context = requireContext(),
             binding = binding,
-            viewModel = viewModel
+            viewModel = viewModel,
+            coroutineScope = viewLifecycleOwner.lifecycleScope
         )
 
         validator.setupAll()
