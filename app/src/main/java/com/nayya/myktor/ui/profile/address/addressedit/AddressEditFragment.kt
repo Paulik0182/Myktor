@@ -173,6 +173,13 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
                 ?: it.counterpartyShortName?.firstOrNull()
                 ?: ""
             binding.ccavRecipientName.text = fullName
+
+            binding.cbIsMain.isChecked = it.isMain ?: false
+        }
+
+        // ВАЖНО: подписка на изменение чекбокса
+        binding.cbIsMain.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.updateForm { copy(isMain = isChecked) }
         }
 
         binding.btnApply.setOnClickListener {
