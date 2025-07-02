@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.nayya.myktor.R
@@ -117,6 +118,14 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
                 binding.ccavRecipientName.text = name
             }
         }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    handleBackPressed()
+                }
+            }
+        )
     }
 
     private fun initToolbar() {
@@ -125,11 +134,7 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         binding.toolbar.btnDelete.visibility = if (address != null) View.VISIBLE else View.GONE
 
         binding.toolbar.btnBack.setOnClickListener {
-            tryNavigateWithSaveCheck {
-                exitWithRevealAnimation {
-                    goBack()
-                }
-            }
+            handleBackPressed()
         }
 
         binding.toolbar.btnDelete.setOnClickListener {
@@ -139,6 +144,14 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
                     subtitle = "Вы уверены, что хотите удалить этот адрес?\nОтменить действие будет невозможно."
                 )
                 .show(childFragmentManager, "delete_address")
+        }
+    }
+
+    private fun handleBackPressed() {
+        tryNavigateWithSaveCheck {
+            exitWithRevealAnimation {
+                goBack()
+            }
         }
     }
 
