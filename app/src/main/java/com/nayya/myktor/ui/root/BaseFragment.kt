@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -12,6 +13,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.nayya.myktor.R
+import com.nayya.myktor.utils.LocaleUtils.goBack
 import java.lang.Math.hypot
 
 abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
@@ -60,7 +62,7 @@ abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
                 object : OnBackPressedCallback(true) {
                     override fun handleOnBackPressed() {
                         exitWithRevealAnimation {
-                            parentFragmentManager.popBackStack()
+                            goBack()
                         }
                     }
                 }
@@ -171,6 +173,13 @@ abstract class BaseFragment(layoutId: Int) : Fragment(layoutId) {
 
     protected fun exitWithRevealAnimation(onEnd: () -> Unit) {
         val v = view ?: return onEnd()
+
+        // 💡 Проверяем, можно ли анимировать
+        if (!isAdded || !isResumed || !v.isShown) {
+            Log.w("ExitReveal", "Can't animate: Fragment not in valid state")
+            onEnd()
+            return
+        }
 
         // 💡 Если слабое устройство — просто скрываем и завершаем
         if (isLowEndDevice) {

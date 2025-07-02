@@ -194,31 +194,7 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
             )
         }
 
-//        val recipientName = binding.ccavRecipientName.text.toString().trim()
         val newAddress = viewModel.getAddressToSave()
-//        val newAddress2 = CounterpartyAddresse(
-//            id = address?.id,
-//            counterpartyId = viewModel.counterpartyId,
-//            countryId = selectedCountry.id ?: 0L,
-//            countryName = selectedCountry.name,
-//            cityId = selectedCity.id ?: 0L,
-//            cityName = selectedCity.name,
-//            postalCode = binding.ccavPostalCode.text.toString(),
-//            streetName = binding.ccavStreet.text.toString(),
-//            houseNumber = binding.ccavHouseNumber.text.toString(),
-//            locationNumber = binding.ccavLocationNumber.text.toString().takeIf { it.isNotEmpty() },
-//            latitude = null,
-//            longitude = null,
-//            entranceNumber = binding.ccavEntranceNumber.text.toString().takeIf { it.isNotEmpty() },
-//            floor = binding.ccavFloor.text.toString().takeIf { it.isNotEmpty() },
-//            numberIntercom = binding.ccavNumberIntercom.text.toString().takeIf { it.isNotEmpty() },
-//            counterpartyContactId = null,
-//            counterpartyShortName = emptyList(),
-//            counterpartyFirstLastName = listOf(recipientName),
-//            country = null,
-//            city = null,
-//            isMain = binding.cbIsMain.isChecked
-//        )
 
         Log.d("AddressEdit", "Создан/обновлен адрес: $newAddress")
         viewModel.saveAddress(newAddress)
@@ -342,9 +318,14 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
 
         viewModel.navigateBack.observe(viewLifecycleOwner) { shouldClose ->
             if (shouldClose) {
-                parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
-                parentFragmentManager.setFragmentResult("counterparty_updated_details", Bundle())
-                goBack()
+                exitWithRevealAnimation {
+                    parentFragmentManager.setFragmentResult("counterparty_updated", Bundle())
+                    parentFragmentManager.setFragmentResult(
+                        "counterparty_updated_details",
+                        Bundle()
+                    )
+                    goBack()
+                }
             }
         }
     }
@@ -360,7 +341,6 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         showUnsavedChangesDialog(
             onSave = {
                 createOrUpdateAddress()
-                exitWithRevealAnimation { navigateAction() }
             },
             onDiscard = {
                 viewModel.setInitialAddress(viewModel.originalAddress.value!!)
