@@ -17,7 +17,8 @@ import com.nayya.myktor.utils.LocaleUtils.goBack
 import com.nayya.myktor.utils.viewBinding
 
 class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
-    ConfirmActionBottomSheet.ConfirmActionCallback {
+    ConfirmActionBottomSheet.ConfirmActionCallback,
+    ConfirmActionBottomSheet.OnConfirmSheetClosedListener {
 
     private val binding by viewBinding<FragmentAddressListBinding>()
     private val viewModel: AddressListViewModel by viewModels {
@@ -36,6 +37,8 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
     private var pendingDeleteAddress: AddressUiModel? = null
 
     private var wasChanged = false
+
+    private var isDeleteSheetShown = false
 
     override fun onConfirmDeleteAddress() {
         pendingDeleteAddress?.let { address ->
@@ -66,6 +69,7 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
             "counterparty_updated",
             viewLifecycleOwner
         ) { _, _ ->
+            isDeleteSheetShown = false
             counterpartyId?.let { viewModel.loadAddresses(it) }
         }
 
@@ -130,6 +134,9 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
     }
 
     private fun showConfirmDelete(address: AddressUiModel) {
+        if (isDeleteSheetShown) return
+        isDeleteSheetShown = true // ← Защита от повторного показа
+
         pendingDeleteAddress = address
 
         val addressString = listOfNotNull(
@@ -145,10 +152,11 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
         val subtitle =
             "Вы уверены, что хотите удалить адрес:\n$addressString?\nОтменить действие будет невозможно"
 
-        ConfirmActionBottomSheet.newInstance(
+        val sheet = ConfirmActionBottomSheet.newInstance(
             ConfirmActionType.DELETE_ADDRESS,
             subtitle = subtitle,
-        ).show(childFragmentManager, "delete_address")
+        )
+        sheet.show(childFragmentManager, "delete_address")
     }
 
     private fun observeViewModel() {
@@ -191,6 +199,10 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
             wasChanged = true
         }
         action()
+    }
+
+    override fun onConfirmSheetClosed() {
+        isDeleteSheetShown = false
     }
 
     interface Controller : BaseFragment.Controller {

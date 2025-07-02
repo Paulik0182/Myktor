@@ -21,7 +21,8 @@ import com.nayya.myktor.utils.showSnackbar
 import com.nayya.myktor.utils.viewBinding
 
 class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
-    ConfirmActionBottomSheet.ConfirmActionCallback {
+    ConfirmActionBottomSheet.ConfirmActionCallback,
+    ConfirmActionBottomSheet.OnConfirmSheetClosedListener  {
 
     private val binding by viewBinding<FragmentAddressEditBinding>()
     private val viewModel: AddressEditViewModel by viewModels {
@@ -52,6 +53,8 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
     private var isCountryChangedByUser = false
 
     private lateinit var validator: AddressFieldsValidationDelegate
+
+    private var isDeleteSheetShown = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -138,6 +141,10 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         }
 
         binding.toolbar.btnDelete.setOnClickListener {
+            // ЗАЩИТА от повторного открытия!
+            if (isDeleteSheetShown) return@setOnClickListener
+            isDeleteSheetShown = true
+
             ConfirmActionBottomSheet
                 .newInstance(
                     ConfirmActionType.DELETE_ADDRESS,
@@ -392,6 +399,10 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         val form = viewModel.formState.value ?: return false
         val original = viewModel.originalAddress.value ?: return false
         return !form.equalsEntity(original)
+    }
+
+    override fun onConfirmSheetClosed() {
+        isDeleteSheetShown = false
     }
 
     companion object {

@@ -1,6 +1,7 @@
 package com.nayya.myktor.ui.login.logoutaccount
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -106,6 +107,12 @@ class ConfirmActionBottomSheet : BottomSheetDialogFragment() {
         return dialog
     }
 
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        // Оповести родителя о закрытии (если нужно)
+        (parentFragment as? OnConfirmSheetClosedListener)?.onConfirmSheetClosed()
+    }
+
     private fun observeViewModel() {
         viewModel.actionCompleted.observe(viewLifecycleOwner) {
             requireParentFragment().parentFragmentManager.setFragmentResult(
@@ -125,6 +132,11 @@ class ConfirmActionBottomSheet : BottomSheetDialogFragment() {
 
     interface ConfirmActionCallback {
         fun onConfirmDeleteAddress()
+    }
+
+
+    interface OnConfirmSheetClosedListener {
+        fun onConfirmSheetClosed()
     }
 
     companion object {
