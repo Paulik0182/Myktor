@@ -21,6 +21,7 @@ class FreeSwipeCallback(
     private var currentDx = 0f
     private var recyclerView: RecyclerView? = null
     private var isActiveSwipe = false
+    private var isSwiping = false // Track if we're in a swipe gesture
 
     override fun onMove(
         recyclerView: RecyclerView,
@@ -44,10 +45,12 @@ class FreeSwipeCallback(
         when {
             isCurrentlyActive && !isActiveSwipe -> {
                 isActiveSwipe = true
+                isSwiping = true
                 onSwipingStateChanged(true)
             }
             !isCurrentlyActive && isActiveSwipe -> {
                 isActiveSwipe = false
+                isSwiping = false
                 onSwipingStateChanged(false)
             }
         }
@@ -99,26 +102,38 @@ class FreeSwipeCallback(
         // Гарантированно сбрасываем состояние при завершении взаимодействия
         if (isActiveSwipe) {
             isActiveSwipe = false
+            isSwiping = false
             onSwipingStateChanged(false)
         }
+        swipedPosition = -1
+        currentDx = 0f
     }
 
     // Слушаем отпускание пальца!
     fun attachTo(rv: RecyclerView) {
         ItemTouchHelper(this).attachToRecyclerView(rv)
         rv.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_UP && swipedPosition != -1) {
-
-                // если dX больше 18% ширины — показать диалог
-                if (currentDx < -rv.width * 0.13f) {
-                    onDelete(swipedPosition)
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // Reset state on new touch
+                    if (!isSwiping) {
+                        swipedPosition = -1
+                        currentDx = 0f
+                    }
                 }
-                // item возвращается назад
-                rv.post {
-                    rv.adapter?.notifyItemChanged(swipedPosition)
+                MotionEvent.ACTION_UP -> {
+                    if (swipedPosition != -1 && isSwiping) {
+                        if (currentDx < -rv.width * 0.13f) {
+                            onDelete(swipedPosition)
+                        }
+                        rv.post {
+                            rv.adapter?.notifyItemChanged(swipedPosition)
+                        }
+                        swipedPosition = -1
+                        currentDx = 0f
+                        isSwiping = false
+                    }
                 }
-                swipedPosition = -1
-                currentDx = 0f
             }
             false
         }

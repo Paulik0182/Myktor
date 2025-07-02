@@ -134,7 +134,9 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
     }
 
     private fun showConfirmDelete(address: AddressUiModel) {
-        if (isDeleteSheetShown) return
+        if (isDeleteSheetShown || childFragmentManager.findFragmentByTag("delete_address") != null) {
+            return
+        }
         isDeleteSheetShown = true // ← Защита от повторного показа
 
         pendingDeleteAddress = address
@@ -170,6 +172,11 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
         viewModel.addressCount.observe(viewLifecycleOwner) { count ->
             binding.toolbar.tvTitle.text = "Адреса $count/${AddressListViewModel.MAX_ADDRESSES}"
         }
+    }
+
+    override fun onDestroyView() {
+        binding.recyclerViewAddresses.setOnTouchListener(null)
+        super.onDestroyView()
     }
 
     private fun initAddButton() {
