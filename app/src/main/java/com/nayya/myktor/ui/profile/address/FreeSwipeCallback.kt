@@ -91,9 +91,11 @@ class FreeSwipeCallback(
 
     // НЕ удаляем из адаптера!
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        // item всегда возвращается назад
-        recyclerView?.post {
-            recyclerView?.adapter?.notifyItemChanged(viewHolder.adapterPosition)
+        recyclerView?.adapter?.let { adapter ->
+            val position = viewHolder.adapterPosition
+            if (position != RecyclerView.NO_POSITION) {
+                recyclerView?.post { adapter.notifyItemChanged(position) }
+            }
         }
     }
 

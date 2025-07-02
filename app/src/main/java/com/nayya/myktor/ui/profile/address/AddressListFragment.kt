@@ -1,9 +1,11 @@
 package com.nayya.myktor.ui.profile.address
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentAddressListBinding
@@ -134,7 +136,7 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
     }
 
     private fun showConfirmDelete(address: AddressUiModel) {
-        if (isDeleteSheetShown || childFragmentManager.findFragmentByTag("delete_address") != null) {
+        if (!isAdded || isDeleteSheetShown || childFragmentManager.findFragmentByTag("delete_address") != null) {
             return
         }
         isDeleteSheetShown = true // ← Защита от повторного показа
@@ -162,11 +164,16 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
     }
 
     private fun observeViewModel() {
-        viewModel.addresses.observe(viewLifecycleOwner) { adapter.submitList(it) }
+        viewModel.addresses.observe(viewLifecycleOwner) { addresses ->
+            if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                adapter.submitList(addresses)
+            }
+        }
         viewModel.navigateToEdit.observe(viewLifecycleOwner) { address ->
             address?.let {
-                requireController<AddressListFragment.Controller>().openAddressEdit(it)
-            }
+                (activity as? Controller)?.openAddressEdit(it) ?: run {
+                    Log.e("AddressList", "Activity is not Controller")
+                }            }
         }
 
         viewModel.addressCount.observe(viewLifecycleOwner) { count ->
@@ -175,6 +182,7 @@ class AddressListFragment : BaseFragment(R.layout.fragment_address_list),
     }
 
     override fun onDestroyView() {
+        binding.recyclerViewAddresses.adapter = null
         binding.recyclerViewAddresses.setOnTouchListener(null)
         super.onDestroyView()
     }
