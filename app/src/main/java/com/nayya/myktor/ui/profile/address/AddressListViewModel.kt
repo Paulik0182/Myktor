@@ -65,12 +65,22 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
             originalMainAddressId = loaded.firstOrNull { it.isMain }?.id
             currentMainAddressId = originalMainAddressId
 
-            _addresses.postValue(loaded.map { it.toUiModel() })
+            _addresses.postValue(loaded.map { it.toUiModel() }.sortedAddresses())
         }
     }
 
     private fun updateAddressCountState() {
         _addressCount.postValue(addressEntities.size)
+    }
+
+    private fun List<AddressUiModel>.sortedAddresses(): List<AddressUiModel> {
+        return this.sortedWith(
+            compareByDescending<AddressUiModel> { it.isMain } // true = выше
+                .thenBy { it.country.lowercase() }
+                .thenBy { it.city.lowercase() }
+                .thenBy { it.street.lowercase() }
+                .thenBy { it.houseNumber?.lowercase() ?: "" }
+        )
     }
 
     private fun hasChanges(): Boolean {
@@ -132,7 +142,7 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
                     }
 
                     updateAddressCountState()
-                    _addresses.postValue(addressEntities.map { it.toUiModel() })
+                    _addresses.postValue(addressEntities.map { it.toUiModel() }.sortedAddresses())
                 } else {
                     // Здесь можно показать ошибку через отдельное LiveData
                     Log.e("AddressListVM", "Ошибка удаления адреса")
@@ -159,7 +169,7 @@ class AddressListViewModel(private val repository: AddressListRepository) : View
         Log.d("Address", "After setAsMain: " + addressEntities.joinToString("\n") {
             "ID=${it.id}, isMain=${it.isMain}, street=${it.streetName}"
         })
-        _addresses.postValue(addressEntities.map { it.toUiModel() })
+        _addresses.postValue(addressEntities.map { it.toUiModel() }.sortedAddresses())
     }
 
     fun saveChanges() {

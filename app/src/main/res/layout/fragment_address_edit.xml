@@ -87,6 +87,7 @@
                 app:inputEnabled="true"
                 app:inputMaxLength="10"
                 app:inputMaxLines="1"
+                app:inputType="phone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/containerIncludeSpinner"
