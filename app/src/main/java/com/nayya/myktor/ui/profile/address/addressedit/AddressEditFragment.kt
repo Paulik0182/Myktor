@@ -2,6 +2,8 @@ package com.nayya.myktor.ui.profile.address.addressedit
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -32,8 +34,8 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
     private var address: CounterpartyAddresse? = null
     private var counterpartyId: Long? = null
 
-    private lateinit var countrySpinnerAdapter: CountrySpinnerAdapter
-    private lateinit var citySpinnerAdapter: CitySpinnerAdapter
+    private lateinit var countryAdapter: CountryFilterAdapter
+    private lateinit var cityAdapter: CityFilterAdapter
     private var countryList: List<Country> = emptyList()
     private var cityList: List<City> = emptyList()
 
@@ -62,11 +64,13 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         address = arguments?.getSerializable("address") as? CounterpartyAddresse
         counterpartyId = arguments?.getLong(COUNTERPARTY_ADDRESS_ID)
 
-        countrySpinnerAdapter = CountrySpinnerAdapter(requireContext(), countryList.toMutableList())
-        citySpinnerAdapter = CitySpinnerAdapter(requireContext(), cityList.toMutableList())
+        // Инициализация адаптеров
+        countryAdapter = CountryFilterAdapter(requireContext(), countryList)
+        cityAdapter = CityFilterAdapter(requireContext(), cityList)
 
-        binding.includeSpinnerCountry.spinner.adapter = countrySpinnerAdapter
-        binding.includeSpinnerCity.spinner.adapter = citySpinnerAdapter
+        // Устанавливаем адаптеры для AutoCompleteTextView
+        binding.includeSpinnerCountry.autoCompleteTextView.setAdapter(countryAdapter)
+        binding.includeSpinnerCity.autoCompleteTextView.setAdapter(cityAdapter)
 
         // Устанавливаем counterpartyId в зависимости от режима
         when {
@@ -166,6 +170,10 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         binding.includeSpinnerCountry.tvDescription.text = "Страна"
         binding.includeSpinnerCity.tvDescription.text = "Город"
 
+        // Настройка AutoCompleteTextView
+        binding.includeSpinnerCountry.autoCompleteTextView.threshold = 1 // начинать поиск после 1 символа
+        binding.includeSpinnerCity.autoCompleteTextView.threshold = 1
+
         address?.let {
             binding.ccavPostalCode.text = it.postalCode
             binding.ccavStreet.text = it.streetName
@@ -207,11 +215,15 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
             return
         }
 
-        val selectedCountry = binding.includeSpinnerCountry.spinner.selectedItem as? Country
-        val selectedCity = binding.includeSpinnerCity.spinner.selectedItem as? City
+        // Получаем выбранные значения
+        val countryId = binding.includeSpinnerCountry.autoCompleteTextView.getTag(R.id.country_id_tag) as? Long
+        val cityId = binding.includeSpinnerCity.autoCompleteTextView.getTag(R.id.city_id_tag) as? Long
+
+        val selectedCountry = countryList.find { it.id == countryId }
+        val selectedCity = cityList.find { it.id == cityId }
 
         if (selectedCountry == null || selectedCity == null) {
-            showSnackbar("Выберите страну и город")
+            showSnackbar("Выберите страну и город из списка")
             return
         }
 
@@ -230,117 +242,107 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
     }
 
     private fun updateCityList(cities: List<City>, selectCityId: Long? = null) {
-        val emptyCity = City(id = null, name = "")
+        val newCityList = cities.toMutableList()
 
-        // Если в режиме редактирования текущий город отсутствует в пришедших городах — добавим его
-        var newCityList: MutableList<City> = when {
-            isFirstCityLoad && address != null -> {
-                val exists = cities.any { it.id == address!!.cityId }
-                val list = if (!exists && address!!.cityId != null) {
-                    cities.toMutableList().apply {
-                        add(0, City(id = address!!.cityId, name = address!!.cityName ?: ""))
-                    }
-                } else {
-                    cities.toMutableList()
-                }
-                list
+        // Добавляем текущий город, если он не в списке (для режима редактирования)
+        if (isFirstCityLoad && address != null && address!!.cityId != null) {
+            val exists = cities.any { it.id == address!!.cityId }
+            if (!exists) {
+                newCityList.add(0, City(id = address!!.cityId, name = address!!.cityName ?: ""))
             }
-
-            else -> cities.toMutableList()
-        }
-
-        // Только если режим создания ИЛИ пользователь сменил страну — добавляем пустой город
-        if (isCountryChangedByUser || (address == null && isFirstCityLoad)) {
-            newCityList = mutableListOf(emptyCity).apply { addAll(newCityList) }
         }
 
         cityList = newCityList
+        cityAdapter = CityFilterAdapter(requireContext(), cityList)
+        binding.includeSpinnerCity.autoCompleteTextView.setAdapter(cityAdapter)
 
-        // Обновляем адаптер
-        citySpinnerAdapter.clear()
-        citySpinnerAdapter.addAll(cityList)
-        citySpinnerAdapter.notifyDataSetChanged()
-
-        // По умолчанию всегда выбираем либо selectCityId, либо первый элемент (пустой)
-        val cityIndex = cityList.indexOfFirst { it.id == selectCityId }
-        binding.includeSpinnerCity.spinner.setSelection(if (cityIndex >= 0) cityIndex else 0, false)
+        // Устанавливаем выбранный город
+        if (selectCityId != null) {
+            val selectedCity = cityList.find { it.id == selectCityId }
+            selectedCity?.let {
+                binding.includeSpinnerCity.autoCompleteTextView.post {
+                    binding.includeSpinnerCity.autoCompleteTextView.setText(it.name, false)
+                    binding.includeSpinnerCity.autoCompleteTextView.setTag(R.id.city_id_tag, it.id)
+                }
+            }
+        } else if (isCountryChangedByUser) {
+            binding.includeSpinnerCity.autoCompleteTextView.post {
+                binding.includeSpinnerCity.autoCompleteTextView.text.clear()
+                binding.includeSpinnerCity.autoCompleteTextView.setTag(R.id.city_id_tag, null)
+            }
+        }
     }
 
     private fun setupCountrySelection() {
-        binding.includeSpinnerCountry.spinner.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long,
-                ) {
-                    val country = countrySpinnerAdapter.getItem(position)
-                    country?.let {
-                        Log.d("@@@", "Выбрана страна: $country")
-
-                        if (!isFirstCountryLoad) {
-                            isCountryChangedByUser = true
-                            viewModel.loadCities(it.id!!)
-                        }
-                    }
+        binding.includeSpinnerCountry.autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
+            val country = countryAdapter.getItem(position)
+            country?.let {
+                binding.includeSpinnerCountry.autoCompleteTextView.setTag(R.id.country_id_tag, it.id)
+                if (!isFirstCountryLoad) {
+                    isCountryChangedByUser = true
+                    viewModel.loadCities(it.id!!)
                 }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
+        }
+
+        binding.includeSpinnerCountry.autoCompleteTextView.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val currentText = binding.includeSpinnerCountry.autoCompleteTextView.text.toString()
+                val exists = countryList.any { it.name == currentText }
+                if (!exists) {
+                    binding.includeSpinnerCountry.autoCompleteTextView.text.clear()
+                    binding.includeSpinnerCountry.autoCompleteTextView.setTag(R.id.country_id_tag, null)
+                }
+            }
+        }
     }
 
     private fun setupCitySelection() {
-        binding.includeSpinnerCity.spinner.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long,
-                ) {
-                    // Можно добавить дополнительную логику при выборе города
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
-            }
+        // Можно добавить обработчик выбора города, если нужно
+        binding.includeSpinnerCity.autoCompleteTextView.setOnItemClickListener { _, _, _, _ ->
+            // Дополнительная логика при выборе города
+        }
     }
 
     private fun observeViewModel() {
         viewModel.countries.observe(viewLifecycleOwner) { countries ->
             countryList = countries
-            countrySpinnerAdapter.clear()
-            countrySpinnerAdapter.addAll(countries)
-            countrySpinnerAdapter.notifyDataSetChanged()
+            countryAdapter = CountryFilterAdapter(requireContext(), countries)
+            binding.includeSpinnerCountry.autoCompleteTextView.setAdapter(countryAdapter)
 
             if (isFirstCountryLoad) {
-                val defaultCountryIndex = if (address == null) {
-                    // Режим создания - выбираем Польшу (id 1)
-                    countries.indexOfFirst { it.id == 1L }
+                val defaultCountry = if (address == null) {
+                    countries.find { it.id == 1L } // Польша по умолчанию
                 } else {
-                    // Режим редактирования - выбираем страну из адреса
-                    countries.indexOfFirst { it.id == address!!.countryId }
+                    countries.find { it.id == address!!.countryId }
                 }
-                if (defaultCountryIndex >= 0) {
-                    binding.includeSpinnerCountry.spinner.setSelection(defaultCountryIndex, false)
+
+                defaultCountry?.let { country ->
+                    binding.includeSpinnerCountry.autoCompleteTextView.post {
+                        binding.includeSpinnerCountry.autoCompleteTextView.setText(country.name, false)
+                        binding.includeSpinnerCountry.autoCompleteTextView.setTag(R.id.country_id_tag, country.id)
+
+                        // Загружаем города для выбранной страны
+                        viewModel.loadCities(country.id!!)
+                    }
                 }
                 isFirstCountryLoad = false
             }
         }
 
         viewModel.cities.observe(viewLifecycleOwner) { cities ->
-            Log.d("@@@", "Города получены: size=${cities.size}, list=$cities")
-
-            // Выбираем нужный город:
             val selectCityId = when {
-                isFirstCityLoad && address != null -> address!!.cityId    // редактирование
-                isFirstCityLoad && address == null -> 1L                  // режим создания, Варшава
-                isCountryChangedByUser -> null                            // смена страны - пустой город
+                isFirstCityLoad && address != null -> address!!.cityId
+                isFirstCityLoad && address == null -> {
+                    // Для Польши выбираем Варшаву (id=1)
+                    if (binding.includeSpinnerCountry.autoCompleteTextView.getTag(R.id.country_id_tag) == 1L) {
+                        1L
+                    } else null
+                }
                 else -> null
             }
 
             updateCityList(cities, selectCityId)
-
             isFirstCityLoad = false
             isCountryChangedByUser = false
         }
