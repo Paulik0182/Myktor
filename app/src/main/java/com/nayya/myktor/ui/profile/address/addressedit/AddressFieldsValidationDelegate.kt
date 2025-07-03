@@ -3,8 +3,12 @@ package com.nayya.myktor.ui.profile.address.addressedit
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
+import androidx.core.content.ContextCompat
 import com.nayya.myktor.R
 import com.nayya.myktor.databinding.FragmentAddressEditBinding
+import com.nayya.myktor.databinding.ViewSpinnerFieldBinding
+import com.nayya.myktor.domain.counterpartyentity.City
+import com.nayya.myktor.domain.counterpartyentity.Country
 import com.nayya.myktor.utils.input.InputValidator
 import com.nayya.uicomponents.BottomTextState
 import com.nayya.uicomponents.CustomCardActionView
@@ -575,6 +579,55 @@ class AddressFieldsValidationDelegate(
                 isEditing = false
             }
         })
+    }
+
+    fun isCountrySelected(): Boolean {
+        val selectedCountry = binding.includeSpinnerCountry.spinner.selectedItem as? Country
+        return selectedCountry != null && !selectedCountry.name.isNullOrEmpty() && selectedCountry.id != null
+    }
+
+    fun isCitySelected(): Boolean {
+        val selectedCity = binding.includeSpinnerCity.spinner.selectedItem as? City
+        return selectedCity != null && !selectedCity.name.isNullOrEmpty() && selectedCity.id != null
+    }
+
+    fun validateCountryAndCity(showError: Boolean = true): Boolean {
+        var valid = true
+
+        if (!isCountrySelected()) {
+            if (showError) {
+                binding.includeSpinnerCountry.tvDescription.text = "Поле 'Страна' не может быть пустым"
+                setDescriptionColor(binding.includeSpinnerCountry, isError = true)
+            }
+            valid = false
+        } else {
+            binding.includeSpinnerCountry.tvDescription.text = "Страна"
+            setDescriptionColor(binding.includeSpinnerCountry, isError = false)
+        }
+
+        if (!isCitySelected()) {
+            if (showError) {
+                binding.includeSpinnerCity.tvDescription.text = "Поле 'Город' не может быть пустым"
+                setDescriptionColor(binding.includeSpinnerCity, isError = true)
+            }
+            valid = false
+        } else {
+            binding.includeSpinnerCity.tvDescription.text = "Город"
+            setDescriptionColor(binding.includeSpinnerCity, isError = false)
+        }
+
+        return valid
+    }
+
+    // Универсальный сеттер цвета для спиннеров:
+    fun setDescriptionColor(includeBinding: ViewSpinnerFieldBinding, isError: Boolean) {
+        val color = if (isError) {
+            ContextCompat.getColor(includeBinding.root.context, R.color.input_bottom_error)
+        } else {
+            ContextCompat.getColor(includeBinding.root.context, R.color.input_bottom_color)
+        }
+        includeBinding.tvDescription.setTextColor(color)
+        includeBinding.ivDescriptionIcon.setColorFilter(color)
     }
 
     // --- locationNumber, entranceNumber, floor ---

@@ -210,7 +210,8 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         val selectedCountry = binding.includeSpinnerCountry.spinner.selectedItem as? Country
         val selectedCity = binding.includeSpinnerCity.spinner.selectedItem as? City
 
-        if (selectedCountry == null || selectedCity == null) {
+        // Валидируем страну и город
+        if (!validator.validateCountryAndCity(true)) {
             showSnackbar("Выберите страну и город")
             return
         }
@@ -218,8 +219,8 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
         // Обновить формстейт перед сохранением
         viewModel.updateForm {
             copy(
-                countryId = selectedCountry.id,
-                cityId = selectedCity.id
+                countryId = selectedCountry?.id,
+                cityId = selectedCity?.id
             )
         }
 
@@ -279,10 +280,18 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
                     country?.let {
                         Log.d("@@@", "Выбрана страна: $country")
 
+                        // Обновляем countryId в formState
+                        viewModel.updateForm { copy(countryId = it.id) }
+
                         if (!isFirstCountryLoad) {
                             isCountryChangedByUser = true
                             viewModel.loadCities(it.id!!)
                         }
+                    }
+                    // Сброс ошибки и цвета
+                    if (validator.isCountrySelected()) {
+                        binding.includeSpinnerCountry.tvDescription.text = "Страна"
+                        validator.setDescriptionColor(binding.includeSpinnerCountry, isError = false)
                     }
                 }
 
@@ -299,7 +308,14 @@ class AddressEditFragment : BaseFragment(R.layout.fragment_address_edit),
                     position: Int,
                     id: Long,
                 ) {
-                    // Можно добавить дополнительную логику при выборе города
+                    val city = citySpinnerAdapter.getItem(position)
+                    // Обновляем cityId в formState
+                    viewModel.updateForm { copy(cityId = city?.id) }
+
+                    if (validator.isCitySelected()) {
+                        binding.includeSpinnerCity.tvDescription.text = "Город"
+                        validator.setDescriptionColor(binding.includeSpinnerCity, isError = false)
+                    }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}

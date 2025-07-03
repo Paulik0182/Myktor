@@ -54,4 +54,7 @@
     <color name="text_input_fill">@color/muted_white</color> <!-- Цвет фона -->
     <color name="text_input_stroke">#33000000</color> <!-- Цвет подчеркивания в неактивном состоянии -->
     <color name="text_input_stroke_focused">@color/primary_500</color> <!-- Цвет подчеркивания при фокусе -->
+
+    <color name="input_bottom_color">#808080</color>
+    <color name="input_bottom_error">#F44336</color>
 </resources>
