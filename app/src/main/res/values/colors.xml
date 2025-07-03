@@ -25,6 +25,7 @@
     <color name="button_muted_olive_yellow">#B9DD41</color>
     <color name="button_positive_actions">#48B7E816</color>
     <color name="button_error">#FF3A69</color>
+    <color name="ic_error">#FF3A69</color>
     <color name="button_important_actions">#E17484</color>
     <color name="muted_white">#FAFAFA</color>
     <color name="soft_black">#212121</color>

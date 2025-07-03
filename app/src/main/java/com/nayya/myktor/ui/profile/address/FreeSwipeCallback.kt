@@ -73,7 +73,7 @@ class FreeSwipeCallback(
                 itemView.right.toFloat(), itemView.bottom.toFloat(),
                 paint
             )
-            val icon = ContextCompat.getDrawable(context, R.drawable.ic_delete)
+            val icon = ContextCompat.getDrawable(context, R.drawable.ic_delete_new)
             val iconMargin = (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
             icon?.setBounds(
                 itemView.right - iconMargin - (icon?.intrinsicWidth ?: 0),
